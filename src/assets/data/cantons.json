@@ -1,0 +1,53 @@
+[
+  { "name": "Zürich", "abbr": "ZH" },
+
+  { "name": "Bern", "abbr": "BE" },
+
+  { "name": "Luzern", "abbr": "LU" },
+
+  { "name": "Uri", "abbr": "UR" },
+
+  { "name": "Schwyz", "abbr": "SZ" },
+
+  { "name": "Obwalden", "abbr": "OW" },
+
+  { "name": "Nidwalden", "abbr": "NW" },
+
+  { "name": "Glarus", "abbr": "GL" },
+
+  { "name": "Zug", "abbr": "ZG" },
+
+  { "name": "Fribourg", "abbr": "FR" },
+
+  { "name": "Solothurn", "abbr": "SO" },
+
+  { "name": "Basel-Stadt", "abbr": "BS" },
+
+  { "name": "Basel-Landschaft", "abbr": "BL" },
+
+  { "name": "Schaffhausen", "abbr": "SH" },
+
+  { "name": "Appenzell Ausserrhoden", "abbr": "AR" },
+
+  { "name": "Appenzell Innerrhoden", "abbr": "AI" },
+
+  { "name": "St. Gallen", "abbr": "SG" },
+
+  { "name": "Graubünden", "abbr": "GR" },
+
+  { "name": "Aargau", "abbr": "AG" },
+
+  { "name": "Thurgau", "abbr": "TG" },
+
+  { "name": "Ticino", "abbr": "TI" },
+
+  { "name": "Vaud", "abbr": "VD" },
+
+  { "name": "Valais", "abbr": "VS" },
+
+  { "name": "Neuchâtel", "abbr": "NE" },
+
+  { "name": "Genève", "abbr": "GE" },
+
+  { "name": "Jura", "abbr": "JU" }
+]

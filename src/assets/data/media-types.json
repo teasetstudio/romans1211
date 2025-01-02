@@ -1,0 +1,18 @@
+[
+  {
+    "label": "All types",
+    "value": "all"
+  },
+  {
+    "label": "Social Media",
+    "value": "social"
+  },
+  {
+    "label": "Print",
+    "value": "print"
+  },
+  {
+    "label": "Online",
+    "value": "online"
+  }
+]

@@ -1,0 +1,105 @@
+// create a basic prisma schema with a user model
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String         @id @default(cuid())
+  name            String
+  email           String         @unique
+  hashedPassword  String?
+  emailVerified   DateTime?
+  verificationToken String?      @unique
+  resetToken      String?       @unique
+  resetTokenExpiry DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  organizations   Organization[]
+}
+
+model Organization {
+  id        String     @id @default(cuid())
+  userId    String
+  name      String
+  isDefault Boolean    @default(false)
+  texts     Text[]
+  songs     Song[]
+  games     Game[]
+  user      User       @relation(fields: [userId], references: [id])
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Text {
+  id             String       @id @default(cuid())
+  title          String       @db.VarChar(1000)
+  content        String       @db.Text
+  language       String       @default("en")
+  organizationId String
+  isPublic       Boolean      @default(false)
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  tags           Wtag[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([organizationId])
+  @@index([isPublic])
+  @@index([title])
+  @@index([content])
+}
+
+model Song {
+  id             String       @id @default(cuid())
+  title          String       @db.VarChar(1000)
+  content        String       @db.Text
+  language       String       @default("en")
+  organizationId String
+  isPublic       Boolean      @default(false)
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  tags           Wtag[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([organizationId])
+  @@index([isPublic])
+  @@index([title])
+  @@index([content])
+}
+
+model Game {
+  id             String       @id @default(cuid())
+  title          String       @db.VarChar(1000)
+  content        String       @db.Text
+  language       String       @default("en")
+  organizationId String
+  isPublic       Boolean      @default(false)
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  tags           Wtag[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([organizationId])
+  @@index([isPublic])
+  @@index([title])
+  @@index([content])
+}
+
+// Wtag is Tag. It is done to simplify the prisma client to avoid creating the middle many-to-many table
+// Wtag alphabetically below Text. Tag not below Text...
+// It creates _TagToText instead of _TextToTag
+model Wtag {
+  id        String     @id @default(cuid())
+  name      String     @unique
+  texts     Text[]
+  songs     Song[]
+  games     Game[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([name])
+}

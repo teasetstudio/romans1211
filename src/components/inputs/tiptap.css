@@ -1,0 +1,45 @@
+.editor-styles h1, 
+.editor-styles h2, 
+.editor-styles h3, 
+.editor-styles h4, 
+.editor-styles h5, 
+.editor-styles h6 {
+  text-wrap: pretty;
+}
+
+.editor-styles h1 {
+  font-weight: bold;
+  font-size: 2rem;
+  line-height: 2.5rem;
+  margin: 1rem 0;
+}
+
+.editor-styles h2 {
+  font-weight: bold;
+  font-size: 1.5rem;
+  line-height: 2rem;
+  margin: 1rem 0;
+}
+
+.editor-styles h3 {
+  font-weight: bold;
+  font-size: 1rem;
+  line-height: 1.2rem;
+  margin: 1rem 0;
+}
+
+.tiptap.ProseMirror {
+  flex: 1;
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  background-color: white;
+  min-height: 300px;
+  overflow-y: auto;
+}
+
+.tiptap.ProseMirror:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}

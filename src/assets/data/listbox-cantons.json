@@ -1,0 +1,55 @@
+[
+  { "label": "All cantons", "value": "all" },
+
+  { "label": "Zürich", "value": "ZH" },
+
+  { "label": "Bern", "value": "BE" },
+
+  { "label": "Luzern", "value": "LU" },
+
+  { "label": "Uri", "value": "UR" },
+
+  { "label": "Schwyz", "value": "SZ" },
+
+  { "label": "Obwalden", "value": "OW" },
+
+  { "label": "Nidwalden", "value": "NW" },
+
+  { "label": "Glarus", "value": "GL" },
+
+  { "label": "Zug", "value": "ZG" },
+
+  { "label": "Fribourg", "value": "FR" },
+
+  { "label": "Solothurn", "value": "SO" },
+
+  { "label": "Basel-Stadt", "value": "BS" },
+
+  { "label": "Basel-Landschaft", "value": "BL" },
+
+  { "label": "Schaffhausen", "value": "SH" },
+
+  { "label": "Appenzell Ausserrhoden", "value": "AR" },
+
+  { "label": "Appenzell Innerrhoden", "value": "AI" },
+
+  { "label": "St. Gallen", "value": "SG" },
+
+  { "label": "Graubünden", "value": "GR" },
+
+  { "label": "Aargau", "value": "AG" },
+
+  { "label": "Thurgau", "value": "TG" },
+
+  { "label": "Ticino", "value": "TI" },
+
+  { "label": "Vaud", "value": "VD" },
+
+  { "label": "Valais", "value": "VS" },
+
+  { "label": "Neuchâtel", "value": "NE" },
+
+  { "label": "Genève", "value": "GE" },
+
+  { "label": "Jura", "value": "JU" }
+]

@@ -1,0 +1,232 @@
+import prisma from './prisma';
+import { Text, Song, Game, Prisma } from '@prisma/client';
+
+export type MaterialType = 'text' | 'song' | 'game';
+export type Material = Text | Song | Game;
+export type MaterialWithIncluded = (Text | Song | Game) & {
+  organization: { name: string };
+  tags: Array<{ id: string; name: string }>;
+};
+export type CatalogMaterial = MaterialWithIncluded & {
+  type: MaterialType;
+};
+
+type PrismaClientDelegate = Prisma.TextDelegate | Prisma.SongDelegate | Prisma.GameDelegate
+
+class MaterialServiceForSSR {
+  private validateType(type: string | string[] | undefined): MaterialType | MaterialType[] | undefined {
+    if (!type) return undefined;
+    
+    const validTypes: MaterialType[] = ['text', 'song', 'game'];
+    
+    if (Array.isArray(type)) {
+      const validatedTypes = type.filter(t => validTypes.includes(t as MaterialType));
+      return validatedTypes.length > 0 ? validatedTypes as MaterialType[] : undefined;
+    }
+    
+    return validTypes.includes(type as MaterialType) ? type as MaterialType : undefined;
+  }
+
+  private getModel(type: MaterialType): PrismaClientDelegate | any {
+    switch (type) {
+      case 'text':
+        return prisma.text;
+      case 'song':
+        return prisma.song;
+      case 'game':
+        return prisma.game;
+      default:
+        throw new Error('Invalid material type');
+    }
+  }
+
+  async findById(type: MaterialType, id: string): Promise<Material | null> {
+    return this.getModel(type).findUnique({
+      where: { id },
+      include: { tags: true, organization: true },
+    });
+  }
+
+  async findPublicById(type: MaterialType, id: string): Promise<MaterialWithIncluded | null> {
+    return this.getModel(type).findUnique({
+      where: { id, isPublic: true },
+      include: { tags: true, organization: true },
+    });
+  }
+
+  async findByTitle(type: MaterialType, title: string): Promise<Material[]> {
+    return this.getModel(type).findMany({
+      where: {
+        title: { contains: title, mode: 'insensitive' },
+      },
+      include: { tags: true, organization: true },
+    });
+  }
+
+  async findByOrganization(type: MaterialType, organizationId: string): Promise<Material[]> {
+    return this.getModel(type).findMany({
+      where: { organizationId, isPublic: true },
+      include: { tags: true, organization: true },
+    });
+  }
+
+  async findByTags(type: MaterialType, tagNames: string[]): Promise<Material[]> {
+    return this.getModel(type).findMany({
+      where: {
+        tags: {
+          some: { name: { in: tagNames } },
+        },
+      },
+      include: { tags: true, organization: true },
+    });
+  }
+
+  async findPublic(type: MaterialType, options?: {
+    orderBy: string;
+    orderDirection: 'asc' | 'desc';
+    limit: number;
+    page: number;
+  }): Promise<MaterialWithIncluded[]> {
+    const orderBy = options?.orderBy || 'createdAt';
+    const orderDirection = options?.orderDirection || 'desc';
+    const limit = options?.limit || 8;
+    const page = options?.page || 1;
+
+    return this.getModel(type).findMany({
+      where: { isPublic: true },
+      orderBy: { [orderBy]: orderDirection },
+      take: limit,
+      skip: (page - 1) * limit,
+      include: { tags: true, organization: true },
+    });
+  }
+
+  async findInCatalog(searchParams: {
+    type?: string | string[];
+    limit?: number;
+    page?: number;
+    tags?: string[];
+    searchTerm?: string;
+    isPublic?: boolean;
+    organizationId?: string;
+    userId?: string;
+  }): Promise<{ materials: CatalogMaterial[]; totalCount: number; totalPages: number }> {
+    const { 
+      page = 1, 
+      limit = 20, 
+      searchTerm, 
+      tags, 
+      type, 
+      isPublic = true,
+      organizationId,
+      userId 
+    } = searchParams;
+
+    const validatedType = this.validateType(type);
+    const offset = (page - 1) * limit;
+
+    const isText = !validatedType || (Array.isArray(validatedType) ? validatedType.includes('text') : validatedType === 'text');
+    const isSong = !validatedType || (Array.isArray(validatedType) ? validatedType.includes('song') : validatedType === 'song');
+    const isGame = !validatedType || (Array.isArray(validatedType) ? validatedType.includes('game') : validatedType === 'game');
+
+    const SELECT = Prisma.sql`
+      SELECT m.id,
+      m.title,
+      m.content,
+      m.language,
+      m."createdAt",
+      m."organizationId",
+      m."isPublic",
+      row_to_json(o) AS organization,
+      COALESCE(json_agg(row_to_json(t)) FILTER (WHERE t.id IS NOT NULL), '[]') AS tags`;
+
+    const WHERE = (type: 'Text' | 'Song' | 'Game') => {
+      const conditions = [];
+      
+      if (isPublic !== undefined) 
+        conditions.push(Prisma.sql`m."isPublic" = ${isPublic}`);
+      
+      if (organizationId)
+        conditions.push(Prisma.sql`m."organizationId" = ${organizationId}`);
+
+      if (userId)
+        conditions.push(Prisma.sql`o."userId" = ${userId}`);
+      
+      if (searchTerm) {
+        conditions.push(Prisma.sql`(
+          m.title ILIKE ${`%${searchTerm}%`}
+          ${searchTerm.length > 4 ? Prisma.sql`OR m.content ILIKE ${`%${searchTerm}%`}` : Prisma.empty}
+        )`);
+      }
+      
+      if (tags && tags.length > 0) {
+        conditions.push(Prisma.sql`EXISTS (
+          SELECT 1
+          FROM "_${Prisma.raw(type)}ToWtag" tt2
+          JOIN "Wtag" t2 ON tt2."B" = t2.id
+          WHERE tt2."A" = m.id 
+          AND LOWER(t2.name) = ANY(ARRAY[${Prisma.join(tags.map(t => t.toLowerCase()))}])
+          GROUP BY tt2."A"
+          HAVING COUNT(DISTINCT t2.name) = ${tags.length}
+        )`);
+      }
+      
+      return conditions.length > 0
+        ? Prisma.sql`WHERE ${Prisma.join(conditions, ' AND ')}`
+        : Prisma.empty;
+    };
+
+    const QUERY = (type: 'Text' | 'Song' | 'Game') => Prisma.sql`
+      ${SELECT}, '${Prisma.raw(type.toLowerCase())}' AS type 
+      FROM "${Prisma.raw(type)}" m
+      LEFT JOIN "Organization" o ON m."organizationId" = o.id
+      LEFT JOIN "_${Prisma.raw(type)}ToWtag" midt ON m.id = midt."A"
+      LEFT JOIN "Wtag" t ON midt."B" = t.id
+      ${WHERE(type)}
+      GROUP BY m.id, o.id
+    `;
+
+    let query = Prisma.empty;
+    if (isText) query = QUERY('Text');
+    if (isSong) {
+      const songQuery = QUERY('Song');
+
+      query = query === Prisma.empty
+        ? songQuery
+        : Prisma.sql`${query} UNION ALL ${songQuery}`;
+    }
+    if (isGame) {
+      const gameQuery = QUERY('Game');
+
+      query = query === Prisma.empty
+        ? gameQuery
+        : Prisma.sql`${query} UNION ALL ${gameQuery}`;
+    }
+
+    // Get total count for pagination
+    const [{ count }] = await prisma.$queryRaw<[{ count: number }]>`
+      WITH Materials AS (${query})
+      SELECT CAST(COUNT(*) AS INTEGER) as count 
+      FROM Materials;
+    `;
+
+    const totalPages = Math.ceil(count / limit);
+
+    // Get paginated results
+    const materials = await prisma.$queryRaw<CatalogMaterial[]>`
+      WITH Materials AS (${query})
+      SELECT * FROM Materials
+      ORDER BY "createdAt" DESC
+      LIMIT ${limit}
+      OFFSET ${offset};
+    `;
+
+    return {
+      materials,
+      totalCount: count,
+      totalPages,
+    };
+  }
+}
+
+export const materialService = new MaterialServiceForSSR();

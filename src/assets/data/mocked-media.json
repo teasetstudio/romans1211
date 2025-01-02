@@ -1,0 +1,152 @@
+[
+  {
+    "id": "11",
+    "as": "/media/20-minuten",
+    "href": "/media/[slug]",
+    "title": "20 Minuten Bern",
+    "details": {
+      "region": "St. Gallen",
+      "run": 58000,
+      "readers": 134000
+    },
+    "tags": [
+      { "id": "1", "text": "Print" },
+      { "id": "2", "text": "Luzern" },
+      { "id": "3", "text": "CH Media" }
+    ],
+    "price": 832.2,
+    "currency": "CHF",
+    "imgUrl": "/mockups/20minutes.png"
+  },
+  {
+    "id": "1234",
+    "as": "/media/20-minuten",
+    "href": "/media/[slug]",
+    "title": "Image-Text Ad",
+    "details": {
+      "region": "St. Gallen",
+      "run": 58000,
+      "readers": 134000
+    },
+    "tags": [
+      { "id": "1", "text": "Online" },
+      { "id": "2", "text": "oneAd GmbH" }
+    ],
+    "price": 250,
+    "currency": "CHF",
+    "imgUrl": "/mockups/image-text.png"
+  },
+  {
+    "id": "12341",
+    "as": "/media/20-minuten",
+    "href": "/media/[slug]",
+    "title": "Facebook ad",
+    "details": {
+      "region": "St. Gallen",
+      "run": 58000,
+      "readers": 134000
+    },
+    "tags": [
+      { "id": "1", "text": "Social" },
+      { "id": "2", "text": "oneAd GmbH" }
+    ],
+    "price": 832.2,
+    "currency": "CHF",
+    "imgUrl": "/mockups/facebook.png"
+  },
+  {
+    "id": "12343221",
+    "as": "/media/20-minuten",
+    "href": "/media/[slug]",
+    "title": "Solothurner Zeitung Gesamt Ad",
+    "details": {
+      "region": "St. Gallen",
+      "run": 58000,
+      "readers": 134000
+    },
+    "tags": [
+      { "id": "1", "text": "Print" },
+      { "id": "2", "text": "Luzern" },
+      { "id": "3", "text": "CH Media" }
+    ],
+    "price": 832.2,
+    "currency": "CHF",
+    "imgUrl": "/mockups/solothurner.png"
+  },
+  {
+    "id": "111",
+    "as": "/media/20-minuten",
+    "href": "/media/[slug]",
+    "title": "20 Minuten Bern",
+    "details": {
+      "region": "St. Gallen",
+      "run": 58000,
+      "readers": 134000
+    },
+    "tags": [
+      { "id": "1", "text": "Print" },
+      { "id": "2", "text": "Luzern" },
+      { "id": "3", "text": "CH Media" }
+    ],
+    "price": 832.2,
+    "currency": "CHF",
+    "imgUrl": "/mockups/20minutes.png"
+  },
+  {
+    "id": "12342",
+    "as": "/media/20-minuten",
+    "href": "/media/[slug]",
+    "title": "St. Galler Tagblatt / St. Gallen, Gossau und Rorschach",
+    "details": {
+      "region": "St. Gallen",
+      "run": 58000,
+      "readers": 134000
+    },
+    "tags": [
+      { "id": "1", "text": "Print" },
+      { "id": "2", "text": "Luzern" },
+      { "id": "3", "text": "CH Media" }
+    ],
+    "price": 832.2,
+    "currency": "CHF",
+    "imgUrl": "/mockups/tagblatt.png"
+  },
+  {
+    "id": "1234341422",
+    "as": "/media/20-minuten",
+    "href": "/media/[slug]",
+    "title": "Schweiz am Wochenende - Solothurn und Grenchen Gesamt",
+    "details": {
+      "region": "St. Gallen",
+      "run": 58000,
+      "readers": 134000
+    },
+    "tags": [
+      { "id": "1", "text": "Print" },
+      { "id": "2", "text": "Luzern" },
+      { "id": "3", "text": "CH Media" }
+    ],
+    "price": 832.2,
+    "currency": "CHF",
+    "imgUrl": "/mockups/schweiz.png"
+  },
+  {
+    "id": "123423121",
+    "as": "/media/20-minuten",
+    "href": "/media/[slug]",
+    "title": "Solothurner Zeitung Gesamt Ad",
+    "details": {
+      "region": "St. Gallen",
+      "run": 58000,
+      "readers": 134000
+    },
+    "tags": [
+      { "id": "1", "text": "Print" },
+      { "id": "2", "text": "Luzern" },
+      { "id": "3", "text": "CH Media" }
+    ],
+    "price": 832.2,
+    "currency": "CHF",
+    "imgUrl": "/mockups/solothurner.png"
+  }
+]
