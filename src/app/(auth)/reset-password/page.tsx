@@ -15,6 +15,7 @@ import H9 from '@/components/typo/H9';
 import Spinner from '@/components/ui/Spinner';
 import { NAMESPACE_COMMON } from '@/res/namespaces';
 import useErrorMessage from '@/hooks/useErrorMessage';
+import { ROUTE_LOGIN } from '@/res/routes';
 
 interface IFormValues {
   password: string;
@@ -75,7 +76,7 @@ export default function ResetPasswordPage() {
       }
 
       // Redirect to login page after successful password reset
-      router.push('/login');
+      router.push(ROUTE_LOGIN);
     } catch (error) {
       setReqState({
         loading: false,

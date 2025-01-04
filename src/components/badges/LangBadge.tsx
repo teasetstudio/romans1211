@@ -1,18 +1,17 @@
 import H2 from '@/components/typo/H2'
 import H8 from '@/components/typo/H8'
 import H9 from '@/components/typo/H9'
+import { Lang } from '@/types/Lang'
 
 interface IProps {
-  price: number
-  currency: string
+  lang: Lang
   className?: string
   size?: 'H2' | 'H8' | 'H9'
   paddingClass?: string
 }
 
-const PriceBadge = ({
-  currency,
-  price,
+const LangBadge = ({
+  lang,
   className,
   size = 'H8',
   paddingClass = 'small:p-3 p-2',
@@ -24,9 +23,9 @@ const PriceBadge = ({
       color="text-white"
       className={`${className} ${paddingClass} bg-primary inline-block rounded-lg cursor-pointer`}
     >
-      {`${currency} ${price.toFixed(2)}`}
+      {`${lang.toUpperCase()}`}
     </Component>
   )
 }
 
-export default PriceBadge
+export default LangBadge

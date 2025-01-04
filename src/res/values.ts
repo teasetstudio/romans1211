@@ -15,3 +15,9 @@ export const languages: ILang = {
     label: "English",
   },
 };
+
+export const materialPlaceholderImg = {
+  song: '/images/music_placeholder.png',
+  text: '/images/text_placeholder.png',
+  game: '/images/game_placeholder.png',
+};

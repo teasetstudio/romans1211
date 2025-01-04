@@ -5,20 +5,12 @@ import { NAMESPACE_WIDGETS } from '@/res/namespaces';
 import SongGrid from '../CardGrid/SongGrid';
 import Spinner from '../ui/Spinner';
 import WideLink from '../buttons/WideLink';
+import { ISongCard } from '../CardGrid/SongCard';
 
-interface SongWidgetProps {
+interface IProps {
   className?: string;
   loadingState?: boolean;
-  songs: Array<{
-    id: string;
-    title: string;
-    content: string;
-    imageUrl: string;
-    metadata: {
-      organization: string;
-      date: string;
-    };
-  }> | null;
+  songs: Array<ISongCard> | null;
   title: string;
   viewAllRoute?: string;
 }
@@ -29,7 +21,7 @@ export default function SongWidget({
   songs,
   title,
   viewAllRoute,
-}: SongWidgetProps) {
+}: IProps) {
   const t = useTranslations(NAMESPACE_WIDGETS);
 
   return (

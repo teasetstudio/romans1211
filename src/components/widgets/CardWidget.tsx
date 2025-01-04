@@ -4,24 +4,24 @@ import H4 from '@/components/typo/H4';
 import { NAMESPACE_WIDGETS } from '@/res/namespaces';
 import Spinner from '../ui/Spinner';
 import WideLink from '../buttons/WideLink';
-import TextGrid from '../CardGrid/TextGrid';
-import { ITextCard } from '../CardGrid/TextCard';
+import CardGrid from '../CardGrid/CardGrid';
+import { ICard } from '../CardGrid/Card';
 
-interface IProps {
+interface ICardWidgetProps {
   className?: string;
   loadingState?: boolean;
-  texts: Array<ITextCard> | null;
-  title: string;
+  cards: Array<ICard> | null;
+  title?: string;
   viewAllRoute?: string;
 }
 
-export default function TextWidget({
+export default function CardWidget({
   className = '',
   loadingState = false,
-  texts,
+  cards,
   title,
   viewAllRoute,
-}: IProps) {
+}: ICardWidgetProps) {
   const t = useTranslations(NAMESPACE_WIDGETS);
 
   return (
@@ -29,7 +29,7 @@ export default function TextWidget({
       <div className="container mb-8">
         <div className="flex justify-between items-center">
           <div className="flex space-x-2 items-center">
-            <H4 color="text-secondary">{title}</H4>
+            {title && <H4 color="text-secondary">{title}</H4>}
             {loadingState && <Spinner sizeClass="w-5 h-5" />}
           </div>
           {viewAllRoute && (
@@ -43,8 +43,8 @@ export default function TextWidget({
         </div>
       </div>
 
-      {texts && texts.length > 0 ? (
-        <TextGrid texts={texts} />
+      {cards && cards.length > 0 ? (
+        <CardGrid cards={cards} />
       ) : (
         <div className="container">
           <p className="text-center text-gray-500">{t('no_materials')}</p>

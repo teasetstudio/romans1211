@@ -14,6 +14,7 @@ import H9 from '@/components/typo/H9';
 import Spinner from '@/components/ui/Spinner';
 import { NAMESPACE_COMMON } from '@/res/namespaces';
 import useErrorMessage from '@/hooks/useErrorMessage';
+import { ROUTE_LOGIN } from '@/res/routes';
 
 interface IFormValues {
   email: string;
@@ -133,7 +134,7 @@ export default function ForgotPasswordPage() {
               }
 
               <div className="text-center">
-                <Link href="/login" className="text-primary hover:underline">
+                <Link href={ROUTE_LOGIN} className="text-primary hover:underline">
                   {t('auth.back_to_login')}
                 </Link>
               </div>

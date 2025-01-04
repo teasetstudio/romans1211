@@ -4,6 +4,9 @@ import React from 'react';
 import { AsyncParams, ILibraryCatalogSearchParams } from '@/types/Params';
 import LibraryCatalogFilter from './LibraryCatalogFilter';
 import { materialService } from '@/lib/MaterialServiceForSSR';
+import { _transformMaterialToCard } from '@/utils/transformers';
+import CardWidget from '@/components/widgets/CardWidget';
+import { appendParamsToUrl } from '@/utils/urls';
 
 type IProps = AsyncParams<{}, ILibraryCatalogSearchParams>
 
@@ -22,14 +25,11 @@ export default async function LibraryCatalogPage({ searchParams }: IProps) {
     tags: tagsArray,
   })
 
+  const cards = materials.map(material => _transformMaterialToCard(material, material.type));
+
   // Helper function to build URL with current filters
   const buildUrl = (params: { [key: string]: string | null }) => {
-    const urlParams = new URLSearchParams();
-    if (params.type) urlParams.set('type', params.type);
-    if (params['search-term']) urlParams.set('search-term', params['search-term']);
-    if (params.page) urlParams.set('page', params.page);
-    if (params.tags) urlParams.set('tags', params.tags);
-    return `/library-catalog?${urlParams.toString()}`;
+    return appendParamsToUrl({url: ROUTE_LIBRARY, params});
   };
 
   return (
@@ -92,49 +92,7 @@ export default async function LibraryCatalogPage({ searchParams }: IProps) {
       </div>
 
       {/* Results Grid */}
-      {materials.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {materials.map((material) => (
-            <div
-              key={material.id}
-              className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-300"
-            >
-              <h2 className="text-xl font-semibold mb-2">{material.title}</h2>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-500 capitalize">{material.type}</span>
-                <Link
-                  href={`${ROUTE_LIBRARY}/${material.type}/${material.id}`}
-                  className="text-blue-500 hover:underline"
-                >
-                  View Details
-                </Link>
-              </div>
-              {material.tags && material.tags.length > 0 && (
-                <div className="mt-2">
-                  <span className="text-sm text-gray-500">Tags:</span>
-                  <ul className="list-none m-0 p-0 flex flex-wrap gap-2">
-                    {material.tags.map((tag: any) => (
-                      <li key={tag.id} className="text-sm text-gray-600">{tag.name}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-8">
-          <p className="text-xl text-gray-600 mb-2">No materials found</p>
-          <p className="text-gray-500">
-            {searchTerm
-              ? `No results found for "${searchTerm}". Try a different search term.`
-              : type
-                ? `No ${type} materials available yet.`
-                : 'No materials available yet.'
-            }
-          </p>
-        </div>
-      )}
+      <CardWidget cards={cards} />
 
       {/* Pagination */}
       {totalPages > 1 && (

@@ -1,1 +1,0 @@
-export type MaterialTypes = 'text' | 'song' | 'game';

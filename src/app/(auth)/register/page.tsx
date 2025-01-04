@@ -1,17 +1,16 @@
 'use client'
 
 import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 import RegisterForm from '@/components/popups/AuthPopup/RegisterForm'
 import H2 from '@/components/typo/H2';
 import H9 from '@/components/typo/H9';
 import { NAMESPACE_COMMON } from '@/res/namespaces';
+import { ROUTE_LOGIN } from '@/res/routes';
 
 export default function RegisterPage() {
   const t = useTranslations(NAMESPACE_COMMON)
-  const router = useRouter()
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray6 p-4">
@@ -28,7 +27,7 @@ export default function RegisterPage() {
         <div className="text-center pt-4">
           <H9 className="text-gray1">
             {t('auth.have_account')}{' '}
-            <Link href="/login" className="text-primary hover:underline">
+          <Link href={ROUTE_LOGIN} className="text-primary hover:underline">
               {t('auth.log_in')}
             </Link>
           </H9>

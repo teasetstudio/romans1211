@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import prisma from '@/lib/prisma';
 import Link from 'next/link';
 import { AsyncParams } from '@/types/Params';
+import { ROUTE_LOGIN } from '@/res/routes';
 
 type IProps = AsyncParams<{}, { token: string }>
 
@@ -52,7 +53,7 @@ export default async function VerifyEmail({ searchParams }: IProps) {
               <div className="space-y-4">
                 <div className="text-green-600">{message}</div>
                 <Link
-                  href="/login"
+                  href={ROUTE_LOGIN}
                   className="inline-block px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
                 >
                   Go to Login

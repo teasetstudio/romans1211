@@ -3,9 +3,10 @@ import { ROUTE_DASHBOARD_MATERIAL_CREATE } from "@/res/routes";
 import Link from "next/link";
 import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
-import { truncateHtml } from "@/utils/stripAndTruncateHtml";
 import { materialService } from "@/lib/MaterialServiceForSSR";
 import { ILibrarySearchParams } from '@/types/Params';
+import { _transformMaterialToCard } from "@/utils/transformers";
+import CardWidget from "@/components/widgets/CardWidget";
 
 export default async function Library({ searchParams }: ILibrarySearchParams) {
   const session = await getSession();
@@ -34,6 +35,8 @@ export default async function Library({ searchParams }: ILibrarySearchParams) {
     limit
   });
 
+  const cards = materials.map(material => _transformMaterialToCard(material, material.type));
+
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start w-full max-w-6xl">
@@ -45,34 +48,11 @@ export default async function Library({ searchParams }: ILibrarySearchParams) {
           <TextButton href={ROUTE_DASHBOARD_MATERIAL_CREATE} className="underline">Create Resource</TextButton>
         </div>
 
-        {materials.length === 0 ? (
+        {cards.length === 0 ? (
           <p className="text-gray-500">No materials found. Create your first resource!</p>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
-              {materials.map((material) => (
-                <div key={material.id} className="p-6 rounded-lg border border-gray-200 hover:border-blue-500 transition-colors">
-                  <div className="flex justify-between items-start mb-2">
-                    <h2 className="text-xl font-semibold">{material.title}</h2>
-                    <span className="text-xs text-gray-500 capitalize">{material.type}</span>
-                  </div>
-                  <div
-                    className="text-gray-600 prose prose-sm max-w-none"
-                    dangerouslySetInnerHTML={{
-                      __html: truncateHtml(material.content || '', 150)
-                    }}
-                  />
-                  <div className="mt-4 flex justify-end">
-                    <Link
-                      href={`/dashboard/library/${material.type}/${material.id}`}
-                      className="text-blue-600 hover:text-blue-700 font-medium"
-                    >
-                      View Details →
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <CardWidget cards={cards} className="w-full" />
 
             {totalPages > 1 && (
               <div className="w-full flex justify-center gap-2">

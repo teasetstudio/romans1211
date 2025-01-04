@@ -3,27 +3,17 @@
 import { updateMaterial } from '@/api/requests/materials';
 import { useRouter } from 'next/navigation';
 import MaterialForm from '@/components/forms/MaterialForm';
+import { getDashboardMaterialUrl } from '@/utils/urls';
+import { TMaterialType, TMaterialWithIncluded } from '@/types/Materials';
 
-interface Material {
-  id: string;
-  title: string;
-  content: string;
-  isPublic: boolean;
-  language: string;
-  type: 'text' | 'song' | 'game';
-  tags: Array<{ id: string; name: string }>;
-  organization: {
-    id: string;
-    name: string;
-  };
+type TMaterial = TMaterialWithIncluded & { type: TMaterialType };
+interface IProps {
+  material: TMaterial;
 }
 
-interface Props {
-  material: Material;
-}
-
-export default function EditForm({ material }: Props) {
+export default function EditForm({ material }: IProps) {
   const router = useRouter();
+  const dashboardMaterialUrl = getDashboardMaterialUrl({type: material.type, id: material.id})
 
   const handleSubmit = async (data: {
     title: string;
@@ -31,14 +21,14 @@ export default function EditForm({ material }: Props) {
     language: string;
     isPublic: boolean;
     tags: string[];
-    type: 'text' | 'song' | 'game';
+    type: TMaterialType;
   }) => {
     await updateMaterial(material.id, {
       ...data,
       organizationId: material.organization.id,
     });
 
-    router.push(`/dashboard/library/${material.type}/${material.id}`);
+    router.push(dashboardMaterialUrl);
   };
 
   return (
@@ -57,7 +47,7 @@ export default function EditForm({ material }: Props) {
         editType={material.type}
         onSubmit={handleSubmit}
         submitLabel="Save Changes"
-        cancelHref={`/dashboard/library/${material.type}/${material.id}`}
+        cancelHref={dashboardMaterialUrl}
       />
     </div>
   );

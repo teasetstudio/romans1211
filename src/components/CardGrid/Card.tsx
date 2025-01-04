@@ -1,18 +1,31 @@
-import Link from 'next/link';
-import { ICard } from './Card';
+import { Lang } from '@/types/Lang';
+import { TMaterialType } from '@/types/Materials';
+import { ITag } from '@/types/Tag';
 import { dateToDDMMYYY } from '@/utils/dates';
+import Link from 'next/link';
 import LangBadge from '../badges/LangBadge';
 import ImageCardPart from './shared/ImageCardPart';
 import TagsCardPart from './shared/TagsCardPart';
 
-export interface ITextCard extends ICard {}
-
-interface IProps {
-  text: ITextCard
+export interface ICard {
+  id: string;
+  title: string;
+  content: string;
+  imageUrl: string;
+  organizationName: string;
+  createdAt: Date;
+  language: Lang;
+  type: TMaterialType;
+  link: string;
+  tags?: ITag[];
 }
 
-export default function TextCard({ text }: IProps) {
-  const { title, content, imageUrl, organizationName, createdAt, tags, link, language } = text;
+interface IProps {
+  card: ICard;
+}
+
+export default function Card({ card }: IProps) {
+  const { title, content, imageUrl, organizationName, createdAt, tags, link, language } = card;
 
   return (
     <Link href={link} className="group h-full relative block">

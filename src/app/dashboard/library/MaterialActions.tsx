@@ -2,13 +2,16 @@
 
 import { deleteMaterial } from '@/api/requests/materials';
 import DeleteButton from '@/components/buttons/DeleteButton';
+import { ROUTE_DASHBOARD_LIBRARY } from '@/res/routes';
+import { TMaterialType } from '@/types/Materials';
+import { getDashboardEditMaterialUrl } from '@/utils/urls';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 interface MaterialActionsProps {
   materialId: string;
   organizationName: string;
-  type: 'text' | 'song' | 'game';
+  type: TMaterialType;
 }
 
 export default function MaterialActions({
@@ -20,14 +23,16 @@ export default function MaterialActions({
 
   const handleDelete = async () => {
     await deleteMaterial(materialId, type);
-    router.push('/dashboard/library');
+    router.push(ROUTE_DASHBOARD_LIBRARY);
   };
+
+  const editMaterialUrl = getDashboardEditMaterialUrl({type, id: materialId});
 
   return (
     <div className="flex items-center gap-4">
       <div className="text-gray-500">Organization: {organizationName}</div>
       <Link
-        href={`/dashboard/library/${type}/${materialId}/edit`}
+        href={editMaterialUrl}
         className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
       >
         Edit Material

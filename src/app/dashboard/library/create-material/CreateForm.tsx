@@ -4,6 +4,8 @@ import { useRouter } from 'next/navigation';
 import { useOrganization } from '@/components/contexts/OrganizationContext';
 import { postMaterial } from '@/api/requests/materials';
 import MaterialForm from '@/components/forms/MaterialForm';
+import { ROUTE_DASHBOARD_LIBRARY } from '@/res/routes';
+import { TMaterialType } from '@/types/Materials';
 
 export default function CreateForm() {
   const router = useRouter();
@@ -15,7 +17,7 @@ export default function CreateForm() {
     language: string;
     isPublic: boolean;
     tags: string[];
-    type: 'text' | 'song' | 'game';
+    type: TMaterialType;
   }) => {
     if (!selectedOrganization) {
       // Show error or redirect to organization selection
@@ -23,7 +25,6 @@ export default function CreateForm() {
       return;
     }
     try {
-      console.log('data', data)
       const material = await postMaterial({
         ...data,
         organizationId: selectedOrganization.id,
@@ -31,7 +32,7 @@ export default function CreateForm() {
         console.error('err', err.stack)
       });
 
-      router.push('/dashboard/library');
+      router.push(ROUTE_DASHBOARD_LIBRARY);
     } catch (error) {
       console.error('Error creating material:', error);
       // Handle error appropriately

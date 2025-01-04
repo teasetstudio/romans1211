@@ -5,20 +5,12 @@ import { NAMESPACE_WIDGETS } from '@/res/namespaces';
 import Spinner from '../ui/Spinner';
 import WideLink from '../buttons/WideLink';
 import GameGrid from '../CardGrid/GameGrid';
+import { IGameCard } from '../CardGrid/GameCard';
 
-interface GamesWidgetProps {
+interface IProps {
   className?: string;
   loadingState?: boolean;
-  games: Array<{
-    id: string;
-    title: string;
-    content: string;
-    imageUrl: string;
-    metadata: {
-      organization: string;
-      date: string;
-    };
-  }> | null;
+  games: Array<IGameCard> | null;
   title: string;
   viewAllRoute?: string;
 }
@@ -29,7 +21,7 @@ export default function GameWidget({
   games,
   title,
   viewAllRoute,
-}: GamesWidgetProps) {
+}: IProps) {
   const t = useTranslations(NAMESPACE_WIDGETS);
 
   return (

@@ -5,6 +5,7 @@ import LoginForm from '@/components/popups/AuthPopup/LoginForm'
 import H2 from '@/components/typo/H2';
 import H9 from '@/components/typo/H9';
 import { NAMESPACE_COMMON } from '@/res/namespaces';
+import { ROUTE_REGISTER } from '@/res/routes';
 
 export default function Login() {
   const t = useTranslations(NAMESPACE_COMMON)
@@ -24,7 +25,7 @@ export default function Login() {
         <div className="text-center pt-4">
           <H9 className="text-gray1">
             {t('auth.no_account')}{' '}
-            <Link href="/register" className="text-primary hover:underline">
+            <Link href={ROUTE_REGISTER} className="text-primary hover:underline">
               {t('auth.register')}
             </Link>
           </H9>

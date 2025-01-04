@@ -7,6 +7,7 @@ import { notFound } from 'next/navigation';
 import { AsyncParams } from '@/types/Params';
 import MaterialActions from '../../MaterialActions';
 import MaterialTypeBadge from '@/components/badges/MaterialTypeBadge';
+import { ROUTE_DASHBOARD_LIBRARY } from '@/res/routes';
 
 export default async function GamePage({ params }: AsyncParams) {
   const { id } = await params;
@@ -32,7 +33,7 @@ export default async function GamePage({ params }: AsyncParams) {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <Link
-            href="/dashboard/library"
+            href={ROUTE_DASHBOARD_LIBRARY}
             className="text-blue-600 hover:text-blue-700 font-medium flex items-center gap-2"
           >
             ← Back to Library

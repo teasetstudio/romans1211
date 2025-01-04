@@ -1,33 +1,24 @@
+import { Prisma } from '@prisma/client';
 import prisma from './prisma';
-import { Text, Song, Game, Prisma } from '@prisma/client';
-
-export type MaterialType = 'text' | 'song' | 'game';
-export type Material = Text | Song | Game;
-export type MaterialWithIncluded = (Text | Song | Game) & {
-  organization: { name: string };
-  tags: Array<{ id: string; name: string }>;
-};
-export type CatalogMaterial = MaterialWithIncluded & {
-  type: MaterialType;
-};
+import { TMaterialType, TMaterial, TMaterialWithIncluded, TCatalogMaterial } from '@/types/Materials';
 
 type PrismaClientDelegate = Prisma.TextDelegate | Prisma.SongDelegate | Prisma.GameDelegate
 
 class MaterialServiceForSSR {
-  private validateType(type: string | string[] | undefined): MaterialType | MaterialType[] | undefined {
+  private validateType(type: string | string[] | undefined): TMaterialType | TMaterialType[] | undefined {
     if (!type) return undefined;
     
-    const validTypes: MaterialType[] = ['text', 'song', 'game'];
+    const validTypes: TMaterialType[] = ['text', 'song', 'game'];
     
     if (Array.isArray(type)) {
-      const validatedTypes = type.filter(t => validTypes.includes(t as MaterialType));
-      return validatedTypes.length > 0 ? validatedTypes as MaterialType[] : undefined;
+      const validatedTypes = type.filter(t => validTypes.includes(t as TMaterialType));
+      return validatedTypes.length > 0 ? validatedTypes as TMaterialType[] : undefined;
     }
     
-    return validTypes.includes(type as MaterialType) ? type as MaterialType : undefined;
+    return validTypes.includes(type as TMaterialType) ? type as TMaterialType : undefined;
   }
 
-  private getModel(type: MaterialType): PrismaClientDelegate | any {
+  private getModel(type: TMaterialType): PrismaClientDelegate | any {
     switch (type) {
       case 'text':
         return prisma.text;
@@ -40,21 +31,21 @@ class MaterialServiceForSSR {
     }
   }
 
-  async findById(type: MaterialType, id: string): Promise<Material | null> {
+  async findById(type: TMaterialType, id: string): Promise<TMaterial | null> {
     return this.getModel(type).findUnique({
       where: { id },
       include: { tags: true, organization: true },
     });
   }
 
-  async findPublicById(type: MaterialType, id: string): Promise<MaterialWithIncluded | null> {
+  async findPublicById(type: TMaterialType, id: string): Promise<TMaterialWithIncluded | null> {
     return this.getModel(type).findUnique({
       where: { id, isPublic: true },
       include: { tags: true, organization: true },
     });
   }
 
-  async findByTitle(type: MaterialType, title: string): Promise<Material[]> {
+  async findByTitle(type: TMaterialType, title: string): Promise<TCatalogMaterial[]> {
     return this.getModel(type).findMany({
       where: {
         title: { contains: title, mode: 'insensitive' },
@@ -63,14 +54,14 @@ class MaterialServiceForSSR {
     });
   }
 
-  async findByOrganization(type: MaterialType, organizationId: string): Promise<Material[]> {
+  async findByOrganization(type: TMaterialType, organizationId: string): Promise<TMaterial[]> {
     return this.getModel(type).findMany({
       where: { organizationId, isPublic: true },
       include: { tags: true, organization: true },
     });
   }
 
-  async findByTags(type: MaterialType, tagNames: string[]): Promise<Material[]> {
+  async findByTags(type: TMaterialType, tagNames: string[]): Promise<TMaterial[]> {
     return this.getModel(type).findMany({
       where: {
         tags: {
@@ -81,12 +72,12 @@ class MaterialServiceForSSR {
     });
   }
 
-  async findPublic(type: MaterialType, options?: {
+  async findPublic(type: TMaterialType, options?: {
     orderBy: string;
     orderDirection: 'asc' | 'desc';
     limit: number;
     page: number;
-  }): Promise<MaterialWithIncluded[]> {
+  }): Promise<TMaterialWithIncluded[]> {
     const orderBy = options?.orderBy || 'createdAt';
     const orderDirection = options?.orderDirection || 'desc';
     const limit = options?.limit || 8;
@@ -110,7 +101,7 @@ class MaterialServiceForSSR {
     isPublic?: boolean;
     organizationId?: string;
     userId?: string;
-  }): Promise<{ materials: CatalogMaterial[]; totalCount: number; totalPages: number }> {
+  }): Promise<{ materials: TCatalogMaterial[]; totalCount: number; totalPages: number }> {
     const { 
       page = 1, 
       limit = 20, 
@@ -213,7 +204,7 @@ class MaterialServiceForSSR {
     const totalPages = Math.ceil(count / limit);
 
     // Get paginated results
-    const materials = await prisma.$queryRaw<CatalogMaterial[]>`
+    const materials = await prisma.$queryRaw<TCatalogMaterial[]>`
       WITH Materials AS (${query})
       SELECT * FROM Materials
       ORDER BY "createdAt" DESC
