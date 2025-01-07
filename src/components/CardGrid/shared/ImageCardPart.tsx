@@ -8,13 +8,13 @@ interface IProps {
 
 const ImageCardPart = ({ imageUrl, title, organizationName }: IProps) => {
   return (
-    <div className="relative h-24 flex-shrink-0 bg-gray-50">
+    <div className="relative h-20 flex-shrink-0 bg-gray-50">
       <Image
         src={imageUrl}
         alt={title}
         fill
         sizes="(max-width: 585px) 100vw, (max-width: 1075px) 45vw, 22vw"
-        className="object-contain w-full h-full opacity-60 grayscale hover:grayscale-0 hover:opacity-70 transition-all duration-300"
+        className="object-cover object-right w-full h-full opacity-60 grayscale hover:grayscale-0 hover:opacity-70 transition-all duration-300"
       />
       {/* Variant 1: from-gray-900/40 to-gray-900/60 */}
       {/* Variant 2: from-primary/40 to-primary/60 */}

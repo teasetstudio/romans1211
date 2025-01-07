@@ -20,11 +20,11 @@ const MediaTypeCard: React.FC<MediaTypeCardProps> = ({
   ctaLabel,
 }) => {
   return (
-    <div className="mx-auto w-full sm:w-2/3 lg:w-full h-72 lg:h-[340px] px-8 lg:px-16 pb-12 lg:pb-24 pt-11 lg:pt-16 flex flex-col items-center lg:items-start bg-dark rounded-[36px] border border-gray3 relative overflow-hidden">
+    <div className="mx-auto w-full sm:w-2/3 lg:w-full h-64 lg:h-64 px-6 lg:px-12 pb-8 lg:pb-14 pt-8 lg:pt-10 flex flex-col items-center lg:items-start bg-dark rounded-[28px] border border-gray3 relative overflow-hidden">
       <H3
         color="text-white"
-        fontSize="text-3xl"
-        className="lg:mb-6 mb-2 relative z-10"
+        fontSize="text-2xl lg:text-3xl"
+        className="mb-1 relative z-10"
       >
         {mediaType}
       </H3>
@@ -33,22 +33,22 @@ const MediaTypeCard: React.FC<MediaTypeCardProps> = ({
         <H8
           color="text-gray2"
           fontSize="text-tiny"
-          className="text-center lg:text-left"
+          className="text-center lg:text-left mt-2"
         >
           {description}
         </H8>
 
         <Button
           href={url}
-          className="w-44 mx-auto lg:mx-0"
+          className="w-40 mx-auto lg:mx-0"
           bgColor="bg-gray4"
-          paddingClass="py-4"
+          paddingClass="py-3"
         >
           <H9 weight="semibold">{ctaLabel}</H9>
         </Button>
       </div>
 
-      <Gradient className="top-[-1200px] right-[-450px] z-0 w-[1000px] h-[1800px]" />
+      <Gradient className="top-[-900px] right-[-350px] z-0 w-[800px] h-[1400px]" />
     </div>
   )
 }

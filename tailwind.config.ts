@@ -59,8 +59,8 @@ export default {
           width: "100%",
           marginLeft: "auto",
           marginRight: "auto",
-          paddingLeft: "16px",
-          paddingRight: "16px",
+          paddingLeft: "8px",
+          paddingRight: "8px",
           "@screen sm": {
             maxWidth: "550px",
             paddingLeft: "0",
@@ -78,8 +78,8 @@ export default {
         },
         ".container-full": {
           width: "100%",
-          paddingLeft: "16px",
-          paddingRight: "16px",
+          paddingLeft: "8px",
+          paddingRight: "8px",
           marginLeft: "auto",
           marginRight: "auto",
           maxWidth: "912px",
@@ -87,7 +87,7 @@ export default {
             maxWidth: "1168px",
           },
           "@screen xl": {
-            maxWidth: "1254px",
+            maxWidth: "1230px",
           },
         },
       });

@@ -22,7 +22,7 @@ const FAQItem = ({ question, answer }: TFAQItem) => {
       {({ open }) => (
         <div>
           <DisclosureButton
-            className={`w-full p-8 bg-gray5 rounded-[24px] border border-gray3`}
+            className={`w-full p-5 bg-gray5 rounded-2xl border border-gray3`}
             aria-expanded={open}
           >
             <div className="flex justify-between items-center">
@@ -35,7 +35,7 @@ const FAQItem = ({ question, answer }: TFAQItem) => {
               </H5>
 
               <IconPlus
-                className={`w-7 sm:w-9 transition transform ${open && 'rotate-45'}`}
+                className={`w-7 transition transform ${open && 'rotate-45'}`}
                 alt="x"
               />
             </div>
@@ -58,7 +58,7 @@ const FAQ = ({ faqs, className = '' }: Props) => {
   return (
     <div className={className}>
       <div className="container">
-        <H4 className="mb-10">{t('faq_title')}</H4>
+        <H4 className="mb-10 text-secondary">{t('faq_title')}</H4>
         <div className="flex flex-col space-y-3">
           {faqs.map((i, id) => (
             <FAQItem key={id} question={t(i.question)} answer={t(i.answer)} />

@@ -33,7 +33,7 @@ const Button: React.FC<IButton> = ({
   type = 'button',
   onClick,
   href,
-  paddingClass = 'py-5',
+  paddingClass = 'py-4',
   disabled,
 }) => {
   const classes = `${className} filter transition hover:invert-[.15] active:brightness-75 ${size && WidthSizes[size]

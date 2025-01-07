@@ -6,8 +6,8 @@ import ImgBold from "@assets/images/edit-text/bold.png";
 import ImgItalic from "@assets/images/edit-text/italic.png";
 import ImgUnderline from "@assets/images/edit-text/underline.png";
 import Logo from "@assets/images/logo.png";
-import ImgNewsPaperCards from "@assets/images/news-paper-cards.png";
-import ImgOnlineAds from "@assets/images/online-ads.png";
+// import ImgNewsPaperCards from "@assets/images/news-paper-cards.png";
+// import ImgOnlineAds from "@assets/images/online-ads.png";
 import ImgWebsiteBazel from "@assets/images/websites/bazel.png";
 import ImgWebsiteHandels from "@assets/images/websites/handels.png";
 import ImgWebsiteLuzerner from "@assets/images/websites/luzerner.png";
@@ -22,8 +22,6 @@ export {
   ImgAlignRight,
   ImgBold,
   ImgItalic,
-  ImgNewsPaperCards,
-  ImgOnlineAds,
   ImgUnderline,
   ImgWebsiteBazel,
   ImgWebsiteHandels,

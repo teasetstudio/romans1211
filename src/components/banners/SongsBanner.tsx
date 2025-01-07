@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import React from 'react'
 import { useTranslations } from 'next-intl';
 
@@ -7,19 +6,19 @@ import H3 from '@/components/typo/H3'
 import H8 from '@/components/typo/H8'
 import H9 from '@/components/typo/H9'
 import Gradient from '@/components/ui/Gradient'
-import { ImgOnlineAds } from '@/res/images'
 import { NAMESPACE_BANNERS } from '@/res/namespaces'
 import { ROUTE_LIBRARY } from '@/res/routes'
 
 import BannerWrapper from './BannerWrapper'
+import H5 from '../typo/H5';
 
 const SongsBanner = () => {
   const t = useTranslations(NAMESPACE_BANNERS)
 
   return (
     <BannerWrapper className="relative overflow-hidden">
-      <div className="md:grid md:grid-cols-2 md:pb-0 md:pt-0 flex flex-col-reverse items-center pb-14 pt-6 relative z-10">
-        <div className="flex flex-col md:pt-16 md:pb-20 md:w-full items-center md:items-start">
+      <div className="md:grid md:grid-cols-2 md:pb-0 md:pt-0 flex flex-col-reverse items-center pb-10 pt-4 relative z-10 gap-8 md:gap-0">
+        <div className="flex flex-col md:pt-10 md:pb-14 md:w-full items-center md:items-start">
           <H3
             color="text-white"
             fontSize="text-3xl"
@@ -44,10 +43,15 @@ const SongsBanner = () => {
           </Button>
         </div>
 
-        <div className="flex justify-center items-center">
-          <Image
-            src={ImgOnlineAds}
-            alt="online ads" />
+        <div className="w-full flex justify-center md:justify-end">
+          <div className="max-w-md w-full bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm rounded-2xl p-8 shadow-[-13px_20px_18px_rgb(0,0,0,0.85)] border border-white/10">
+            <H5 color="text-white" className="text-center font-semibold leading-relaxed">
+              {t('top_banner.ephesians_5_19')}
+            </H5>
+            <div className="text-right mt-4">
+              <H8 color="text-gray3" className="italic">{t('top_banner.ref_ephesians_5_19')}</H8>
+            </div>
+          </div>
         </div>
       </div>
 

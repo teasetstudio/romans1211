@@ -42,7 +42,9 @@ const Footer = () => {
           </div>
           <div className="flex flex-col lg:items-end items-start">
             <H9 weight="semibold" className="mb-[23px]">
-              Onelib
+              <Link href="/" className="text-white text-2xl font-black tracking-wider hover:text-gray2 transition-colors">
+                <span className="hidden md:inline">Ephesians </span>4:12
+              </Link>
             </H9>
             <H7 color="text-gray1" className="mb-[10px]">
               {COMPANY_ADDRESS}
@@ -70,7 +72,7 @@ const Footer = () => {
       <div className="bg-gray5 py-4">
         <div className="container">
           <H9 color="text-gray1">
-            <>© 2021 oneLib. {t('footer.rights')}</>
+            <> 2021 oneLib. {t('footer.rights')}</>
           </H9>
         </div>
       </div>

@@ -31,11 +31,10 @@ const ChangeLangMenu = () => {
               <H9 color="text-white" weight="semibold" className="mr-1 w-4">
                 {t('lang')}
               </H9>
-              <div className="flex mt-0.5">
+              <div className="flex ">
                 <IconDown
                   alt="arrow down"
-                  className={`transition-transform transform ${open ? 'rotate-180' : 'rotate-0'
-                    }`}
+                  className={`transition-transform transform ${open ? 'rotate-180' : 'rotate-0' }`}
                 />
               </div>
             </PopoverButton>

@@ -31,7 +31,7 @@ const MediaTypesBanner = () => {
   const t = useTranslations(NAMESPACE_BANNERS)
   return (
     <div className="container-full">
-      <div className="grid lg:grid-cols-3 gap-4 lg:gap-8">
+      <div className="grid lg:grid-cols-3 gap-3 lg:gap-6">
         {matTypesList.map(({ mediaType, url, description, ctaLabel }) => (
           <MaterialTypeCard
             key={url}

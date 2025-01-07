@@ -38,7 +38,7 @@ const AdButton = ({
       href={href}
       onClick={onClick}
       className={`${className} flex items-center justify-center space-x-0.5 desktop:space-x-3 w-48 small:w-52`}
-      paddingClass="py-3"
+      paddingClass="py-2.5"
       bgColor={bgColor}
       rounded="rounded-lg"
     >

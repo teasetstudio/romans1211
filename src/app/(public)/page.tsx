@@ -44,7 +44,7 @@ export default async function Home() {
       <SongsBanner />
 
       <GameWidget
-        className="my-10 md:my-16"
+        className="mt-6 md:mt-12 mb-8 md:mb-16"
         title={t('games')}
         games={games}
         viewAllRoute={ROUTE_LIBRARY}
@@ -53,13 +53,13 @@ export default async function Home() {
       <MaterialTypesBanner />
 
       <TextWidget
-        className="my-10 md:my-16"
+        className="mt-6 md:mt-12 mb-8 md:mb-16"
         title={t('texts')}
         texts={texts}
         viewAllRoute={ROUTE_LIBRARY}
       />
 
-      <FAQ className="mt-16 md:mt-24" faqs={faqs} />
+      <FAQ faqs={faqs} />
     </>
   );
 }
