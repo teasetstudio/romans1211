@@ -58,7 +58,7 @@ export default async function LibraryCatalogPage({ searchParams }: IProps) {
       {/* Pagination */}
       <Pagination
         totalPages={totalPages}
-        page={parsedPage}
+        currentPage={parsedPage}
         buildUrl={buildUrl}
       />
     </div>

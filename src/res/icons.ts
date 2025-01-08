@@ -39,6 +39,9 @@ import IconGoogle from "@assets/icons/google.svg";
 import IconCross from "@assets/icons/cross.svg";
 import IconLove from "@assets/icons/love.svg";
 import IconAnchor from "@assets/icons/anchor.svg";
+import IconParagraph from "@assets/icons/paragraph.svg";
+import IconRedo from "@assets/icons/redo.svg";
+import IconUndo from "@assets/icons/undo.svg";
 
 export {
   IconBurger,
@@ -81,5 +84,8 @@ export {
   IconGoogle,
   IconCross,
   IconLove,
-  IconAnchor
+  IconAnchor,
+  IconParagraph,
+  IconRedo,
+  IconUndo,
 };

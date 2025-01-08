@@ -26,7 +26,8 @@ export default function CardWidget({
 
   return (
     <div className={className}>
-      <div className="container mb-8">
+      {(title || loadingState || viewAllRoute) &&
+        <div className="container mb-8">
         <div className="flex justify-between items-center">
           <div className="flex space-x-2 items-center">
             {title && <H4 color="text-secondary">{title}</H4>}
@@ -42,6 +43,7 @@ export default function CardWidget({
           )}
         </div>
       </div>
+      }
 
       {cards && cards.length > 0 ? (
         <CardGrid cards={cards} />

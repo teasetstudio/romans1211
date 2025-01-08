@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Listbox, ListboxOptions, ListboxOption, ListboxButton, Switch } from '@headlessui/react';
 import clsx from 'clsx';
 import Link from 'next/link';
-import { IconCheck } from '@/res/icons';
+import { IconCheck, IconChevronDown, IconX, IconLanguage, IconWorld, IconTag } from '@tabler/icons-react';
 import TabGroup from '../tabs/TabGroup';
 import TextMaterialForm from './TextMaterialForm';
 import SongMaterialForm from './SongMaterialForm';
@@ -50,8 +50,8 @@ interface MaterialFormProps {
 
 export default function MaterialForm({
   initialData = {
-    title: '123',
-    content: '<p>Description here.</p>',
+    title: '',
+    content: '<p></p>',
     language: 'en',
     isPublic: false,
     tags: [],
@@ -119,25 +119,32 @@ export default function MaterialForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">
+    <form onSubmit={handleSubmit} className="max-w-4xl mx-auto space-y-8">
+      {/* Header */}
+      <div className="flex justify-between items-center pb-4 border-b">
+        <h1 className="text-2xl font-bold text-gray-900">
           {initialData.id ? 'Edit Material' : 'Create New Material'}
         </h1>
         {cancelHref && (
-          <Link href={cancelHref} className="text-blue-600 hover:text-blue-700">
+          <Link
+            href={cancelHref}
+            className="px-4 py-2 text-gray-600 hover:text-gray-800 rounded-lg hover:bg-gray-100 transition-colors"
+          >
             Cancel
           </Link>
         )}
       </div>
 
+      {/* Error Message */}
       {error && (
-        <div className="bg-red-50 text-red-500 p-3 rounded-md">{error}</div>
+        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg flex items-center gap-2">
+          <IconX className="size-5 flex-shrink-0" />
+          {error}
+        </div>
       )}
 
-
-
-      {editType ?
+      {/* Material Type Selection */}
+      {editType ? (
         <>
           <MaterialTypeBadge type={editType} />
           {editType === 'text' ? (
@@ -163,7 +170,7 @@ export default function MaterialForm({
             />
           )}
         </>
-        :
+      ) : (
         <TabGroup
           tabs={MATERIAL_TYPES}
           activeTab={activeTab}
@@ -192,90 +199,136 @@ export default function MaterialForm({
             />
           )}
         </TabGroup>
+      )}
 
-      }
-
-
-
-      <div className="flex items-center space-x-4">
-        <Listbox value={language} onChange={setLanguage}>
-          <div className="relative w-48">
-            <ListboxButton className="w-full p-2 text-left border rounded-md">
-              {language.name}
-            </ListboxButton>
-            <ListboxOptions className="absolute w-full mt-1 bg-white border rounded-md shadow-lg z-50">
-              {LANGUAGES.map((lang) => (
-                <ListboxOption
-                  key={lang.id}
-                  value={lang}
-                  className="group cursor-pointer select-none p-2 flex items-center gap-2 data-[focus]:outline-red/25"
-                >
-                  <IconCheck className="invisible size-4 fill-white text-gray-500 group-data-[selected]:visible h-6 w-6" />
-                  <div>{lang.name}</div>
-                </ListboxOption>
-              ))}
-            </ListboxOptions>
+      {/* Settings Section */}
+      <div className="space-y-6 bg-gray-50 p-6 rounded-lg">
+        <h2 className="text-lg font-semibold text-gray-900">Material Settings</h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Language Selection */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">Language</label>
+            <Listbox value={language} onChange={setLanguage}>
+              <div className="relative">
+                <ListboxButton className="w-full flex items-center justify-between gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-left focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                  <span className="flex items-center gap-2">
+                    <IconLanguage className="size-5 text-gray-500" />
+                    {language.name}
+                  </span>
+                  <IconChevronDown className="size-5 text-gray-400" />
+                </ListboxButton>
+                <ListboxOptions className="absolute w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50">
+                  {LANGUAGES.map((lang) => (
+                    <ListboxOption
+                      key={lang.id}
+                      value={lang}
+                      className={({ active, selected }) =>
+                        clsx(
+                          'flex items-center gap-2 px-4 py-2 cursor-pointer',
+                          active && 'bg-primary/5',
+                          selected && 'bg-primary/10'
+                        )
+                      }
+                    >
+                      {({ selected }) => (
+                        <>
+                          <IconCheck
+                            className={clsx(
+                              'size-5',
+                              selected ? 'text-primary' : 'text-transparent'
+                            )}
+                          />
+                          {lang.name}
+                        </>
+                      )}
+                    </ListboxOption>
+                  ))}
+                </ListboxOptions>
+              </div>
+            </Listbox>
           </div>
-        </Listbox>
 
-        <div className="flex items-center space-x-2">
-          <Switch
-            checked={isPublic}
-            onChange={setIsPublic}
-            className={clsx(
-              'relative inline-flex h-6 w-11 items-center rounded-full',
-              isPublic ? 'bg-blue-600' : 'bg-gray-200'
-            )}
-          >
-            <span
-              className={clsx(
-                'inline-block h-4 w-4 transform rounded-full bg-white transition',
-                isPublic ? 'translate-x-6' : 'translate-x-1'
-              )}
-            />
-          </Switch>
-          <span>Public</span>
+          {/* Visibility Toggle */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">Visibility</label>
+            <Switch.Group>
+              <div className="flex items-center gap-4 h-[42px] px-4">
+                <Switch
+                  checked={isPublic}
+                  onChange={setIsPublic}
+                  className={clsx(
+                    'relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2',
+                    isPublic ? 'bg-primary' : 'bg-gray-200'
+                  )}
+                >
+                  <span
+                    className={clsx(
+                      'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
+                      isPublic ? 'translate-x-6' : 'translate-x-1'
+                    )}
+                  />
+                </Switch>
+                <Switch.Label className="flex items-center gap-2">
+                  <IconWorld className="size-5 text-gray-500" />
+                  <span>Make this material public</span>
+                </Switch.Label>
+              </div>
+            </Switch.Group>
+          </div>
+        </div>
+
+        {/* Tags Input */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">Tags</label>
+          <div className="space-y-3">
+            <div className="flex flex-wrap gap-2">
+              {tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
+                >
+                  {tag}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveTag(tag)}
+                    className="hover:bg-primary/20 rounded-full p-0.5 transition-colors"
+                  >
+                    <IconX className="size-4" />
+                  </button>
+                </span>
+              ))}
+            </div>
+            <div className="relative">
+              <IconTag className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-gray-400" />
+              <input
+                type="text"
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={handleAddTag}
+                placeholder="Add tags (press Enter)"
+                className="w-full pl-12 pr-4 py-2 bg-white border border-gray-200 rounded-lg placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="space-y-2">
-        <div className="flex flex-wrap gap-2">
-          {tags.map((tag) => (
-            <span
-              key={tag}
-              className="px-2 py-1 bg-blue-100 rounded-full text-sm flex items-center"
-            >
-              {tag}
-              <button
-                type="button"
-                onClick={() => handleRemoveTag(tag)}
-                className="ml-1 text-blue-500 hover:text-blue-700"
-              >
-                ×
-              </button>
-            </span>
-          ))}
-        </div>
-        <input
-          type="text"
-          value={tagInput}
-          onChange={(e) => setTagInput(e.target.value)}
-          onKeyDown={handleAddTag}
-          placeholder="Add tags (press Enter)"
-          className="border w-full p-2 rounded-md"
-        />
+      {/* Submit Button */}
+      <div className="flex justify-end pt-4">
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className={clsx(
+            'px-6 py-2 text-white bg-primary rounded-lg transition-colors',
+            isSubmitting
+              ? 'opacity-50 cursor-not-allowed'
+              : 'hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
+          )}
+        >
+          {isSubmitting ? 'Saving...' : submitLabel}
+        </button>
       </div>
-
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className={clsx(
-          'px-4 py-2 bg-blue-600 text-white rounded-md transition-colors',
-          isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'
-        )}
-      >
-        {isSubmitting ? 'Saving...' : submitLabel}
-      </button>
     </form>
   );
 }

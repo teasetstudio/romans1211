@@ -47,7 +47,7 @@ export default function Card({ card }: IProps) {
         </div>
       </div>
 
-      <LangBadge className="absolute top-0 right-0 z-50" lang={language} />
+      <LangBadge className="absolute top-0 right-0 z-10" lang={language} />
     </Link>
   );
 }

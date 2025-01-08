@@ -1,4 +1,6 @@
-import { ROUTE_LIBRARY } from '@/res/routes'
+"use client"
+
+import { usePathname } from 'next/navigation';
 import { appendParamsToUrl } from '@/utils/urls'
 import Link from 'next/link'
 import React from 'react'
@@ -12,8 +14,10 @@ interface IProps {
 }
 
 const ActiveLibraryFilters = ({ className, page, searchTerm, tags, type }: IProps) => {
+  const pathname = usePathname()
+
   const buildUrl = (params: { [key: string]: string | null }) => {
-    return appendParamsToUrl({url: ROUTE_LIBRARY, params});
+    return appendParamsToUrl({url: pathname, params});
   };
 
   return (

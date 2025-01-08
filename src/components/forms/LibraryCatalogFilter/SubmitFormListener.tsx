@@ -1,12 +1,12 @@
 'use client';
 
-import { ROUTE_LIBRARY } from '@/res/routes';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 
 export function SubmitFormListener() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname()
 
   useEffect(() => {
     const form = document.getElementById('library-catalog-form') as HTMLFormElement;
@@ -44,12 +44,12 @@ export function SubmitFormListener() {
         }
       });
 
-      router.push(`${ROUTE_LIBRARY}${params.toString() ? `?${params.toString()}` : ''}`);
+      router.push(`${pathname}${params.toString() ? `?${params.toString()}` : ''}`);
     };
 
     form.addEventListener('submit', handleSubmit);
     return () => form.removeEventListener('submit', handleSubmit);
-  }, [router, searchParams]);
+  }, [router, searchParams, pathname]);
 
   return null;
 }
