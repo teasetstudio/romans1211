@@ -1,10 +1,8 @@
 import IconDown from "@assets/icons/arrow-down.svg";
 import IconArrowLeft from "@assets/icons/arrow-left.svg";
 import IconRightLong from "@assets/icons/arrow-right-long.svg";
-import IconCart from "@assets/icons/cart.svg";
 import IconCheck from "@assets/icons/check.svg";
 import IconClose from "@assets/icons/close.svg";
-import IconCrop from "@assets/icons/crop.svg";
 import IconDownload from "@assets/icons/download.svg";
 import IconEdit from "@assets/icons/edit.svg";
 import IconFacebook from "@assets/icons/facebook.svg";
@@ -42,6 +40,7 @@ import IconAnchor from "@assets/icons/anchor.svg";
 import IconParagraph from "@assets/icons/paragraph.svg";
 import IconRedo from "@assets/icons/redo.svg";
 import IconUndo from "@assets/icons/undo.svg";
+import IconClock from "@assets/icons/clock.svg";
 
 export {
   IconBurger,
@@ -53,10 +52,8 @@ export {
   IconSettings,
   IconLogout,
   IconArrowLeft,
-  IconCart,
   IconCheck,
   IconClose,
-  IconCrop,
   IconDown,
   IconDownload,
   IconEdit,
@@ -88,4 +85,5 @@ export {
   IconParagraph,
   IconRedo,
   IconUndo,
+  IconClock,
 };

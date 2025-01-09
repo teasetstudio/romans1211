@@ -4,11 +4,17 @@ export type TMaterialType = 'text' | 'song' | 'game';
 
 export type TMaterial = Text | Song | Game;
 
-export type TMaterialWithIncluded = TMaterial & {
+export type TMaterialObjectType = {
+  type: TMaterialType;
+};
+
+export type TMaterialsIncluded = {
   organization: Organization;
   tags: Array<Wtag>;
 };
 
-export type TCatalogMaterial = TMaterialWithIncluded & {
-  type: TMaterialType;
-};
+export type TMaterialWithIncluded = TMaterial & TMaterialsIncluded;
+
+export type TCatalogMaterial = TMaterialWithIncluded & TMaterialObjectType;
+
+export type TMaterialWithType = TMaterial & TMaterialObjectType;

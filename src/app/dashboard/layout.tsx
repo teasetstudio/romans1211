@@ -2,9 +2,7 @@ import Sidebar from "@/components/ui/Sidebar";
 import { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { OrganizationProvider } from "@/components/contexts/OrganizationContext";
-import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
-import { Organization } from "@prisma/client";
 import { organizationService } from "@/lib/OrganizationServiceForSSR";
 
 interface IProps {

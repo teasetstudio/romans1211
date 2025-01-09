@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 import prisma from './prisma';
-import { TMaterialType, TMaterial, TMaterialWithIncluded, TCatalogMaterial } from '@/types/Materials';
+import { TMaterialType, TMaterial, TMaterialWithIncluded, TCatalogMaterial, TMaterialWithType } from '@/types/Materials';
 
 type PrismaClientDelegate = Prisma.TextDelegate | Prisma.SongDelegate | Prisma.GameDelegate
 
@@ -217,6 +217,18 @@ class MaterialServiceForSSR {
       totalCount: count,
       totalPages,
     };
+  }
+
+  async findLatestMaterials(organizationId: string, limit: number): Promise<TMaterialWithType[]> {
+    return prisma.$queryRaw`
+      SELECT 'game' as type, title, "createdAt", id FROM "Game" WHERE "organizationId" = ${organizationId}
+      UNION ALL
+      SELECT 'text' as type, title, "createdAt", id FROM "Text" WHERE "organizationId" = ${organizationId}
+      UNION ALL
+      SELECT 'song' as type, title, "createdAt", id FROM "Song" WHERE "organizationId" = ${organizationId}
+      ORDER BY "createdAt" DESC
+      LIMIT ${limit}
+    `;
   }
 }
 

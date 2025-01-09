@@ -9,7 +9,11 @@ import { ROUTE_DASHBOARD_LIBRARY } from '@/res/routes';
 import { TMaterialType } from '@/types/Materials';
 import { IconExclamationCircle } from '@tabler/icons-react';
 
-export default function CreateForm() {
+interface Props {
+  defaultType?: TMaterialType;
+}
+
+export default function CreateForm({ defaultType }: Props) {
   const router = useRouter();
   const { selectedOrganization } = useOrganization();
   const [error, setError] = useState<string | null>(null);
@@ -80,12 +84,11 @@ export default function CreateForm() {
           isPublic: false,
           tags: [],
           organizationId: selectedOrganization.id,
-          type: 'text' as const,
+          type: defaultType || 'text',
         }}
         onSubmit={handleSubmit}
         submitLabel="Create Material"
         cancelHref={ROUTE_DASHBOARD_LIBRARY}
-        // loading={loading}
       />
     </div>
   );
