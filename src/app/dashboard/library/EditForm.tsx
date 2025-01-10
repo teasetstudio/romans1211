@@ -32,7 +32,7 @@ export default function EditForm({ material }: IProps) {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto p-2 pt-8 md:pt-4 md:p-4">
       <MaterialForm
         initialData={{
           id: material.id,

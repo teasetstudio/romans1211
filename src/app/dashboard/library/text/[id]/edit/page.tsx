@@ -14,17 +14,15 @@ export default async function EditTextPage({ params }: AsyncParams) {
   const text = await prisma.text.findFirst({
     where: {
       id,
-      organization: {
-        userId: session.user.id,
-      },
+      organization: { userId: session.user.id },
     },
     include: { organization: true, tags: true },
-  })
+  });
 
   if (!text) notFound();
 
   return (
-    <div className="min-h-screen p-8 pb-20 sm:p-20">
+    <div className="min-h-screen">
       <div className="max-w-4xl mx-auto">
         <EditForm material={{ ...text, type: 'text' }} />
       </div>

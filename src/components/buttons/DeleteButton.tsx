@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import clsx from 'clsx';
+import DeleteConfirmationPopup from '../popups/DeleteConfirmationPopup';
 
 interface DeleteButtonProps {
   onDelete: () => Promise<void>;
@@ -37,31 +38,25 @@ export default function DeleteButton({
   };
 
   return (
-    <div className={clsx('flex items-center gap-2', className)}>
-      {isConfirming && (
-        <>
-          <span className="text-sm text-gray-600">{confirmText}</span>
-          <button
-            onClick={handleCancel}
-            className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800"
-            disabled={isDeleting}
-          >
-            Cancel
-          </button>
-        </>
-      )}
+    <>
       <button
-        onClick={handleDelete}
+        onClick={() => setIsConfirming(true)}
         disabled={isDeleting}
         className={clsx(
-          'px-3 py-1 rounded-md text-sm font-medium transition-colors',
-          isConfirming
-            ? 'bg-red-600 text-white hover:bg-red-700'
-            : 'text-red-600 hover:text-red-700'
+          "px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-xl transition-colors",
+          className
         )}
       >
-        {isDeleting ? 'Deleting...' : isConfirming ? 'Confirm' : 'Delete'}
+        Delete
       </button>
-    </div>
+
+      <DeleteConfirmationPopup
+        isOpen={isConfirming}
+        onClose={handleCancel}
+        onConfirm={handleDelete}
+        confirmText={confirmText}
+        isDeleting={isDeleting}
+      />
+    </>
   );
 }

@@ -68,7 +68,7 @@ export default function CreateForm({ defaultType }: Props) {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto p-2 pt-8 md:pt-4 md:p-4">
       {error && (
         <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
           <IconExclamationCircle className="size-5 text-red-600 flex-shrink-0" />

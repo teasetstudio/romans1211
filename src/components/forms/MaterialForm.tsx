@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Listbox, ListboxOptions, ListboxOption, ListboxButton, Switch } from '@headlessui/react';
+import { Listbox, ListboxOptions, ListboxOption, ListboxButton, Switch, Label } from '@headlessui/react';
 import clsx from 'clsx';
 import Link from 'next/link';
 import { IconCheck, IconChevronDown, IconX, IconLanguage, IconWorld, IconTag } from '@tabler/icons-react';
@@ -269,10 +269,10 @@ export default function MaterialForm({
                     )}
                   />
                 </Switch>
-                <Switch.Label className="flex items-center gap-2">
+                <Label className="flex items-center gap-2">
                   <IconWorld className="size-5 text-gray-500" />
                   <span>Make this material public</span>
-                </Switch.Label>
+                </Label>
               </div>
             </Switch.Group>
           </div>

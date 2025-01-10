@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 
 import { IconClose, IconDashboard, IconHome, IconLibrary, IconProfile, IconBurger } from '@/res/icons'
@@ -13,6 +13,10 @@ interface IProps {
 
 const Sidebar = ({ children }: IProps) => {
   const [isExpanded, setIsExpanded] = useState(false)
+
+  useEffect(() => {
+    
+  }, [isExpanded])
 
   return (
     <div className="flex h-screen w-screen bg-gray-100">
@@ -44,9 +48,9 @@ const Sidebar = ({ children }: IProps) => {
               <LinkItem href='/' text='Home' icon={IconHome} isExpanded={isExpanded} />
               <div className={`text-gray-300 my-5 ${!isExpanded && 'md:hidden'}`}>Organization</div>
               <nav className="flex flex-col flex-1 gap-2">
-                <LinkItem href={ROUTE_DASHBOARD} text='Dashboard' icon={IconDashboard} isExpanded={isExpanded} />
-                <LinkItem href={ROUTE_DASHBOARD_LIBRARY} text='Library' icon={IconLibrary} isExpanded={isExpanded} />
-                <LinkItem href={ROUTE_SETTINGS} text='Profile' icon={IconProfile} isExpanded={isExpanded} />
+                <LinkItem href={ROUTE_DASHBOARD} text='Dashboard' icon={IconDashboard} isExpanded={isExpanded} setIsExpanded={setIsExpanded} />
+                <LinkItem href={ROUTE_DASHBOARD_LIBRARY} text='Library' icon={IconLibrary} isExpanded={isExpanded} setIsExpanded={setIsExpanded} />
+                <LinkItem href={ROUTE_SETTINGS} text='Profile' icon={IconProfile} isExpanded={isExpanded} setIsExpanded={setIsExpanded} />
               </nav>
             </div>
 
@@ -80,13 +84,39 @@ interface ILinkProps {
   text: string
   icon: React.FC<{ className?: string }>
   isExpanded?: boolean
+  setIsExpanded?: (arg: boolean) => void
 }
 
-const LinkItem = ({ href, text, icon: Icon, isExpanded = true }: ILinkProps) => {
+const LinkItem = ({ href, text, icon: Icon, isExpanded = true, setIsExpanded }: ILinkProps) => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 840);
+    };
+    
+    // Initial check
+    checkMobile();
+
+    // Add resize listener
+    window.addEventListener('resize', checkMobile);
+    
+    // Cleanup
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const onClick = () => {
+    // Only close sidebar on mobile screens
+    if (isMobile && isExpanded && setIsExpanded) {
+      setIsExpanded(false);
+    }
+  };
+
   return (
     <Link
       href={href}
       className="flex items-center gap-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded-lg p-2 transition-colors"
+      onClick={onClick}
     >
       <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
         <Icon className="w-full h-full" />

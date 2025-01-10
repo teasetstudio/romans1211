@@ -11,11 +11,9 @@ import { materialService } from '@/lib/MaterialServiceForSSR';
 import faqs from '@/assets/data/mocked-faq.json'
 import FAQ from '@/components/ui/FAQ';
 import { TMaterialType } from '@/types/Materials';
-import GameWidget from '@/components/widgets/GameWidget';
-import TextWidget from '@/components/widgets/TextWidget';
 import { ICard } from '@/components/CardGrid/Card';
-import SongWidget from '@/components/widgets/SongWidget';
 import { _transformMaterialToCard } from '@/utils/transformers';
+import CardWidget from '@/components/widgets/CardWidget';
 
 async function getPublicMaterials(type: TMaterialType):Promise<ICard[]> {
   const materials = await materialService.findPublic(type);
@@ -34,28 +32,28 @@ export default async function Home() {
     <>
       <TopBanner className="md:mt-12" />
 
-      <SongWidget
+      <CardWidget
         className="mt-6 md:mt-12 mb-8 md:mb-16"
         title={t('songs')}
-        songs={songs}
+        cards={songs}
         viewAllRoute={ROUTE_LIBRARY}
       />
 
       <SongsBanner />
 
-      <GameWidget
+      <CardWidget
         className="mt-6 md:mt-12 mb-8 md:mb-16"
         title={t('games')}
-        games={games}
+        cards={games}
         viewAllRoute={ROUTE_LIBRARY}
       />
 
       <MaterialTypesBanner />
 
-      <TextWidget
+      <CardWidget
         className="mt-6 md:mt-12 mb-8 md:mb-16"
         title={t('texts')}
-        texts={texts}
+        cards={texts}
         viewAllRoute={ROUTE_LIBRARY}
       />
 

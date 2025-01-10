@@ -84,7 +84,7 @@ const UserDropdown = ({ onClick, className = '' }: IProps) => {
           <PopoverBackdrop className="fixed inset-0" />
 
           {session?.user && (
-            <PopoverPanel className="absolute z-50 right-1/2 transform translate-x-1/2 top-10 bg-white w-48 rounded-xl p-6 border border-gray3 flex flex-col items-center space-y-6 outline-none">
+            <PopoverPanel className="absolute z-50 right-0 md:right-1/2 transform md:translate-x-1/2 top-10 bg-white w-48 rounded-xl p-6 border border-gray3 flex flex-col items-center space-y-6 outline-none">
               {({ close }) => (
                 <>
                   <UserBtns title={t('dashboard')} href={ROUTE_DASHBOARD} onClick={close} />

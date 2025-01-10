@@ -127,7 +127,7 @@ export default async function Dashboard() {
               </div>
               <div className="p-6">
                 <div className="divide-y divide-gray-200">
-                  {recentMaterials.map((material, index: number) => (
+                  {recentMaterials.length > 0 ? recentMaterials.map((material, index: number) => (
                     <Link 
                       key={`${material.title}-${index}`}
                       href={getDashboardMaterialUrl({ type: material.type, id: material.id })}
@@ -148,7 +148,9 @@ export default async function Dashboard() {
                       </div>
                       <IconArrowLeft className="w-5 h-5 rotate-180 text-gray2" />
                     </Link>
-                  ))}
+                  )) : (
+                    <div className="text-sm text-gray2">No recent materials. Create one.</div>
+                  )}
                 </div>
               </div>
             </div>

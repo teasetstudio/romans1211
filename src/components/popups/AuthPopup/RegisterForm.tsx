@@ -177,7 +177,7 @@ const RegisterForm = () => {
             >
               <IconGoogle className="text-primary" />
               <H9 color="text-secondary" weight="semibold">
-                {t('auth.signin_google')}
+                {t('auth.signup_google')}
               </H9>
             </TextButton>
           </div>

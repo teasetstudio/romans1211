@@ -85,14 +85,14 @@ export default async function Library({ searchParams }: ILibrarySearchParams) {
       <div className="min-h-[300px]">
         {cards.length === 0 ? (
           <p className="text-gray-500 container">
-            No materials found. Click
+            No materials found. Click{` `}
             <TextButton 
               href={ROUTE_DASHBOARD_MATERIAL_CREATE} 
-              className="px-3 py-2 mx-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+              className="text-primary underline hover:text-gray-900"
             >
-              Create Resource
-            </TextButton>
-            to Create your first resource!
+              here
+            </TextButton>{` `}
+            to create your first resource!
           </p>
         ) : (
           <CardWidget cards={cards} />
