@@ -25,7 +25,7 @@ export const EmailTemplate: React.FC<Readonly<EmailTemplateProps>> = ({
         fontSize: '24px',
         marginBottom: '10px',
       }}>
-        Welcome to OneLib, {firstName}!
+        Welcome to Christian Material Library, {firstName}!
       </h1>
       <p style={{
         fontSize: '16px',
@@ -57,7 +57,7 @@ export const EmailTemplate: React.FC<Readonly<EmailTemplateProps>> = ({
         lineHeight: '1.6',
         marginBottom: '20px',
       }}>
-        Thank you for joining our community of believers. We&apos;re excited to have you as part of OneLib!
+        Thank you for joining our community of believers. We&apos;re excited to have you as part of Christian Material Library!
       </p>
       <p style={{
         fontSize: '14px',
@@ -74,7 +74,7 @@ export const EmailTemplate: React.FC<Readonly<EmailTemplateProps>> = ({
       fontSize: '14px',
       marginTop: '20px',
     }}>
-      <p>May God bless your journey with OneLib!</p>
+      <p>May God bless your journey with Christian Material Library!</p>
     </div>
   </div>
 );

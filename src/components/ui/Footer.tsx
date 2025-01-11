@@ -72,7 +72,7 @@ const Footer = () => {
       <div className="bg-gray5 py-4">
         <div className="container">
           <H9 color="text-gray1">
-            <> 2021 oneLib. {t('footer.rights')}</>
+            <> 2025 Christian Material Library. {t('footer.rights')}</>
           </H9>
         </div>
       </div>

@@ -27,7 +27,7 @@ export const VerificationEmailTemplate: React.FC<EmailTemplateProps> = ({
         fontSize: '24px',
         marginBottom: '10px',
       }}>
-        Welcome to OneLib, {name}!
+        Welcome to Christian Material Library, {name}!
       </h1>
       <p style={{
         fontSize: '16px',
@@ -59,7 +59,7 @@ export const VerificationEmailTemplate: React.FC<EmailTemplateProps> = ({
         lineHeight: '1.6',
         marginBottom: '20px',
       }}>
-        Thank you for joining our community of believers. To begin your journey with OneLib, please verify your email address by clicking the button below:
+        Thank you for joining our community of believers. To begin your journey with Christian Material Library, please verify your email address by clicking the button below:
       </p>
 
       <div style={{
@@ -113,7 +113,7 @@ export const VerificationEmailTemplate: React.FC<EmailTemplateProps> = ({
         lineHeight: '1.6',
         margin: '0',
       }}>
-        If you did not create an account with OneLib, please disregard this email.
+        If you did not create an account with Christian Material Library, please disregard this email.
       </p>
     </div>
 
@@ -123,8 +123,8 @@ export const VerificationEmailTemplate: React.FC<EmailTemplateProps> = ({
       color: '#A0AEC0',
       fontSize: '12px',
     }}>
-      <p>OneLib - Your Digital Christian Library</p>
-      <p> {new Date().getFullYear()} OneLib. All rights reserved.</p>
+      <p>Ephesians 4:12 - Your Digital Christian Library</p>
+      <p> {new Date().getFullYear()} Ephesians 4:12. All rights reserved.</p>
     </div>
   </div>
 );
