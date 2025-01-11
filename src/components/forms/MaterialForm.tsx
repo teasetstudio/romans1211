@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Listbox, ListboxOptions, ListboxOption, ListboxButton, Switch, Label } from '@headlessui/react';
 import clsx from 'clsx';
-import Link from 'next/link';
+import { Link } from '@/i18n/routing';;
 import { IconCheck, IconChevronDown, IconX, IconLanguage, IconWorld, IconTag } from '@tabler/icons-react';
 import TabGroup from '../tabs/TabGroup';
 import TextMaterialForm from './TextMaterialForm';

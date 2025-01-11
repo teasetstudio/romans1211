@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import prisma from '@/lib/prisma';
-import Link from 'next/link';
+import { Link } from '@/i18n/routing';
 import { AsyncParams } from '@/types/Params';
 import { ROUTE_LOGIN } from '@/res/routes';
 

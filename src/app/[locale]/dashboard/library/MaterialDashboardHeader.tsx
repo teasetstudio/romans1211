@@ -5,8 +5,8 @@ import DeleteButton from '@/components/buttons/DeleteButton';
 import { ROUTE_DASHBOARD_LIBRARY } from '@/res/routes';
 import { TMaterialType } from '@/types/Materials';
 import { getDashboardEditMaterialUrl } from '@/utils/urls';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { Link } from '@/i18n/routing';
+import { useRouter } from '@/i18n/routing';
 import { IconArrowLeft } from '@/res/icons';
 
 interface MaterialActionsProps {

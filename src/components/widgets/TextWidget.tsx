@@ -1,5 +1,5 @@
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+import { Link } from '@/i18n/routing';;
 import H4 from '@/components/typo/H4';
 import { NAMESPACE_WIDGETS } from '@/res/namespaces';
 import Spinner from '../ui/Spinner';

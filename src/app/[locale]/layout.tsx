@@ -71,7 +71,7 @@ export default async function RootLayout({ children }: IProps) {
   const [locale, messages, session] = await Promise.all([
     getLocale(),
     getMessages(),
-    getSession()
+    getSession(),
   ]);
 
   return (

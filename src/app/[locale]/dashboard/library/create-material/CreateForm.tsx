@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/routing';
 import { useOrganization } from '@/components/contexts/OrganizationContext';
 import { postMaterial } from '@/api/requests/materials';
 import MaterialForm from '@/components/forms/MaterialForm';

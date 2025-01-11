@@ -1,6 +1,6 @@
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import Link from "next/link";
+import { Link } from '@/i18n/routing';
 import { IconText, IconMusic, IconGame, IconLibrary, IconClock, IconArrowLeft, IconPlus } from "@/res/icons";
 import { ROUTE_DASHBOARD_LIBRARY, ROUTE_DASHBOARD_MATERIAL_CREATE } from "@/res/routes";
 import { getDashboardMaterialUrl } from "@/utils/urls";

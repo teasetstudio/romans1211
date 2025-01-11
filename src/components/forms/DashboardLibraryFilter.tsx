@@ -2,7 +2,7 @@
 
 import { ILibraryCatalogSearchParams } from '@/types/Params'
 import { IconSearch } from '@/res/icons'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter, usePathname } from '@/i18n/routing'
 import { FormEvent, useState, useEffect } from 'react'
 
 interface IProps {

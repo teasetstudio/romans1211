@@ -1,13 +1,15 @@
-import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+'use client'
 
-import LoginForm from '@/components/popups/AuthPopup/LoginForm'
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/routing';
+
+import RegisterForm from '@/components/popups/AuthPopup/RegisterForm'
 import H2 from '@/components/typo/H2';
 import H9 from '@/components/typo/H9';
 import { NAMESPACE_COMMON } from '@/res/namespaces';
-import { ROUTE_REGISTER } from '@/res/routes';
+import { ROUTE_LOGIN } from '@/res/routes';
 
-export default function Login() {
+export default function RegisterPage() {
   const t = useTranslations(NAMESPACE_COMMON)
 
   return (
@@ -19,14 +21,14 @@ export default function Login() {
           </Link>
         </div>
         <div className="text-center mb-8">
-          <H2>{t('auth.log_in')}</H2>
+          <H2>{t('auth.register')}</H2>
         </div>
-        <LoginForm redirectAfterLoginURL='/' />
+        <RegisterForm />
         <div className="text-center pt-4">
           <H9 className="text-gray1">
-            {t('auth.no_account')}{' '}
-            <Link href={ROUTE_REGISTER} className="text-primary hover:underline">
-              {t('auth.register')}
+            {t('auth.have_account')}{' '}
+          <Link href={ROUTE_LOGIN} className="text-primary hover:underline">
+              {t('auth.log_in')}
             </Link>
           </H9>
         </div>

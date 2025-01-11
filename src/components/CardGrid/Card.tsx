@@ -2,7 +2,7 @@ import { Lang } from '@/types/Lang';
 import { TMaterialType } from '@/types/Materials';
 import { ITag } from '@/types/Tag';
 import { dateToDDMMYYY } from '@/utils/dates';
-import Link from 'next/link';
+import { Link } from '@/i18n/routing';;
 import LangBadge from '../badges/LangBadge';
 import ImageCardPart from './shared/ImageCardPart';
 import TagsCardPart from './shared/TagsCardPart';
