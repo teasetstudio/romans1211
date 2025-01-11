@@ -36,4 +36,4 @@ export const DEFAULT_LANG = 'de'
 export const swVatPercent = 0.077
 export const cropAspectRatio = 1.7777777777777777
 
-export const defaultResendEmail = 'ChristianMaterials@onelib.click'
+export const defaultResendEmail = process.env.RESEND_EMAIL || 'ChristianMaterials@onelib.click'
