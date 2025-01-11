@@ -1,7 +1,7 @@
 "use client"
 
 import { Popover, PopoverBackdrop, PopoverButton, PopoverPanel } from '@headlessui/react'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from '@/i18n/routing';
 
 import { useLocale, useTranslations } from 'next-intl';
 import React, { useRef } from 'react'
@@ -71,11 +71,13 @@ interface IBtnProps {
 
 const LangBtns = ({ title, active = false, locale, onClose }: IBtnProps) => {
   const router = useRouter();
+  const pathname = usePathname();
 
   const onClick = () => {
     onClose()
     document.cookie = `NEXT_LOCALE=${locale}; path=/; max-age=31536000; SameSite=Lax`
-    router.refresh()
+    router.replace(pathname, { locale });
+    router.refresh();
   };
 
   return (

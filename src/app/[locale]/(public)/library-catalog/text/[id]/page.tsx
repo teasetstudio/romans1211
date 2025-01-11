@@ -3,7 +3,6 @@ import { AsyncParams } from '@/types/Params';
 import React from 'react';
 import { materialService } from '@/lib/MaterialServiceForSSR';
 
-
 export default async function TextPage({ params }: AsyncParams) {
   const { id } = await params;
   const text = await materialService.findPublicById('text', id)

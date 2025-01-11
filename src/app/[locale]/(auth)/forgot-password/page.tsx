@@ -1,8 +1,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
+import { Link } from '@/i18n/routing';
 import { useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import * as yup from 'yup';
@@ -18,28 +17,22 @@ import useErrorMessage from '@/hooks/useErrorMessage';
 import { ROUTE_LOGIN } from '@/res/routes';
 
 interface IFormValues {
-  password: string;
-  confirmPassword: string;
+  email: string;
 }
 
-export default function ResetPasswordPage() {
+export default function ForgotPasswordPage() {
   const t = useTranslations(NAMESPACE_COMMON);
   const { getErrorMessage } = useErrorMessage();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const token = searchParams.get('token');
 
   const [reqState, setReqState] = useState({
     loading: false,
     error: '',
+    success: false,
   });
-  const { loading, error } = reqState;
+  const { loading, error, success } = reqState;
 
   const schema = yup.object({
-    password: yup.string().min(8).required(),
-    confirmPassword: yup.string()
-      .oneOf([yup.ref('password')], t('error.passwords_must_match'))
-      .required(),
+    email: yup.string().email().required(),
   });
 
   const methods = useForm<IFormValues>({
@@ -49,24 +42,13 @@ export default function ResetPasswordPage() {
   const { handleSubmit } = methods;
 
   const onSubmit = async (data: IFormValues) => {
-    if (!token) {
-      setReqState({
-        loading: false,
-        error: 'Invalid reset token',
-      });
-      return;
-    }
-
-    setReqState({ loading: true, error: '' });
+    setReqState({ loading: true, error: '', success: false });
 
     try {
-      const response = await fetch('/api/auth/reset-password', {
+      const response = await fetch('/api/auth/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          token,
-          password: data.password,
-        }),
+        body: JSON.stringify({ email: data.email }),
       });
 
       const result = await response.json();
@@ -75,27 +57,31 @@ export default function ResetPasswordPage() {
         throw new Error(result.error);
       }
 
-      // Redirect to login page after successful password reset
-      router.push(ROUTE_LOGIN);
+      setReqState({
+        loading: false,
+        error: '',
+        success: true,
+      });
     } catch (error) {
       setReqState({
         loading: false,
         error: getErrorMessage(error),
+        success: false,
       });
     }
   };
 
-  if (!token) {
+  if (success) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray6 p-4">
         <div className="w-full max-w-lg space-y-4 bg-white p-12 rounded-[36px] border border-gray3">
-          <div className="text-center">
-            <H9 color="text-danger" className="mb-4">
-              {t('auth.invalid_reset_token')}
+          <div className="text-center py-8">
+            <H9 color="text-success" className="mb-4">
+              {t('auth.reset_email_sent')}
             </H9>
-            <Link href="/forgot-password" className="text-primary hover:underline">
-              {t('auth.request_new_link')}
-            </Link>
+            <H9 className="mb-4">
+              {t('auth.check_email_reset')}
+            </H9>
           </div>
         </div>
       </div>
@@ -111,26 +97,18 @@ export default function ResetPasswordPage() {
           </Link>
         </div>
         <div className="text-center mb-8">
-          <H2>{t('auth.reset_password')}</H2>
+          <H2>{t('auth.forgot_password')}</H2>
         </div>
 
         <FormProvider {...methods}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="mb-6">
-              <H9 className="mb-3">{t('auth.new_password')}</H9>
+              <H9 className="mb-3">{t('auth.email_address')}</H9>
               <Input
-                {...methods.register('password')}
-                type="password"
-                placeholder={t('auth.new_password')}
+                {...methods.register('email')}
+                type="text"
+                placeholder={t('auth.email_address')}
               />
-
-              <H9 className="mb-3 mt-5">{t('auth.confirm_password')}</H9>
-              <Input
-                {...methods.register('confirmPassword')}
-                type="password"
-                placeholder={t('auth.confirm_password')}
-              />
-
               {error && (
                 <H9 color="text-danger" className="mt-3 text-center">
                   {error}
@@ -138,21 +116,29 @@ export default function ResetPasswordPage() {
               )}
             </div>
 
-            {loading ? <Spinner /> :
-              <Button
-                type="submit"
-                disabled={loading}
-                paddingClass="py-3"
-                rounded="rounded-lg"
-                className="w-full"
-                bgColor="bg-primary"
-              >
+            <div className="flex flex-col space-y-4">
+              {loading ? <Spinner /> :
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  paddingClass="py-3"
+                  rounded="rounded-lg"
+                  className="w-full"
+                  bgColor="bg-primary"
+                >
 
-                <H9 color="text-white" weight="semibold">
-                  {t('auth.reset_password')}
-                </H9>
-              </Button>
-            }
+                  <H9 color="text-white" weight="semibold">
+                    {t('auth.reset_password')}
+                  </H9>
+                </Button>
+              }
+
+              <div className="text-center">
+                <Link href={ROUTE_LOGIN} className="text-primary hover:underline">
+                  {t('auth.back_to_login')}
+                </Link>
+              </div>
+            </div>
           </form>
         </FormProvider>
       </div>

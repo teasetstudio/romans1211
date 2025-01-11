@@ -3,8 +3,8 @@ import Header from "@/components/ui/Header";
 import { ReactNode } from "react";
 
 interface IProps {
-  children: ReactNode
-}
+  children: ReactNode;
+};
 
 export default async function Layout({ children }: IProps) {
   return (

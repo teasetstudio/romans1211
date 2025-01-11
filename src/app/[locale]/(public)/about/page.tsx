@@ -1,4 +1,12 @@
-import React from 'react';
+// Generate static pages for default locale (en) and ru locale
+export function generateStaticParams() {
+  return [
+    // This will generate / and /en (they are the same)
+    { locale: 'en' },
+    // This will generate /ru
+    { locale: 'ru' },
+  ];
+}
 
 export default function AboutPage() {
   return (

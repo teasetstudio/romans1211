@@ -1,6 +1,6 @@
 'use client'
 
-import Link from 'next/link'
+import { Link } from '@/i18n/routing';
 
 import { IconPlus } from '@/res/icons'
 import H9 from '../typo/H9'

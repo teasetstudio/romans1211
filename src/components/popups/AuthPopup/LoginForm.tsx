@@ -5,7 +5,7 @@ import { useContext, useState } from 'react'
 import { FormProvider, SubmitHandler, useForm } from 'react-hook-form'
 import * as yup from 'yup'
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/routing';
 import AuthContext from '@/components/contexts/AuthContext'
 import Button from '@/components/buttons/Button'
 import TextButton from '@/components/buttons/TextButton'

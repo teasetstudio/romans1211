@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { Link } from '@/i18n/routing';;
 import { ICard } from './Card';
 import { dateToDDMMYYY } from '@/utils/dates';
 import LangBadge from '../badges/LangBadge';

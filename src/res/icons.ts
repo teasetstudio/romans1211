@@ -41,6 +41,8 @@ import IconParagraph from "@assets/icons/paragraph.svg";
 import IconRedo from "@assets/icons/redo.svg";
 import IconUndo from "@assets/icons/undo.svg";
 import IconClock from "@assets/icons/clock.svg";
+import IconMapPin from "@assets/icons/map-pin.svg";
+import IconEmail from "@assets/icons/email.svg";
 
 export {
   IconBurger,
@@ -86,4 +88,6 @@ export {
   IconRedo,
   IconUndo,
   IconClock,
+  IconMapPin,
+  IconEmail,
 };

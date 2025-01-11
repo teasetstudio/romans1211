@@ -1,7 +1,7 @@
 'use client';
 
 import { updateMaterial } from '@/api/requests/materials';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/routing';
 import MaterialForm from '@/components/forms/MaterialForm';
 import { getDashboardMaterialUrl } from '@/utils/urls';
 import { TMaterialType, TMaterialWithIncluded } from '@/types/Materials';

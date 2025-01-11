@@ -1,8 +1,8 @@
 "use client"
 
-import { usePathname } from 'next/navigation';
+import { usePathname } from '@/i18n/routing';
 import { appendParamsToUrl } from '@/utils/urls'
-import Link from 'next/link'
+import { Link } from '@/i18n/routing';
 import React from 'react'
 
 interface IProps {
