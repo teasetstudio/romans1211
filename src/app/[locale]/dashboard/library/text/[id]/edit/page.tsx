@@ -22,10 +22,8 @@ export default async function EditTextPage({ params }: AsyncParams) {
   if (!text) notFound();
 
   return (
-    <div className="min-h-screen">
-      <div className="max-w-4xl mx-auto">
-        <EditForm material={{ ...text, type: 'text' }} />
-      </div>
+    <div>
+      <EditForm material={{ ...text, type: 'text' }} />
     </div>
   );
 }

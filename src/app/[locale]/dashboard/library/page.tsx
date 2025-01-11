@@ -36,6 +36,7 @@ export default async function Library({ searchParams }: ILibrarySearchParams) {
     tags: tagsArray,
     organizationId: defaultOrg.id, 
     page: parsedPage,
+    isPublic: null,
     limit
   });
 

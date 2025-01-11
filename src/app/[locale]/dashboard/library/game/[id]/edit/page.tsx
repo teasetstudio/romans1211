@@ -14,9 +14,7 @@ export default async function EditGamePage({ params }: AsyncParams) {
   const game = await prisma.game.findFirst({
     where: {
       id,
-      organization: {
-        userId: session.user.id,
-      },
+      organization: { userId: session.user.id },
     },
     include: { organization: true, tags: true },
   })
@@ -24,10 +22,8 @@ export default async function EditGamePage({ params }: AsyncParams) {
   if (!game) notFound();
 
   return (
-    <div className="min-h-screen p-8 pb-20 sm:p-20">
-      <div className="max-w-4xl mx-auto">
-        <EditForm material={{ ...game, type: 'game' }} />
-      </div>
+    <div>
+      <EditForm material={{ ...game, type: 'game' }} />
     </div>
   );
 }

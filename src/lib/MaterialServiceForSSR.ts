@@ -98,7 +98,7 @@ class MaterialServiceForSSR {
     page?: number;
     tags?: string[];
     searchTerm?: string;
-    isPublic?: boolean;
+    isPublic?: boolean | null;
     organizationId?: string;
     userId?: string;
   }): Promise<{ materials: TCatalogMaterial[]; totalCount: number; totalPages: number }> {
@@ -134,7 +134,7 @@ class MaterialServiceForSSR {
     const WHERE = (type: 'Text' | 'Song' | 'Game') => {
       const conditions = [];
       
-      if (isPublic !== undefined) 
+      if (isPublic !== undefined && isPublic !== null) 
         conditions.push(Prisma.sql`m."isPublic" = ${isPublic}`);
       
       if (organizationId)

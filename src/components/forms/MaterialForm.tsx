@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Listbox, ListboxOptions, ListboxOption, ListboxButton, Switch, Label } from '@headlessui/react';
+import { Listbox, ListboxOptions, ListboxOption, ListboxButton, Switch, Label, Field } from '@headlessui/react';
 import clsx from 'clsx';
 import { Link } from '@/i18n/routing';;
 import { IconCheck, IconChevronDown, IconX, IconLanguage, IconWorld, IconTag } from '@tabler/icons-react';
@@ -202,7 +202,7 @@ export default function MaterialForm({
       )}
 
       {/* Settings Section */}
-      <div className="space-y-6 bg-gray-50 p-6 rounded-lg">
+      <div className="space-y-6 bg-gray-50 p-2 sm:p-6 rounded-lg border border-gray-300">
         <h2 className="text-lg font-semibold text-gray-900">Material Settings</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -252,29 +252,31 @@ export default function MaterialForm({
           {/* Visibility Toggle */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">Visibility</label>
-            <Switch.Group>
-              <div className="flex items-center gap-4 h-[42px] px-4">
-                <Switch
-                  checked={isPublic}
-                  onChange={setIsPublic}
-                  className={clsx(
-                    'relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2',
-                    isPublic ? 'bg-primary' : 'bg-gray-200'
-                  )}
-                >
-                  <span
+            <Field>
+              <div className="flex items-center gap-4 h-12">
+                <div>
+                  <Switch
+                    checked={isPublic}
+                    onChange={setIsPublic}
                     className={clsx(
-                      'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
-                      isPublic ? 'translate-x-6' : 'translate-x-1'
+                      'relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2',
+                      isPublic ? 'bg-primary' : 'bg-gray-200'
                     )}
-                  />
-                </Switch>
+                  >
+                    <span
+                      className={clsx(
+                        'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
+                        isPublic ? 'translate-x-6' : 'translate-x-1'
+                      )}
+                    />
+                  </Switch>
+                </div>
                 <Label className="flex items-center gap-2">
                   <IconWorld className="size-5 text-gray-500" />
                   <span>Make this material public</span>
                 </Label>
               </div>
-            </Switch.Group>
+            </Field>
           </div>
         </div>
 
