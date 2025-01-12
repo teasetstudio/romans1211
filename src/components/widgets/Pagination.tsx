@@ -1,4 +1,6 @@
 import { Link } from '@/i18n/routing';
+import { NAMESPACE_COMMON } from '@/res/namespaces';
+import { useTranslations } from 'next-intl';
 
 interface IProps {
   className?: string
@@ -8,6 +10,8 @@ interface IProps {
 }
 
 const Pagination = ({ totalPages, currentPage, buildUrl, className }: IProps) => {
+  const t = useTranslations(NAMESPACE_COMMON);
+
   return (
     <>
       {totalPages > 1 && (
@@ -18,12 +22,12 @@ const Pagination = ({ totalPages, currentPage, buildUrl, className }: IProps) =>
                 href={buildUrl(currentPage - 1)}
                 className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
               >
-                Previous
+                {t('previous')}
               </Link>
             )}
 
             <span className="px-4 py-2">
-              Page {currentPage} of {totalPages}
+              {t('page_of', { currentPage, totalPages })}
             </span>
 
             {currentPage < totalPages && (
@@ -31,7 +35,7 @@ const Pagination = ({ totalPages, currentPage, buildUrl, className }: IProps) =>
                 href={buildUrl(currentPage + 1)}
                 className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
               >
-                Next
+                {t('next')}
               </Link>
             )}
           </div>

@@ -8,6 +8,8 @@ import { getDashboardEditMaterialUrl } from '@/utils/urls';
 import { Link } from '@/i18n/routing';
 import { useRouter } from '@/i18n/routing';
 import { IconArrowLeft } from '@/res/icons';
+import { NAMESPACE_DASHBOARD } from '@/res/namespaces';
+import { useTranslations } from 'next-intl';
 
 interface MaterialActionsProps {
   materialId: string;
@@ -19,6 +21,7 @@ const MaterialDashboardHeader = ({
   type,
 }: MaterialActionsProps) => {
   const router = useRouter();
+  const t = useTranslations(NAMESPACE_DASHBOARD);
 
   const handleDelete = async () => {
     await deleteMaterial(materialId, type);
@@ -41,11 +44,11 @@ const MaterialDashboardHeader = ({
           href={editMaterialUrl}
           className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-secondary rounded-[12px] transition-colors shadow-md hover:shadow-lg"
         >
-          Edit Material
+          {t('edit')}
         </Link>
         <DeleteButton
           onDelete={handleDelete}
-          confirmText={`Are you sure you want to delete this ${type}?`}
+          confirmText={t('confirm_delete_material', { type })}
           className="shadow-md hover:shadow-lg"
         />
       </div>

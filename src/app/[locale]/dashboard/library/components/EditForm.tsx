@@ -46,7 +46,6 @@ export default function EditForm({ material }: IProps) {
         }}
         editType={material.type}
         onSubmit={handleSubmit}
-        submitLabel="Save Changes"
         cancelHref={dashboardMaterialUrl}
       />
     </div>

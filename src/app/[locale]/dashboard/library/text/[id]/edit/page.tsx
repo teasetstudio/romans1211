@@ -2,7 +2,7 @@ import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { notFound } from 'next/navigation';
-import EditForm from '../../../EditForm';
+import EditForm from '../../../components/EditForm';
 import { AsyncParams } from '@/types/Params';
 
 export default async function EditTextPage({ params }: AsyncParams) {

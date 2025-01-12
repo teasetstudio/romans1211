@@ -1,14 +1,10 @@
 export const NAMESPACE_COMMON = "common";
 export const NAMESPACE_HOME = "home";
 export const NAMESPACE_CONTACT = "contact";
-export const NAMESPACE_MEDIA_PAGE = "media_page";
 export const NAMESPACE_BANNERS = "banners";
-export const NAMESPACE_CATALOG_PAGE = "catalog";
-export const NAMESPACE_SINGLE_PRODUCT_PAGE = "single_product_page";
+export const NAMESPACE_DASHBOARD = "dashboard";
 export const NAMESPACE_WIDGETS = "widgets";
 export const NAMESPACE_POPUPS = "popups";
 export const NAMESPACE_ERRORS = "error";
 export const NAMESPACE_AD_MANAGER_PAGE = "ad_manager_page";
-export const NAMESPACE_CHECKOUT = "checkout";
-export const NAMESPACE_FORM_ITEMS = "form_items";
 export const NAMESPACE_USER_SETTINGS_PAGE = "user_settings_page";

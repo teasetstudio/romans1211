@@ -1,1 +1,202 @@
-{"widgets":{"no_materials":"No materials available","view_all":"View All"},"contact":{"address":"Address","contact_info":"Contact Information","email_us":"Email Us","our_church":"Our Church","title":"Contact Us"},"home":{"answer1":"Our website is dedicated to providing Christian resources that inspire, equip, and encourage ministries around the world. We aim to create a collaborative space where people can share and access materials for worship, education, and outreach.","answer2":"Yes, you can contribute your own materials to the library. By default, any materials you create will remain private. You have full control over whether you want to make them public and share them with others. If you choose to make them public, they will be accessible to the community for use.","answer3":"First of all, it was created for those involved in youth and children's ministry, but it is open to materials for all ages and ministries.","faq_title":"FAQ","featured_placements":"Featured Placements","games":"Games","question1":"What is the purpose of this website?","question2":"Can I contribute my own materials to the library?","question3":"Who is this website for?","songs":"Songs","texts":"Texts","title":"Title1"},"catalog":{"subtitle":"Explore this library to find the right material for your meetings.","title":"Library Catalog"},"banners":{"mat_types":{"game":{"btn_label":"Browse Games","description":"Interactive and engaging games designed for youth ministry, Sunday school, and group activities.","title":"Games"},"song":{"btn_label":"Browse Songs","description":"A collection of worship songs, hymns, and spiritual music for every occasion.","title":"Songs"},"text":{"btn_label":"Browse Texts","description":"Sermons, Bible studies, and educational materials for Sunday school and children's ministry.","title":"Texts"}},"songs":{"btn_label":"Browse Songs","description":"Explore Songs to Support and Encourage Your Ministry – For Worship, Youth Groups, and More.","title":"Praise God in Songs"},"top_banner":{"create":"Create","ephesians_4_12":"To equip His people for works of service, so that the body of Christ may be built up.","ephesians_5_19":"Speaking to one another with psalms, hymns, and songs from the Spirit. Sing and make music from your heart to the Lord.","log_in":"Log In","ref_ephesians_4_12":"Ephesians 4:12","ref_ephesians_5_19":"Ephesians 5:19","subtitle":"Discover Resources for Your Ministry – Songs, Games, Texts!","subtitle2":"Contribute Your Creations – Help Build a Growing Library of Christian Resources.","title":"Christian Library","view_placements":"View placements"}},"common":{"auth":{"back_to_login":"Back to Login","check_email":"Сheck your Email","check_email_reset":"Check Email Reset","confirm_password":"Confirm Password","email_address":"Email Address","forgot_password":"Forgot your password?","have_account":"Already have an account?","invalid_reset_token":"Invalid reset Token","log_in":"Log in","logout":"Logout","name":"Name","new_password":"New Password","no_account":"Don't have an account?","no_auth":"You are not authorized","password":"Password","register":"Register","registration_success":"Registration Successful","request_new_link":"Request New Link","reset_email_sent":"Reset Email Sent","reset_password":"Reset Password","settings":"Settings","signin_google":"Sign in with Google","sign_up":"Sign up","signup_google":"Sign up with Google","verification_email_sent":"Verification Email Sent"},"dashboard":"Dashboard","error":{"bad_request":"Bad Request","file_format":"Use can only JPG, JPEG, PNG","link":"Insert the correct link","minimum_8":"Minimum 8 characters","passwords_must_match":"Passwords must match","required":"This field is required","something_wrong":"Something went wrong, please try again later","string":"Should be a string","user_exists":"Busy Email","user_not_found":"User doesn't exist","wrong_password":"Wrong password"},"footer":{"1_cor_13_13":"And now these three remain: faith, hope and love. But the greatest of these is love. (1 Cor 13:13)","about":"About","banner":{"btn_view_placements":"View Placements","create":"Create","title":"Your online library for your Christian materials"},"contact":"Contact","game":"Game","library":"Library","page":"Page","products":"Products","rights":"Rights","song":"Songs","text":"Text","tos":"ToS"},"header":{"btn_library_catalog":"Library Catalog","create_material":"Create Material"},"home":"Home","lang":"En","title":"Title"}}
+{
+  "widgets": {
+    "no_materials": "No materials available",
+    "view_all": "View All",
+    "catalog_filter": {
+      "subtitle": "Explore this library to find the right material for your meetings.",
+      "title": "Library Catalog",
+      "material_type": "Material Type",
+      "all_materials": "All Materials",
+      "games": "Games",
+      "songs": "Songs",
+      "texts": "Texts",
+      "search": "Search",
+      "search_materials": "Search materials...",
+      "tags":"Tags",
+      "tags_placeholder": "Tags (comma-separated)",
+      "apply_filters": "Apply Filters"
+    }
+  },
+  "contact": {
+    "address": "Address",
+    "contact_info": "Contact Information",
+    "email_us": "Email Us",
+    "our_church": "Our Church",
+    "title": "Contact Us"
+  },
+  "home": {
+    "answer1": "Our website is dedicated to providing Christian resources that inspire, equip, and encourage ministries around the world. We aim to create a collaborative space where people can share and access materials for worship, education, and outreach.",
+    "answer2": "Yes, you can contribute your own materials to the library. By default, any materials you create will remain private. You have full control over whether you want to make them public and share them with others. If you choose to make them public, they will be accessible to the community for use.",
+    "answer3": "First of all, it was created for those involved in youth and children's ministry, but it is open to materials for all ages and ministries.",
+    "faq_title": "FAQ",
+    "games": "Games",
+    "question1": "What is the purpose of this website?",
+    "question2": "Can I contribute my own materials to the library?",
+    "question3": "Who is this website for?",
+    "songs": "Songs",
+    "texts": "Texts",
+    "title": "Title1"
+  },
+  "banners": {
+    "mat_types": {
+      "game": {
+        "btn_label": "Browse Games",
+        "description": "Interactive and engaging games designed for youth ministry, Sunday school, and group activities.",
+        "title": "Games"
+      },
+      "song": {
+        "btn_label": "Browse Songs",
+        "description": "A collection of Christian songs, hymns, and spiritual music for every occasion.",
+        "title": "Songs"
+      },
+      "text": {
+        "btn_label": "Browse Texts",
+        "description": "Sermons, Bible studies, and educational materials for Sunday school and children's ministry.",
+        "title": "Texts"
+      }
+    },
+    "songs": {
+      "btn_label": "Browse Songs",
+      "description": "Explore Songs to Support and Encourage Your Ministry – For Worship, Youth Groups, and More.",
+      "title": "Praise God in Songs"
+    },
+    "top_banner": {
+      "create": "Create",
+      "ephesians_4_12": "To equip His people for works of service, so that the body of Christ may be built up.",
+      "ephesians_5_19": "Speaking to one another with psalms, hymns, and songs from the Spirit. Sing and make music from your heart to the Lord.",
+      "log_in": "Log In",
+      "ref_ephesians_4_12": "Ephesians 4:12",
+      "ref_ephesians_5_19": "Ephesians 5:19",
+      "subtitle": "Discover Resources for Your Ministry – Songs, Games, Texts!",
+      "subtitle2": "Contribute Your Creations – Help Build a Growing Library of Christian Resources.",
+      "title": "Christian Library",
+      "view_placements": "View placements"
+    }
+  },
+  "common": {
+    "auth": {
+      "back_to_login": "Back to Login",
+      "check_email": "Сheck your Email",
+      "check_email_reset": "Check Email Reset",
+      "confirm_password": "Confirm Password",
+      "email_address": "Email Address",
+      "forgot_password": "Forgot your password?",
+      "have_account": "Already have an account?",
+      "invalid_reset_token": "Invalid reset Token",
+      "log_in": "Log in",
+      "logout": "Logout",
+      "name": "Name",
+      "new_password": "New Password",
+      "no_account": "Don't have an account?",
+      "no_auth": "You are not authorized",
+      "password": "Password",
+      "register": "Register",
+      "registration_success": "Registration Successful",
+      "request_new_link": "Request New Link",
+      "reset_email_sent": "Reset Email Sent",
+      "reset_password": "Reset Password",
+      "settings": "Settings",
+      "signin_google": "Sign in with Google",
+      "sign_up": "Sign up",
+      "signup_google": "Sign up with Google",
+      "verification_email_sent": "Verification Email Sent"
+    },
+    "dashboard": "Dashboard",
+    "error": {
+      "bad_request": "Bad Request",
+      "link": "Insert the correct link",
+      "minimum_8": "Minimum 8 characters",
+      "passwords_must_match": "Passwords must match",
+      "required": "This field is required",
+      "something_wrong": "Something went wrong, please try again later",
+      "string": "Should be a string",
+      "user_exists": "Busy Email",
+      "user_not_found": "User doesn't exist",
+      "wrong_password": "Wrong password"
+    },
+    "footer": {
+      "1_cor_13_13": "And now these three remain: faith, hope and love. But the greatest of these is love. (1 Cor 13:13)",
+      "about": "About",
+      "banner": {
+        "btn_view_placements": "View Placements",
+        "create": "Create",
+        "title": "Your online library for your Christian materials"
+      },
+      "contact": "Contacts",
+      "game": "Game",
+      "library": "Library",
+      "page": "Page",
+      "products": "Material types",
+      "rights": "Rights",
+      "song": "Songs",
+      "text": "Text",
+      "tos": "ToS"
+    },
+    "header": {
+      "btn_library_catalog": "Library Catalog",
+      "create_material": "Create Material"
+    },
+    "home": "Home",
+    "lang": "En",
+    "next": "Next",
+    "page_of": "Page {currentPage} of {totalPages}",
+    "previous": "Previous",
+    "title": "Title",
+    "delete": "Delete",
+    "deleting": "Deleting...",
+    "cancel": "Cancel"
+  },
+  "dashboard": {
+    "all_materials": "All Materials",
+    "browse_library": "Browse Library",
+    "create_game": "Create Game",
+    "create_new_material": "Create New Material",
+    "create_one": "Create One",
+    "create_resource": "Create Resource",
+    "create_song": "Create Song",
+    "create_text": "Create Text",
+    "dashboard": "Dashboard",
+    "games": "Games",
+    "library": "Library",
+    "no_materials": "No {type} created yet",
+    "no_materials_found_1": "No materials found. Click",
+    "no_materials_found_2": "here",
+    "no_materials_found_3": "to create your first resource",
+    "no_recent_materials": "No recent materials. Create one.",
+    "recent_materials": "Recent Materials",
+    "romans_12_11": "Never be lacking in zeal, but keep your spiritual fervor, serving the Lord.",
+    "romans_12_11_ref": "Romans 12:11",
+    "search": "Search",
+    "search_materials": "Search materials",
+    "songs": "Songs",
+    "tags_placeholder": "Tags (comma-separated)",
+    "texts": "Texts",
+    "total": "Total",
+    "total_items": "Total: {totalCount} items",
+    "view_all": "View All",
+    "cancel": "Cancel",
+    "edit_material": "Edit Material",
+    "edit": "Edit",
+    "save_changes": "Save Changes",
+    "create_material": "Create Material",
+    "confirm_delete_material": "Are you sure you want to delete this {type}?",
+    "form": {
+      "title": "Title",
+      "title_text_placeholder": "Enter text material title...",
+      "title_song_placeholder": "Enter song material title...",
+      "title_game_placeholder": "Enter game material title...",
+      "content": "Content",
+      "language": "Language",
+      "language_en": "English",
+      "language_ru": "Russian",
+      "language_lt": "Lithuanian",
+      "tags": "Tags",
+      "tags_placeholder": "Add tags (press Enter)",
+      "visibility": "Visibility",
+      "make_public": "Make this material public",
+      "material_settings": "Material Settings",
+      "type": "Type",
+      "saving": "Saving..."
+    }
+  }
+}
