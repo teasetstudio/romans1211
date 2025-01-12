@@ -3,6 +3,8 @@ import { AsyncParams } from '@/types/Params';
 import React from 'react';
 import { materialService } from '@/lib/MaterialServiceForSSR';
 
+import '@/styles/tiptap-components.css';
+
 export default async function TextPage({ params }: AsyncParams) {
   const { id } = await params;
   const text = await materialService.findPublicById('text', id)
@@ -35,7 +37,7 @@ export default async function TextPage({ params }: AsyncParams) {
         {/* Content Section */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           <div
-            className="prose max-w-none"
+            className="tiptap-wrapper whitespace-pre-wrap"
             dangerouslySetInnerHTML={{ __html: text.content }}
           />
         </div>

@@ -7,6 +7,16 @@ import H9 from '@/components/typo/H9';
 import { NAMESPACE_COMMON } from '@/res/namespaces';
 import { ROUTE_REGISTER } from '@/res/routes';
 
+// Generate static pages for default locale (en) and ru locale
+export function generateStaticParams() {
+  return [
+    // This will generate / and /en (they are the same)
+    { locale: 'en' },
+    // This will generate /ru
+    { locale: 'ru' },
+  ];
+}
+
 export default function Login() {
   const t = useTranslations(NAMESPACE_COMMON)
 

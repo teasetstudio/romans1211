@@ -1,3 +1,5 @@
+'use client'
+
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useTranslations } from 'next-intl';
 import { useState } from 'react'
@@ -8,7 +10,7 @@ import { signIn } from 'next-auth/react'
 import Button from '@/components/buttons/Button'
 import Input from '@/components/inputs/Input'
 import H9 from '@/components/typo/H9'
-import Spinner from '@/components/ui/Spinner'
+import Spinner from '@/components/widgets/ui/Spinner'
 import useErrorMessage from '@/hooks/useErrorMessage'
 import { NAMESPACE_COMMON, NAMESPACE_ERRORS } from '@/res/namespaces'
 import TextButton from '@/components/buttons/TextButton';

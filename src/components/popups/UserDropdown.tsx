@@ -11,7 +11,7 @@ import useScreenSize from '@/hooks/useScreenSize'
 import { IconUser } from '@/res/icons'
 import { NAMESPACE_COMMON } from '@/res/namespaces'
 import { ROUTE_DASHBOARD, ROUTE_SETTINGS } from '@/res/routes'
-import Spinner from '../ui/Spinner';
+import Spinner from '../widgets/ui/Spinner';
 import AuthPopup from './AuthPopup';
 
 // const AuthPopup = dynamic(() => import('@/components/popups/AuthPopup'), { ssr: false })

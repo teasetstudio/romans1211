@@ -2,7 +2,7 @@ import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';;
 import H4 from '@/components/typo/H4';
 import { NAMESPACE_WIDGETS } from '@/res/namespaces';
-import Spinner from '../ui/Spinner';
+import Spinner from './ui/Spinner';
 import WideLink from '../buttons/WideLink';
 import TextGrid from '../CardGrid/TextGrid';
 import { ITextCard } from '../CardGrid/TextCard';

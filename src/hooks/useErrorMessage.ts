@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useTranslations } from "next-intl";
 
 import { errCode } from "@/res/errorCodes";

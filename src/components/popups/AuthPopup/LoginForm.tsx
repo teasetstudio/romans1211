@@ -1,17 +1,17 @@
 "use client"
+
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useTranslations } from 'next-intl';
-import { useContext, useState } from 'react'
+import { useState } from 'react'
 import { FormProvider, SubmitHandler, useForm } from 'react-hook-form'
 import * as yup from 'yup'
 import { signIn } from 'next-auth/react'
 import { useRouter } from '@/i18n/routing';
-import AuthContext from '@/components/contexts/AuthContext'
 import Button from '@/components/buttons/Button'
 import TextButton from '@/components/buttons/TextButton'
 import Input from '@/components/inputs/Input'
 import H9 from '@/components/typo/H9'
-import Spinner from '@/components/ui/Spinner'
+import Spinner from '@/components/widgets/ui/Spinner'
 import useErrorMessage from '@/hooks/useErrorMessage'
 import { NAMESPACE_COMMON } from '@/res/namespaces';
 import { IconGoogle } from '@/res/icons';

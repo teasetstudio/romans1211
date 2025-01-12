@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import Button from '@/components/buttons/Button'
 import H6 from '@/components/typo/H6'
 import H9 from '@/components/typo/H9'
-import Gradient from '@/components/ui/Gradient'
+import Gradient from '@/components/widgets/ui/Gradient'
 import { NAMESPACE_COMMON } from '@/res/namespaces'
 import { ROUTE_LIBRARY } from '@/res/routes'
 
@@ -27,7 +27,7 @@ const FooterCTABanner = () => {
             {t('footer.banner.title')}
           </H6>
           <div className="flex gap-2 lg:gap-3 flex-wrap justify-center">
-            <ClientFooterBtn title={t('footer.banner.create')} />
+            <ClientFooterBtn />
             <Button
               href={ROUTE_LIBRARY}
               className="w-44"

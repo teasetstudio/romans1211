@@ -14,7 +14,7 @@ yarn dev
 
 ## Database
 ```bash
-# Updates the database schema without migrations:
+# Updates the database schema without migrations (only for development, NOT PRODUCTION, use npx prisma migrate deploy instead for production):
 npx prisma db push
 npx prisma db push --accept-data-loss # Ignore data loss warnings
 npx prisma db push --force-reset  # Force a reset of the database before push_

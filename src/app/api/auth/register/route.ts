@@ -37,7 +37,7 @@ export async function POST(req: Request) {
         const verificationToken = crypto.randomBytes(32).toString('hex');
 
         // Update user data
-        const updatedUser = await prisma.user.update({
+        await prisma.user.update({
           where: { email },
           data: {
             name,

@@ -27,7 +27,7 @@ export default function DeleteButton({
     try {
       setIsDeleting(true);
       await onDelete();
-    } catch (error) {
+    } catch {
       setIsDeleting(false);
       setIsConfirming(false);
     }

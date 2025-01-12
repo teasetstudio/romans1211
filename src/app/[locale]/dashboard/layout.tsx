@@ -1,4 +1,4 @@
-import Sidebar from "@/components/ui/Sidebar";
+import Sidebar from "@/components/widgets/ui/Sidebar";
 import { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { OrganizationProvider } from "@/components/contexts/OrganizationContext";

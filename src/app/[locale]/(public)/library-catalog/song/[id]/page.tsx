@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { AsyncParams } from '@/types/Params';
 import { materialService } from '@/lib/MaterialServiceForSSR';
 
+import '@/styles/tiptap-components.css';
+
 export default async function SongPage({ params }: AsyncParams) {
   const { id } = await params;
   const song = await materialService.findPublicById('song', id)
@@ -35,7 +37,7 @@ export default async function SongPage({ params }: AsyncParams) {
         {/* Content Section */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           <div
-            className="prose max-w-none"
+            className="tiptap-wrapper whitespace-pre-wrap"
             dangerouslySetInnerHTML={{ __html: song.content }}
           />
         </div>

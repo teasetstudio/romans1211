@@ -9,7 +9,7 @@ import MaterialTypesBanner from '@/components/banners/MaterialTypesBanner';
 import { materialService } from '@/lib/MaterialServiceForSSR';
 
 import faqs from '@/assets/data/mocked-faq.json'
-import FAQ from '@/components/ui/FAQ';
+import FAQ from '@/components/widgets/ui/FAQ';
 import { TMaterialType } from '@/types/Materials';
 import { ICard } from '@/components/CardGrid/Card';
 import { _transformMaterialToCard } from '@/utils/transformers';

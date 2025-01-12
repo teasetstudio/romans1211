@@ -3,7 +3,7 @@ import { Link } from '@/i18n/routing';;
 import H4 from '@/components/typo/H4';
 import { NAMESPACE_WIDGETS } from '@/res/namespaces';
 import SongGrid from '../CardGrid/SongGrid';
-import Spinner from '../ui/Spinner';
+import Spinner from './ui/Spinner';
 import WideLink from '../buttons/WideLink';
 import { ISongCard } from '../CardGrid/SongCard';
 

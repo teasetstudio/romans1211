@@ -3,7 +3,7 @@ import axios from 'axios'
 import { IApiError } from '@/types/ApiError'
 
 // TODO: Implement custom types
-export const errorHandler = (error: any): IApiError => {
+export const errorHandler = (error: Error): IApiError => {
   if (axios.isAxiosError(error)) {
     return {
       code: error.response?.status,
