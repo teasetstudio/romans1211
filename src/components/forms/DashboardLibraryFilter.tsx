@@ -4,6 +4,8 @@ import { ILibraryCatalogSearchParams } from '@/types/Params'
 import { IconSearch } from '@/res/icons'
 import { useRouter, usePathname } from '@/i18n/routing'
 import { FormEvent, useState, useEffect } from 'react'
+import { NAMESPACE_DASHBOARD } from '@/res/namespaces'
+import { useTranslations } from 'next-intl'
 
 interface IProps {
   searchParams: ILibraryCatalogSearchParams
@@ -11,6 +13,8 @@ interface IProps {
 }
 
 const DashboardLibraryFilter = ({ searchParams, className }: IProps) => {
+  const t = useTranslations(NAMESPACE_DASHBOARD);
+
   const { type, 'search-term': searchTerm, tags } = searchParams
   const router = useRouter()
   const pathname = usePathname()
@@ -55,10 +59,10 @@ const DashboardLibraryFilter = ({ searchParams, className }: IProps) => {
                 name="search-term"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search materials..."
+                placeholder={`${t('search_materials')}...`}
                 className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
               />
-              <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400" />
             </div>
           </div>
 
@@ -70,10 +74,10 @@ const DashboardLibraryFilter = ({ searchParams, className }: IProps) => {
               onChange={(e) => setMaterialType(e.target.value)}
               className="w-full sm:w-[180px] px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-800 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors appearance-none cursor-pointer"
             >
-              <option value="">All Materials</option>
-              <option value="text">Texts</option>
-              <option value="song">Songs</option>
-              <option value="game">Games</option>
+              <option value="">{t('all_materials')}</option>
+              <option value="text">{t('texts')}</option>
+              <option value="song">{t('songs')}</option>
+              <option value="game">{t('games')}</option>
             </select>
           </div>
 
@@ -84,7 +88,7 @@ const DashboardLibraryFilter = ({ searchParams, className }: IProps) => {
               name="tags"
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
-              placeholder="Tags (comma-separated)"
+              placeholder={t('tags_placeholder')}
               className="w-full sm:w-[200px] px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
             />
           </div>
@@ -94,7 +98,7 @@ const DashboardLibraryFilter = ({ searchParams, className }: IProps) => {
             type="submit"
             className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
           >
-            Search
+            {t('search')}
           </button>
         </div>
       </form>

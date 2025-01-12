@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import clsx from 'clsx';
 import DeleteConfirmationPopup from '../popups/DeleteConfirmationPopup';
+import { NAMESPACE_COMMON } from '@/res/namespaces';
+import { useTranslations } from 'next-intl';
 
 interface DeleteButtonProps {
   onDelete: () => Promise<void>;
@@ -15,6 +17,8 @@ export default function DeleteButton({
   confirmText = 'Are you sure you want to delete this?',
   className,
 }: DeleteButtonProps) {
+  const t = useTranslations(NAMESPACE_COMMON);
+
   const [isConfirming, setIsConfirming] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -47,7 +51,7 @@ export default function DeleteButton({
           className
         )}
       >
-        Delete
+        {t('delete')}
       </button>
 
       <DeleteConfirmationPopup

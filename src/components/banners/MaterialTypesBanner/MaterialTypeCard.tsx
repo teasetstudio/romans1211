@@ -20,7 +20,7 @@ const MediaTypeCard: React.FC<MediaTypeCardProps> = ({
   ctaLabel,
 }) => {
   return (
-    <div className="mx-auto w-full sm:w-2/3 lg:w-full h-64 lg:h-64 px-6 lg:px-12 pb-8 lg:pb-14 pt-8 lg:pt-10 flex flex-col items-center lg:items-start bg-dark rounded-[28px] border border-gray3 relative overflow-hidden">
+    <div className="mx-auto w-full sm:w-2/3 lg:w-full h-64 lg:h-72 px-6 lg:px-12 pb-8 lg:pb-14 pt-8 lg:pt-10 flex flex-col items-center lg:items-start bg-dark rounded-3xl border border-gray3 relative overflow-hidden">
       <H3
         color="text-white"
         fontSize="text-2xl lg:text-3xl"

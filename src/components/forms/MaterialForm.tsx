@@ -3,13 +3,15 @@
 import { useState } from 'react';
 import { Listbox, ListboxOptions, ListboxOption, ListboxButton, Switch, Label, Field } from '@headlessui/react';
 import clsx from 'clsx';
-import { Link } from '@/i18n/routing';;
+import { Link } from '@/i18n/routing';
 import { IconCheck, IconChevronDown, IconX, IconLanguage, IconWorld, IconTag } from '@tabler/icons-react';
 import TabGroup from '../tabs/TabGroup';
 import TextMaterialForm from './TextMaterialForm';
 import SongMaterialForm from './SongMaterialForm';
 import GameMaterialForm from './GameMaterialForm';
 import MaterialTypeBadge from '../badges/MaterialTypeBadge';
+import { NAMESPACE_DASHBOARD } from '@/res/namespaces';
+import { useTranslations } from 'next-intl';
 
 const LANGUAGES = [
   { id: 'en', name: 'English' },
@@ -61,8 +63,11 @@ export default function MaterialForm({
   onSubmit,
   editType,
   cancelHref,
-  submitLabel = 'Save',
 }: MaterialFormProps) {
+  const t = useTranslations(NAMESPACE_DASHBOARD);
+
+  const submitLabel = initialData.id ? t('save_changes') : t('create_material');
+
   const [title, setTitle] = useState(initialData.title);
   const [content, setContent] = useState(initialData.content);
   const [language, setLanguage] = useState(
@@ -123,14 +128,14 @@ export default function MaterialForm({
       {/* Header */}
       <div className="flex justify-between items-center pb-4 border-b">
         <h1 className="text-2xl font-bold text-gray-900">
-          {initialData.id ? 'Edit Material' : 'Create New Material'}
+          {initialData.id ? t('edit_material') : t('create_new_material')}
         </h1>
         {cancelHref && (
           <Link
             href={cancelHref}
             className="px-4 py-2 text-gray-600 hover:text-gray-800 rounded-lg hover:bg-gray-100 transition-colors"
           >
-            Cancel
+            {t('cancel')}
           </Link>
         )}
       </div>
@@ -203,18 +208,18 @@ export default function MaterialForm({
 
       {/* Settings Section */}
       <div className="space-y-6 bg-gray-50 p-2 sm:p-6 rounded-lg border border-gray-300">
-        <h2 className="text-lg font-semibold text-gray-900">Material Settings</h2>
+        <h2 className="text-lg font-semibold text-gray-900">{t('form.material_settings')}</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Language Selection */}
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">Language</label>
+            <label className="block text-sm font-medium text-gray-700">{t('form.language')}</label>
             <Listbox value={language} onChange={setLanguage}>
               <div className="relative">
                 <ListboxButton className="w-full flex items-center justify-between gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-left focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
                   <span className="flex items-center gap-2">
                     <IconLanguage className="size-5 text-gray-500" />
-                    {language.name}
+                    {t(`form.language_${language.id}`)}
                   </span>
                   <IconChevronDown className="size-5 text-gray-400" />
                 </ListboxButton>
@@ -239,7 +244,7 @@ export default function MaterialForm({
                               selected ? 'text-primary' : 'text-transparent'
                             )}
                           />
-                          {lang.name}
+                          {t(`form.language_${lang.id}`)}
                         </>
                       )}
                     </ListboxOption>
@@ -251,7 +256,7 @@ export default function MaterialForm({
 
           {/* Visibility Toggle */}
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">Visibility</label>
+            <label className="block text-sm font-medium text-gray-700">{t('form.visibility')}</label>
             <Field>
               <div className="flex items-center gap-4 h-12">
                 <div>
@@ -273,7 +278,7 @@ export default function MaterialForm({
                 </div>
                 <Label className="flex items-center gap-2">
                   <IconWorld className="size-5 text-gray-500" />
-                  <span>Make this material public</span>
+                  <span>{t('form.make_public')}</span>
                 </Label>
               </div>
             </Field>
@@ -282,7 +287,7 @@ export default function MaterialForm({
 
         {/* Tags Input */}
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">Tags</label>
+          <label className="block text-sm font-medium text-gray-700">{t('form.tags')}</label>
           <div className="space-y-3">
             <div className="flex flex-wrap gap-2">
               {tags.map((tag) => (
@@ -308,7 +313,7 @@ export default function MaterialForm({
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={handleAddTag}
-                placeholder="Add tags (press Enter)"
+                placeholder={t('form.tags_placeholder')}
                 className="w-full pl-12 pr-4 py-2 bg-white border border-gray-200 rounded-lg placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
               />
             </div>
@@ -328,7 +333,7 @@ export default function MaterialForm({
               : 'hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
           )}
         >
-          {isSubmitting ? 'Saving...' : submitLabel}
+          {isSubmitting ? t('form.saving') : submitLabel}
         </button>
       </div>
     </form>

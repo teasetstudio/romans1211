@@ -1,6 +1,8 @@
 'use client';
 
+import { NAMESPACE_COMMON } from '@/res/namespaces';
 import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react';
+import { useTranslations } from 'next-intl';
 
 interface DeleteConfirmationModalProps {
   isOpen: boolean;
@@ -17,6 +19,8 @@ export default function DeleteConfirmationPopup({
   confirmText,
   isDeleting,
 }: DeleteConfirmationModalProps) {
+  const t = useTranslations(NAMESPACE_COMMON);
+ 
   return (
     <Dialog
       open={isOpen}
@@ -41,14 +45,14 @@ export default function DeleteConfirmationPopup({
                 disabled={isDeleting}
                 className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors"
               >
-                Cancel
+                {t('cancel')}
               </button>
               <button
                 onClick={onConfirm}
                 disabled={isDeleting}
                 className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-xl transition-colors"
               >
-                {isDeleting ? 'Deleting...' : 'Delete'}
+                {isDeleting ? t('deleting') : t('delete')}
               </button>
             </div>
           </div>

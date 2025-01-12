@@ -4,9 +4,9 @@ import { getServerSession } from 'next-auth';
 import { notFound } from 'next/navigation';
 
 import { AsyncParams } from '@/types/Params';
-import MaterialDashboardHeader from '../../MaterialDashboardHeader';
-import ContentTitle from '../../ContentTitle';
-import MaterialDashboardFooter from '../../MaterialDashboardFooter';
+import MaterialDashboardHeader from '../../components/MaterialDashboardHeader';
+import ContentTitle from '../../components/ContentTitle';
+import MaterialDashboardFooter from '../../components/MaterialDashboardFooter';
 
 import '@/styles/tiptap-components.css';
 
