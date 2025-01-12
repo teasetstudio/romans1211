@@ -3,10 +3,10 @@ import { useTranslations } from 'next-intl';
 
 import { NAMESPACE_COMMON } from '@/res/namespaces';
 import { ROUTE_LIBRARY } from '@/res/routes';
-import H9 from '../typo/H9';
-import UserDropdown from '../popups/UserDropdown';
-import ChangeLangMenu from '../popups/ChangeLangMenu';
-import CreateMaterialButton from '../buttons/CreateMaterialButton';
+import H9 from '../../typo/H9';
+import UserDropdown from '../../popups/UserDropdown';
+import ChangeLangMenu from '../../popups/ChangeLangMenu';
+import CreateMaterialButton from '../../buttons/CreateMaterialButton';
 
 function Header() {
   const t = useTranslations(NAMESPACE_COMMON)

@@ -1,6 +1,7 @@
 "use client"
 
-import { EditorContent, useEditor } from '@tiptap/react'
+import { Editor, EditorContent, useEditor } from '@tiptap/react'
+import { Level } from '@tiptap/extension-heading'
 import Highlight from '@tiptap/extension-highlight'
 import TextAlign from '@tiptap/extension-text-align'
 import StarterKit from '@tiptap/starter-kit'
@@ -22,9 +23,10 @@ import {
   IconQuote,
   IconSeparator,
 } from '@tabler/icons-react'
-
-import './tiptap.css'
 import { IconParagraph, IconRedo, IconUndo } from '@/res/icons'
+
+import '@/styles/tiptap-components.css';
+import './tiptap.css'
 
 interface TextEditorProps {
   content: string
@@ -49,7 +51,7 @@ const TextEditor = ({ content, onChange }: TextEditorProps) => {
   if (!editor) return null
 
   return (
-    <div className="flex flex-col editor-styles h-auto">
+    <div className="tiptap-wrapper flex flex-col h-auto">
       <div className="sticky top-0 z-10 ">
         <MenuBar editor={editor} />
       </div>
@@ -148,7 +150,7 @@ const IconDropdown = ({
   );
 };
 
-const MobileMenuBar = ({ editor }: any) => {
+const MobileMenuBar = ({ editor }: { editor: Editor }) => {
   if (!editor) return null;
 
   const getCurrentHeadingValue = () => {
@@ -197,7 +199,7 @@ const MobileMenuBar = ({ editor }: any) => {
     if (value === 'p') {
       editor.chain().focus().setParagraph().run();
     } else {
-      editor.chain().focus().toggleHeading({ level: parseInt(value[1]) }).run();
+      editor.chain().focus().toggleHeading({ level: parseInt(value[1]) as Level }).run();
     }
   };
 
@@ -279,7 +281,7 @@ const MobileMenuBar = ({ editor }: any) => {
   );
 };
 
-const MenuBar = ({ editor }: any) => {
+const MenuBar = ({ editor }: {editor: Editor}) => {
   const [isMobile, setIsMobile] = React.useState(false);
 
   React.useEffect(() => {

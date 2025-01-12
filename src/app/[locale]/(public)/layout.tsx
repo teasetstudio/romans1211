@@ -1,5 +1,5 @@
-import Footer from "@/components/ui/Footer";
-import Header from "@/components/ui/Header";
+import Footer from "@/components/widgets/ui/Footer";
+import Header from "@/components/widgets/ui/Header";
 import { ReactNode } from "react";
 
 interface IProps {

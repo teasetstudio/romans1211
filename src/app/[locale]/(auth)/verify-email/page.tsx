@@ -4,6 +4,16 @@ import { Link } from '@/i18n/routing';
 import { AsyncParams } from '@/types/Params';
 import { ROUTE_LOGIN } from '@/res/routes';
 
+// Generate static pages for default locale (en) and ru locale
+export function generateStaticParams() {
+  return [
+    // This will generate / and /en (they are the same)
+    { locale: 'en' },
+    // This will generate /ru
+    { locale: 'ru' },
+  ];
+}
+
 type IProps = AsyncParams<{}, { token: string }>
 
 export default async function VerifyEmail({ searchParams }: IProps) {

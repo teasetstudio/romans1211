@@ -36,7 +36,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { title, content, isPublic, language = 'en', tags = [], type } = await req.json();
+    const { title, content, isPublic, language = 'en', tags = [] } = await req.json();
     const { id } = await params;
 
     // Verify material belongs to user's organization

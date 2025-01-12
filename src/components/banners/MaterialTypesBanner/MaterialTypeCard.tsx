@@ -4,7 +4,7 @@ import Button from '@/components/buttons/Button'
 import H3 from '@/components/typo/H3'
 import H8 from '@/components/typo/H8'
 import H9 from '@/components/typo/H9'
-import Gradient from '@/components/ui/Gradient'
+import Gradient from '@/components/widgets/ui/Gradient'
 
 interface MediaTypeCardProps {
   mediaType: string

@@ -5,7 +5,9 @@ import { notFound } from 'next/navigation';
 import { AsyncParams } from '@/types/Params';
 import MaterialDashboardHeader from '../../MaterialDashboardHeader';
 import ContentTitle from '../../ContentTitle';
-import MaterialDashboardFooter from '../../text/MaterialDashboardFooter';
+import MaterialDashboardFooter from '../../MaterialDashboardFooter';
+
+import '@/styles/tiptap-components.css';
 
 export default async function SongPage({ params }: AsyncParams) {
   const { id } = await params;
@@ -24,7 +26,7 @@ export default async function SongPage({ params }: AsyncParams) {
   if (!song) notFound();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="h-full min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <MaterialDashboardHeader
           materialId={song.id}
@@ -48,7 +50,7 @@ export default async function SongPage({ params }: AsyncParams) {
 
           <div className="prose prose-lg max-w-none">
             <h2 className="text-xl font-medium text-gray-700 mb-4">Lyrics</h2>
-            <div className="whitespace-pre-wrap font-mono text-gray-800" dangerouslySetInnerHTML={{ __html: song.content }} />
+            <div className="tiptap-wrapper whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: song.content }} />
           </div>
 
           <MaterialDashboardFooter

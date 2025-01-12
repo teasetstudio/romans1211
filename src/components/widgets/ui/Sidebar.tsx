@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { Link } from '@/i18n/routing';
 
 import { IconClose, IconDashboard, IconHome, IconLibrary, IconProfile, IconBurger } from '@/res/icons'
-import LogoutBtn from '../client/LogoutBtn'
+import LogoutBtn from '../../client/LogoutBtn'
 import { ROUTE_DASHBOARD, ROUTE_DASHBOARD_LIBRARY, ROUTE_SETTINGS } from '@/res/routes'
 
 interface IProps {
@@ -71,7 +71,9 @@ const Sidebar = ({ children }: IProps) => {
 
       {/* Main Content */}
       <div className='overflow-y-auto flex flex-col flex-1'>
-        {children}
+        <div>
+          {children}
+        </div>
       </div>
     </div>
   )

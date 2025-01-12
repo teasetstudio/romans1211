@@ -1,5 +1,3 @@
-'use client'
-
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 
@@ -8,6 +6,16 @@ import H2 from '@/components/typo/H2';
 import H9 from '@/components/typo/H9';
 import { NAMESPACE_COMMON } from '@/res/namespaces';
 import { ROUTE_LOGIN } from '@/res/routes';
+
+// Generate static pages for default locale (en) and ru locale
+export function generateStaticParams() {
+  return [
+    // This will generate / and /en (they are the same)
+    { locale: 'en' },
+    // This will generate /ru
+    { locale: 'ru' },
+  ];
+}
 
 export default function RegisterPage() {
   const t = useTranslations(NAMESPACE_COMMON)

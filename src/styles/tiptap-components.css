@@ -1,0 +1,88 @@
+/* .editor-styles > *:first-child {
+  margin-top: 0;
+}
+
+.editor-styles > *:last-child {
+  margin-bottom: 0;
+}
+
+.editor-styles {
+  outline: none;
+  color: theme('colors.gray.800');
+  background-color: white;
+  -webkit-text-fill-color: currentColor;
+} */
+
+.tiptap-wrapper {
+  p {
+    margin: 0.1em 0;
+    min-height: 1.5em;  /* This ensures empty paragraphs take up space */
+  }
+
+  p:empty::before {
+    content: "\200B";  /* Zero-width space to ensure empty paragraphs maintain height */
+    display: inline-block;
+  }
+
+  ul,
+  ol {
+    padding: 0 1rem;
+    margin: 0.5em 0;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    line-height: 1.1;
+    font-weight: 600;
+    margin: 0.35em 0 0.25em;
+  }
+
+  h1 { font-size: 2em; }
+  h2 { font-size: 1.75em; }
+  h3 { font-size: 1.5em; }
+  h4 { font-size: 1.25em; }
+  h5 { font-size: 1.1em; }
+  h6 { font-size: 1em; }
+
+  code {
+    background-color: theme('colors.gray.100');
+    border-radius: 0.25em;
+    padding: 0.2em 0.4em;
+  }
+
+  pre {
+    background: theme('colors.gray.100');
+    border-radius: 0.5em;
+    padding: 0.75em 1em;
+    margin: 0.5em 0;
+  }
+  
+  pre code {
+    background: none;
+    padding: 0;
+    font-size: 0.9em;
+  }
+
+  blockquote {
+    border-left: 3px solid theme('colors.gray.300');
+    padding-left: 1em;
+    margin: 0.5em 0;
+    color: theme('colors.gray.600');
+  }
+
+  hr {
+    border: none;
+    border-top: 2px solid theme('colors.gray.200');
+    margin: 1em 0;
+  }
+
+  mark {
+    background-color: theme('colors.yellow.200');
+    border-radius: 0.2em;
+    padding: 0 0.2em;
+  }
+}

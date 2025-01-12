@@ -11,7 +11,7 @@ import Button from '@/components/buttons/Button';
 import Input from '@/components/inputs/Input';
 import H2 from '@/components/typo/H2';
 import H9 from '@/components/typo/H9';
-import Spinner from '@/components/ui/Spinner';
+import Spinner from '@/components/widgets/ui/Spinner';
 import { NAMESPACE_COMMON } from '@/res/namespaces';
 import useErrorMessage from '@/hooks/useErrorMessage';
 import { ROUTE_LOGIN } from '@/res/routes';

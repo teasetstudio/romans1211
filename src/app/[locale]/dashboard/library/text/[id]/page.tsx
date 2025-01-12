@@ -5,7 +5,9 @@ import { notFound } from 'next/navigation';
 import { AsyncParams } from '@/types/Params';
 import MaterialDashboardHeader from '../../MaterialDashboardHeader';
 import ContentTitle from '../../ContentTitle';
-import MaterialDashboardFooter from '../MaterialDashboardFooter';
+import MaterialDashboardFooter from '../../MaterialDashboardFooter';
+
+import '@/styles/tiptap-components.css';
 
 export default async function TextPage({ params }: AsyncParams) {
   const { id } = await params;
@@ -48,7 +50,7 @@ export default async function TextPage({ params }: AsyncParams) {
           </div>
 
           <div className="prose prose-lg max-w-none">
-            <div className="whitespace-pre-wrap font-mono text-gray-800" dangerouslySetInnerHTML={{ __html: text.content }} />
+            <div className="tiptap-wrapper whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: text.content }} />
           </div>
 
           <MaterialDashboardFooter

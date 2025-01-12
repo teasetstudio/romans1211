@@ -18,6 +18,7 @@ class MaterialServiceForSSR {
     return validTypes.includes(type as TMaterialType) ? type as TMaterialType : undefined;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private getModel(type: TMaterialType): PrismaClientDelegate | any {
     switch (type) {
       case 'text':

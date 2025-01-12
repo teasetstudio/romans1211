@@ -7,12 +7,7 @@ import { ROUTE_DASHBOARD_MATERIAL_CREATE, ROUTE_LOGIN } from "@/res/routes";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 
-
-interface InteractiveAdButtonProps {
-  title: string;
-}
-
-const ClientFooterBtn = ({ title }: InteractiveAdButtonProps) => {
+const ClientFooterBtn = () => {
   const t = useTranslations(NAMESPACE_BANNERS)
   const { data: session } = useSession()
 

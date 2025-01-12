@@ -12,6 +12,7 @@ enum WidthSizes {
 interface IButton {
   title?: string
   type?: 'button' | 'reset' | 'submit'
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onClick?: (arg?: any) => void
   href?: string
   className?: string

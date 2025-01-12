@@ -17,7 +17,6 @@ export default function CreateForm({ defaultType }: Props) {
   const router = useRouter();
   const { selectedOrganization } = useOrganization();
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (data: {
     title: string;
@@ -32,9 +31,8 @@ export default function CreateForm({ defaultType }: Props) {
       return;
     }
 
-    setLoading(true);
     try {
-      const material = await postMaterial({
+      await postMaterial({
         ...data,
         organizationId: selectedOrganization.id,
       });
@@ -50,7 +48,7 @@ export default function CreateForm({ defaultType }: Props) {
       );
       throw error; // Re-throw to let MaterialForm handle the error state
     } finally {
-      setLoading(false);
+      // loading false ?
     }
   };
 
