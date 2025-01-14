@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
     }
 
     // If trying to make a translation public, validate that the original is public
-    if (originalMaterial.isPublic === false && isPublic) {
+    if (originalMaterial && originalMaterial.isPublic === false && isPublic) {
       return NextResponse.json({ error: 'Cannot make translation public when original is not public'  }, { status: 400 });
     }
 
@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
           organization: true,
           tags: true,
           translations: true,
-          original: true,
+          original: !!originalId,
         },
       });
     } else {

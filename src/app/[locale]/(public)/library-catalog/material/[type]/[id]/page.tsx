@@ -3,9 +3,9 @@ import { IdAndTypeParams } from '@/types/Params';
 import React from 'react';
 import { materialService } from '@/lib/MaterialServiceForSSR';
 import { isValidMaterialType } from '@/utils';
+import MaterialTranslations from '../../../components/MaterialTranslations';
 
 import '@/styles/tiptap-components.css';
-import MaterialTranslations from '../../../components/MaterialTranslations';
 
 export default async function MaterialPage({ params }: IdAndTypeParams) {
   const { id, type } = await params;

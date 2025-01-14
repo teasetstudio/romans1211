@@ -53,7 +53,6 @@ model Text {
   @@index([organizationId])
   @@index([isPublic])
   @@index([title])
-  @@index([content])
 }
 
 model Song {
@@ -74,7 +73,6 @@ model Song {
   @@index([organizationId])
   @@index([isPublic])
   @@index([title])
-  @@index([content])
 }
 
 model Game {
@@ -95,7 +93,6 @@ model Game {
   @@index([organizationId])
   @@index([isPublic])
   @@index([title])
-  @@index([content])
 }
 
 // Wtag is Tag. It is done to simplify the prisma client to avoid creating the middle many-to-many table
