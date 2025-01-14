@@ -42,6 +42,9 @@ model Text {
   language       String       @default("en")
   organizationId String
   isPublic       Boolean      @default(false)
+  originalId     String?      // Reference to the original text this is translated from
+  original       Text?        @relation("Translations", fields: [originalId], references: [id])
+  translations   Text[]       @relation("Translations")
   organization   Organization @relation(fields: [organizationId], references: [id])
   tags           Wtag[]
   createdAt      DateTime     @default(now())
@@ -60,6 +63,9 @@ model Song {
   language       String       @default("en")
   organizationId String
   isPublic       Boolean      @default(false)
+  originalId     String?      // Reference to the original song this is translated from
+  original       Song?        @relation("Translations", fields: [originalId], references: [id])
+  translations   Song[]       @relation("Translations")
   organization   Organization @relation(fields: [organizationId], references: [id])
   tags           Wtag[]
   createdAt      DateTime     @default(now())
@@ -78,6 +84,9 @@ model Game {
   language       String       @default("en")
   organizationId String
   isPublic       Boolean      @default(false)
+  originalId     String?      // Reference to the original game this is translated from
+  original       Game?        @relation("Translations", fields: [originalId], references: [id])
+  translations   Game[]       @relation("Translations")
   organization   Organization @relation(fields: [organizationId], references: [id])
   tags           Wtag[]
   createdAt      DateTime     @default(now())

@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 import prisma from './prisma';
-import { TMaterialType, TMaterial, TMaterialWithIncluded, TCatalogMaterial, TMaterialWithType } from '@/types/Materials';
+import { TMaterialType, TMaterial, TMaterialWithIncluded, TCatalogMaterial, TMaterialWithType, TMaterialsIncluded } from '@/types/Materials';
 
 type PrismaClientDelegate = Prisma.TextDelegate | Prisma.SongDelegate | Prisma.GameDelegate
 
@@ -32,17 +32,36 @@ class MaterialServiceForSSR {
     }
   }
 
-  async findById(type: TMaterialType, id: string): Promise<TMaterial | null> {
-    return this.getModel(type).findUnique({
-      where: { id },
-      include: { tags: true, organization: true },
-    });
+  async findByTypeAndId<ReturnIncludedType = Partial<TMaterialsIncluded>>(type: TMaterialType, id: string, include?: {
+    tags?: boolean,
+    organization?: boolean,
+    original?: boolean | { include?: { translations?: boolean } },
+    translations?: boolean
+  }): Promise<(TMaterial & ReturnIncludedType) | null> {
+    return this.getModel(type).findUnique({ where: { id }, include });
+  }
+
+  async findByTypeAndIdAndUserId<ReturnIncludedType = Partial<TMaterialsIncluded>>(type: TMaterialType, id: string, userId: string, include?: {
+    tags?: boolean,
+    organization?: boolean,
+    original?: boolean | { include?: { translations?: boolean } },
+    translations?: boolean
+  }): Promise<(TMaterial & ReturnIncludedType) | null> {
+    return this.getModel(type).findUnique({ where: { id, organization: { userId } }, include });
   }
 
   async findPublicById(type: TMaterialType, id: string): Promise<TMaterialWithIncluded | null> {
     return this.getModel(type).findUnique({
       where: { id, isPublic: true },
-      include: { tags: true, organization: true },
+      include: {
+        tags: true,
+        organization: true,
+        original: {
+          where: { isPublic: true },
+          include: { translations: { where: { isPublic: true }} }
+        },
+        translations: { where: { isPublic: true } },
+      },
     });
   }
 

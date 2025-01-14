@@ -1,29 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import prisma from '@/lib/prisma';
 import { authOptions } from '@/lib/auth';
-
-async function findMaterialById(id: string, userId: string) {
-  const [text, song, game] = await Promise.all([
-    prisma.text.findFirst({
-      where: { id, organization: { userId } },
-      include: { tags: true },
-    }),
-    prisma.song.findFirst({
-      where: { id, organization: { userId } },
-      include: { tags: true },
-    }),
-    prisma.game.findFirst({
-      where: { id, organization: { userId } },
-      include: { tags: true },
-    }),
-  ]);
-
-  if (text) return { type: 'text', material: text };
-  if (song) return { type: 'song', material: song };
-  if (game) return { type: 'game', material: game };
-  return null;
-}
+import { materialApiService } from '@/lib/MaterialServiceForAPI';
+import { apiTagService } from '@/lib/TagServiceForAPI';
 
 // PUT /api/materials/[id]
 export async function PUT(
@@ -40,28 +19,33 @@ export async function PUT(
     const { id } = await params;
 
     // Verify material belongs to user's organization
-    const materialData = await findMaterialById(id, session.user.id);
+    const material = await materialApiService.findByIdAndUserId(id, session.user.id, {
+      tags: true,
+    });
 
-    if (!materialData) {
+    if (!material) {
       return NextResponse.json({ error: 'Material not found' }, { status: 404 });
     }
 
+    // If trying to make a translation public, validate that the original is public
+    if (material.originalId && isPublic) {
+      const validationResult = await materialApiService.validatePublicTranslation(
+        material.type,
+        material.originalId,
+        isPublic
+      );
+      if (!validationResult.isValid) {
+        return NextResponse.json({ error: validationResult.error }, { status: 400 });
+      }
+    }
+
+    // If making an original material private, make all its translations private too
+    if (!material.originalId && material.isPublic && !isPublic) {
+      await materialApiService.makeTranslationsPrivate(material.type, material.id);
+    }
+
     // Create or get existing tags
-    const tagObjects = await Promise.all(
-      tags.map(async (tagName: string) => {
-        const existingTag = await prisma.wtag.findUnique({
-          where: { name: tagName },
-        });
-
-        if (existingTag) {
-          return existingTag;
-        }
-
-        return prisma.wtag.create({
-          data: { name: tagName },
-        });
-      })
-    );
+    const tagObjects = await apiTagService.findOrCreate(tags);
 
     const updateData = {
       title,
@@ -69,37 +53,14 @@ export async function PUT(
       isPublic,
       language,
       tags: {
-        disconnect: materialData.material.tags.map(tag => ({ id: tag.id })),
+        disconnect: material.tags?.map(tag => ({ id: tag.id })),
         connect: tagObjects.map(tag => ({ id: tag.id })),
       },
     };
 
-    let updatedMaterial;
-    switch (materialData.type) {
-      case 'text':
-        updatedMaterial = await prisma.text.update({
-          where: { id },
-          data: updateData,
-          include: { tags: true },
-        });
-        break;
-      case 'song':
-        updatedMaterial = await prisma.song.update({
-          where: { id },
-          data: updateData,
-          include: { tags: true },
-        });
-        break;
-      case 'game':
-        updatedMaterial = await prisma.game.update({
-          where: { id },
-          data: updateData,
-          include: { tags: true },
-        });
-        break;
-    }
+    const updatedMaterial = await materialApiService.update(material.type, id, updateData);
 
-    return NextResponse.json({ ...updatedMaterial, type: materialData.type });
+    return NextResponse.json(updatedMaterial);
   } catch (error) {
     console.error('Error updating material:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -113,35 +74,49 @@ export async function DELETE(
 ) {
   try {
     const session = await getServerSession(authOptions);
+
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { id } = await params;
+    const { searchParams } = new URL(req.url);
+    const deleteAll = searchParams.get('deleteAll') === 'true';
 
-    // Verify material belongs to user's organization
-    const materialData = await findMaterialById(id, session.user.id);
+    // Find the material and check if it has translations
+    const material = await materialApiService.findByIdAndUserId(id, session.user.id, {
+      translations: true,
+    });
 
-    if (!materialData) {
-      return NextResponse.json({ error: 'Material not found' }, { status: 404 });
+    if (!material) {
+      return NextResponse.json(
+        { error: 'Material not found or unauthorized' },
+        { status: 404 }
+      );
     }
 
-    // Delete the material based on its type
-    switch (materialData.type) {
-      case 'text':
-        await prisma.text.delete({ where: { id } });
-        break;
-      case 'song':
-        await prisma.song.delete({ where: { id } });
-        break;
-      case 'game':
-        await prisma.game.delete({ where: { id } });
-        break;
+    // If this is an original with translations
+    if (material.translations && material.translations.length > 0) {
+      if (!deleteAll) {
+        return NextResponse.json({
+          error: 'Cannot delete original material with translations. Either change the original first or set deleteAll=true to delete all translations.',
+          hasTranslations: true,
+          translationsCount: material.translations.length
+        }, { status: 400 });
+      }
+
+      await materialApiService.deleteWithTranslations(material.type, id);
+    } else {
+      // Regular delete for materials without translations
+      await materialApiService.deleteById(material.type, id);
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting material:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

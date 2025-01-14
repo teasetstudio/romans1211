@@ -25,6 +25,16 @@ const MATERIAL_TYPES = [
   { id: 'game', label: 'Game' },
 ] as const;
 
+export interface ISubmitData {
+  title: string;
+  content: string;
+  language: string;
+  isPublic: boolean;
+  tags: string[];
+  organizationId: string;
+  type: 'text' | 'song' | 'game';
+}
+
 interface MaterialFormProps {
   initialData?: {
     id?: string;
@@ -36,15 +46,7 @@ interface MaterialFormProps {
     organizationId: string;
     type?: 'text' | 'song' | 'game';
   };
-  onSubmit: (data: {
-    title: string;
-    content: string;
-    language: string;
-    isPublic: boolean;
-    tags: string[];
-    organizationId: string;
-    type: 'text' | 'song' | 'game';
-  }) => Promise<void>;
+  onSubmit: (data: ISubmitData) => Promise<void>;
   cancelHref?: string;
   editType?: 'text' | 'song' | 'game';
   submitLabel?: string;
@@ -63,10 +65,11 @@ export default function MaterialForm({
   onSubmit,
   editType,
   cancelHref,
+  submitLabel: submitLabelProp,
 }: MaterialFormProps) {
   const t = useTranslations(NAMESPACE_DASHBOARD);
 
-  const submitLabel = initialData.id ? t('save_changes') : t('create_material');
+  const submitLabel = submitLabelProp || initialData.id ? t('save_changes') : t('create_material');
 
   const [title, setTitle] = useState(initialData.title);
   const [content, setContent] = useState(initialData.content);

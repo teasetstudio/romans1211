@@ -37,15 +37,16 @@ export const postMaterial = async (data: IPostMaterialBody): Promise<IMaterialRe
   return result.data;
 };
 
-export const updateMaterial = async (id: string, data: Partial<IPostMaterialBody>): Promise<IMaterialResponse> => {
-  return fetch(`/api/materials/${id}`, {
+export const updateMaterial = async (id: string, data: Partial<IPostMaterialBody>): Promise<Response> => {
+  const response = await fetch(`/api/materials/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(data),
-  })
-    .then((response) => response.json());
+  });
+
+  return response;
 };
 
 export const deleteMaterial = async (id: string, type: 'text' | 'song' | 'game'): Promise<void> => {

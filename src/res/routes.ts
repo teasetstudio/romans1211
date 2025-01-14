@@ -1,4 +1,5 @@
 export const ROUTE_LIBRARY = '/library-catalog'
+export const ROUTE_MATERIAL = '/library-catalog/material'
 export const ROUTE_LOGIN = '/login'
 export const ROUTE_REGISTER = '/register'
 export const ROUTE_TOS = '/terms-of-service'
@@ -7,9 +8,9 @@ export const ROUTE_CONTACT = '/contact'
 // Dashboard
 export const ROUTE_DASHBOARD = '/dashboard'
 export const ROUTE_DASHBOARD_LIBRARY = '/dashboard/library'
-export const ROUTE_DASHBOARD_MATERIAL_CREATE = '/dashboard/library/create-material'
+export const ROUTE_DASHBOARD_MATERIAL = '/dashboard/library/material'
+export const ROUTE_DASHBOARD_MATERIAL_CREATE = '/dashboard/library/material/create'
 export const ROUTE_SETTINGS = '/dashboard/settings'
-export const ROUTE_EDIT = '/edit'
 
 export const ROUTE_MEDIA_HREF = '/media/[slug]' // Temp | How [slug] works here? Is it outdated?
 
