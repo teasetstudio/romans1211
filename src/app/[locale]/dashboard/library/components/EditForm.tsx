@@ -1,14 +1,13 @@
 'use client';
 
-import { updateMaterial } from '@/api/requests/materials';
 import { useRouter } from '@/i18n/routing';
 import MaterialForm from '@/components/forms/MaterialForm';
 import { getDashboardMaterialUrl } from '@/utils/urls';
-import { TMaterialType, TMaterialWithIncluded } from '@/types/Materials';
+import { TMaterial_Tags_Org, TMaterialType } from '@/types/Materials';
 
-type TMaterial = TMaterialWithIncluded & { type: TMaterialType };
+type Material = TMaterial_Tags_Org & { type: TMaterialType };
 interface IProps {
-  material: TMaterial;
+  material: Material;
 }
 
 export default function EditForm({ material }: IProps) {
@@ -23,10 +22,18 @@ export default function EditForm({ material }: IProps) {
     tags: string[];
     type: TMaterialType;
   }) => {
-    await updateMaterial(material.id, {
-      ...data,
-      organizationId: material.organization.id,
+    const response = await fetch(`/api/materials/${material.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
     });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to update material');
+    }
 
     router.push(dashboardMaterialUrl);
   };
