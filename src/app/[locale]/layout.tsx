@@ -9,11 +9,11 @@ import { ClientSessionProvider } from "@/components/contexts/ClientSessionProvid
 import { ProgressProvider } from "@/components/contexts/ProgressProvider";
 
 export const metadata: Metadata = {
-  title: "Eph. 4:12 - Christian Material Library",
+  title: "Christian Material Library",
   description: "A comprehensive digital library and catalog for Christian ministry resources. Browse and manage sermons, worship songs, and interactive games for youth meetings, Sunday school, and summer camps.",
   keywords: "Christian library, ministry material catalog, sermon library, worship songs collection, youth ministry games, Sunday school resources, summer camp activities, church digital library, ministry resources, Christian education",
   openGraph: {
-    title: "Eph. 4:12 - Christian Material Library",
+    title: "Christian Material Library",
     description: "A comprehensive digital library and catalog for Christian ministry resources. Browse and manage sermons, worship songs, and interactive games for youth meetings, Sunday school, and summer camps.",
     type: "website",
     locale: "en_US",
@@ -23,13 +23,13 @@ export const metadata: Metadata = {
     //     url: "/images/onelib-og.png",
     //     width: 1200,
     //     height: 630,
-    //     alt: "Eph. 4:12 - Christian Material Library"
+    //     alt: "Christian Material Library"
     //   }
     // ]
   },
   twitter: {
     card: "summary_large_image",
-    title: "Eph. 4:12 - Christian Material Library",
+    title: "Christian Material Library",
     description: "Access our digital library of sermons, worship songs, and youth ministry games. The perfect catalog for churches, youth groups, and summer camps.",
     creator: "@ephesians412",
     // images: ["/images/onelib-og.png"]
