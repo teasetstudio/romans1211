@@ -1,0 +1,42 @@
+.ProseMirror {
+  outline: none;
+  color: theme('colors.gray.800');
+  background-color: white;
+  -webkit-text-fill-color: currentColor;
+}
+
+.ProseMirror > *:first-child {
+  margin-top: 0;
+}
+
+.ProseMirror > *:last-child {
+  margin-bottom: 0;
+}
+
+/* Fix iPhone text color */
+@supports (-webkit-touch-callout: none) {
+  .ProseMirror {
+    -webkit-text-fill-color: theme('colors.gray.800');
+  }
+  
+  .ProseMirror::placeholder {
+    -webkit-text-fill-color: theme('colors.gray.400');
+  }
+}
+
+.tiptap.ProseMirror {
+  flex: 1;
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  background-color: white;
+  min-height: 300px;
+  overflow-y: auto;
+}
+
+.tiptap.ProseMirror:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}

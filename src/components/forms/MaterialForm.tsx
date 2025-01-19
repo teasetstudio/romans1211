@@ -15,8 +15,9 @@ import { useTranslations } from 'next-intl';
 
 const LANGUAGES = [
   { id: 'en', name: 'English' },
-  { id: 'ru', name: 'Russian' },
   { id: 'lt', name: 'Lithuanian' },
+  { id: 'ru', name: 'Russian' },
+  { id: 'pl', name: 'Polish' },
 ];
 
 const MATERIAL_TYPES = [

@@ -68,6 +68,16 @@
   h5 { font-size: 1.1em; }
   h6 { font-size: 1em; }
 
+  a {
+    color: theme('colors.primary');
+    text-decoration: underline;
+    cursor: pointer;
+
+    &:hover {
+      color: theme('colors.secondary');
+    }
+  }
+
   code {
     background-color: theme('colors.gray.100');
     border-radius: 0.25em;
