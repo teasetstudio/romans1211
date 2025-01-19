@@ -3,10 +3,11 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
 import { ReactNode } from "react";
 
-import "@/styles/globals.css";
 import { getSession } from "@/lib/auth";
 import { ClientSessionProvider } from "@/components/contexts/ClientSessionProvider";
 import { ProgressProvider } from "@/components/contexts/ProgressProvider";
+
+import "@/styles/globals.css";
 
 export const metadata: Metadata = {
   title: "Christian Material Library",
