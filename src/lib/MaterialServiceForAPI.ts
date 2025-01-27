@@ -85,6 +85,20 @@ class MaterialServiceForAPI {
     };
   }
 
+  async updateTranslationGroupVisivility(type: TMaterialType, originalId: string, isPublic: boolean): Promise<number> {
+    const result = await this.getModel(type).updateMany({
+      where: {
+        OR: [
+          { id: originalId },
+          { originalId }
+        ]
+      },
+      data: { isPublic }
+    });
+
+    return result.count;
+  }
+
   async changeGroupOriginal(newOriginalMaterial: TMaterialWithType & Partial<TMaterialsIncluded>): Promise<TMaterialWithType & Required<TMaterialsIncluded>> {
     const type = newOriginalMaterial.type;
     const newOriginalId = newOriginalMaterial.id as string;

@@ -1,15 +1,19 @@
+'use client';
+
 import MaterialTypeBadge from '@/components/badges/MaterialTypeBadge'
 import VisibilityBadge from '@/components/badges/VisibilityBadge';
-import { TMaterial, TMaterialType } from '@/types/Materials';
+import { TMaterialType } from '@/types/Materials';
 import { getFullUrl, getMaterialUrl } from '@/utils/urls';
+import { useMaterial } from './MaterialStateProvider';
 
 interface IProps {
-  material: TMaterial;
   type: TMaterialType;
 }
 
-const ContentTitle = ({ material, type }: IProps) => {
-  const publicUrl = material.isPublic ? getFullUrl(getMaterialUrl({ type, id: material.id })) : undefined
+const ContentTitle = ({ type }: IProps) => {
+  const { material } = useMaterial();
+  const publicUrl = material.isPublic ? getFullUrl(getMaterialUrl({ type, id: material.id })) : undefined;
+
   return (
     <div className="flex items-center justify-between mb-4">
       <h1 className="text-3xl font-bold text-dark">{material.title}</h1>

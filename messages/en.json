@@ -203,6 +203,11 @@
     },
     "filter-panel": {
       "original_only": "Only Original Translation"
-    }
+    },
+    "make_all_public": "Make all public",
+    "make_all_private": "Make all private",
+    "made_all_public": "All materials in group are now public",
+    "made_all_private": "All materials in group are now private",
+    "error_updating_visibility": "Failed to update visibility"
   }
 }

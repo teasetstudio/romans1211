@@ -8,24 +8,26 @@ type TGeneralProps = {
 
 type TButton = TGeneralProps & {
   onClick?: () => void
+  disabled?: boolean
   href?: never
 }
 
 type TLink = TGeneralProps & {
   href: string
+  disabled?: boolean
   onClick?: () => void
 }
 
 type IProps = TButton | TLink
 
-const TextButton = ({ children, className = '', onClick, href }: IProps) => (
+const TextButton = ({ children, className = '', onClick, href, disabled }: IProps) => (
   <>
     {href ? (
       <Link href={href}>
         <span className={className} onClick={onClick}>{children}</span>
       </Link>
     ) : (
-      <button className={className} onClick={onClick}>
+      <button className={className} onClick={onClick} disabled={disabled}>
         {children}
       </button>
     )}
