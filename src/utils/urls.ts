@@ -25,3 +25,11 @@ export const appendParamsToUrl = ({ url, params }: TAppendParamsToUrlProps) => {
   const queryString = urlParams.toString();
   return queryString ? `${url}?${queryString}` : url;
 };
+
+export const getFullUrl = (path: string): string => {
+  if (typeof window !== 'undefined') {
+    return `${window.location.origin}${path}`
+  }
+  // Fallback for server-side rendering
+  return `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}${path}`
+}
