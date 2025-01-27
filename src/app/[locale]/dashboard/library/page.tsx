@@ -16,7 +16,7 @@ export default async function Library({ searchParams }: ILibrarySearchParams) {
   if (!session?.user?.id) return null;
 
   const searchParamsRes = await searchParams;
-  const { type = '', page = '1', 'search-term': searchTerm, tags } = searchParamsRes;
+  const { type = '', page = '1', 'search-term': searchTerm, tags, originalOnly = 'true' } = searchParamsRes;
   const limit = 20;
   const parsedPage = parseInt(page);
   const tagsArray = tags ? tags.split(',') : [];
@@ -37,7 +37,8 @@ export default async function Library({ searchParams }: ILibrarySearchParams) {
     organizationId: defaultOrg.id, 
     page: parsedPage,
     isPublic: null,
-    limit
+    limit,
+    originalOnly: originalOnly === 'true',
   });
 
   const cards = materials.map(material => _transformMaterialToCard(material, material.type, true));
