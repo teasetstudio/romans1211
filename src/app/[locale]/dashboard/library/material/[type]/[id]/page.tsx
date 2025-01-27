@@ -47,7 +47,7 @@ export default async function MaterialPage({ params }: IdAndTypeParams) {
 
         {/* Main content */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 pt-8 md:p-8 relative">
-          <ContentTitle title={material.title} type={type} />
+          <ContentTitle material={material} type={type} />
 
           <div className="flex flex-wrap gap-2 mb-6">
             {material.tags.map((tag) => (

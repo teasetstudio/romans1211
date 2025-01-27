@@ -16,7 +16,7 @@ import { _transformMaterialToCard } from '@/utils/transformers';
 import CardWidget from '@/components/widgets/CardWidget';
 
 async function getPublicMaterials(type: TMaterialType):Promise<ICard[]> {
-  const materials = await materialService.findPublic(type);
+  const materials = await materialService.findPublic(type, { originalOnly: true });
   return materials.map(material => _transformMaterialToCard(material, type));
 }
 

@@ -10,7 +10,8 @@ export interface ILibraryCatalogSearchParams {
   page?: string,
   limit?: string,
   'search-term'?: string,
-  tags?: string
+  tags?: string,
+  originalOnly?: string,
 }
 
 export type ILibrarySearchParams = AsyncParams<{}, ILibraryCatalogSearchParams>
