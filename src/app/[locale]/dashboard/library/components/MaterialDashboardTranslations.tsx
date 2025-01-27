@@ -1,8 +1,14 @@
+'use client';
+
 import { TMaterialType, TMaterialWithIncluded } from '@/types/Materials'
 import { Link } from '@/i18n/routing';
 import MakeOriginalButton from '@/components/buttons/MakeOriginalButton';
 import { getDashboardMaterialUrl, getDashboardTranslateMaterialUrl } from '@/utils/urls';
-import { IconPlus } from '@tabler/icons-react';
+
+import { IconEye, IconEyeOff, IconPlus } from '@tabler/icons-react';
+import { useMaterial } from './MaterialStateProvider'
+import { useTranslations } from 'next-intl';
+import { NAMESPACE_DASHBOARD } from '@/res/namespaces';
 
 interface IProps {
   material: TMaterialWithIncluded
@@ -13,6 +19,9 @@ const MaterialDashboardTranslations = ({ material, type }: IProps) => {
   const original = material.original ? material.original : material;
   const childTranslations = material.original ? material.original.translations : material.translations;
   const translations = [original, ...(childTranslations ? childTranslations : [])];
+
+  const t = useTranslations(NAMESPACE_DASHBOARD);
+  const { updateMaterialVisibility, isLoading } = useMaterial();
 
   return (
     <div className="mb-4 flex flex-wrap justify-between">
@@ -33,6 +42,25 @@ const MaterialDashboardTranslations = ({ material, type }: IProps) => {
             </Link>
           ))}
         </div>
+        <div className="flex flex-wrap items-center gap-2 md:gap-4 mt-2">
+          <button
+            onClick={() => updateMaterialVisibility(true)}
+            disabled={isLoading}
+            className="inline-flex items-center justify-center gap-1 py-1.5 text-sm font-medium text-gray-500 hover:text-gray-900 underline rounded-xl transition-colors disabled:opacity-50"
+          >
+            <IconEye size={16} />
+            {t('make_all_public')}
+          </button>
+          <button
+            onClick={() => updateMaterialVisibility(false)}
+            disabled={isLoading}
+            className="inline-flex items-center justify-center gap-1 py-1.5 text-sm font-medium text-gray-500 hover:text-gray-900 underline rounded-xl transition-colors disabled:opacity-50"
+          >
+            <IconEyeOff size={16} />
+            {t('make_all_private')}
+          </button>
+
+      </div>
       </div>
 
       <div className='mt-2'>
