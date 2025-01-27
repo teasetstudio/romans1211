@@ -19,9 +19,9 @@ export default async function Dashboard() {
 
   if (!defaultOrg) return null;
 
-  const songsCount = await prisma.song.count({ where: { organizationId: defaultOrg.id }});
-  const gamesCount = await prisma.game.count({ where: { organizationId: defaultOrg.id }});
-  const textsCount = await prisma.text.count({ where: { organizationId: defaultOrg.id }});
+  const songsCount = await prisma.song.count({ where: { organizationId: defaultOrg.id, originalId: null }});
+  const gamesCount = await prisma.game.count({ where: { organizationId: defaultOrg.id, originalId: null }});
+  const textsCount = await prisma.text.count({ where: { organizationId: defaultOrg.id, originalId: null }});
 
   // Get the most recent materials
   const recentMaterials: TMaterialWithType[] = await materialService.findLatestMaterials(defaultOrg.id, 3);
