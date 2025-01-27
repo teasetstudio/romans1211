@@ -93,18 +93,23 @@ class MaterialServiceForSSR {
   }
 
   async findPublic(type: TMaterialType, options?: {
-    orderBy: string;
-    orderDirection: 'asc' | 'desc';
-    limit: number;
-    page: number;
+    orderBy?: string;
+    orderDirection?: 'asc' | 'desc';
+    limit?: number;
+    page?: number;
+    originalOnly?: boolean;
   }): Promise<TMaterialWithIncluded[]> {
     const orderBy = options?.orderBy || 'createdAt';
     const orderDirection = options?.orderDirection || 'desc';
     const limit = options?.limit || 8;
     const page = options?.page || 1;
+    const originalOnly = options?.originalOnly || false;
 
     return this.getModel(type).findMany({
-      where: { isPublic: true },
+      where: {
+        isPublic: true,
+        ...(originalOnly && { originalId: null })
+      },
       orderBy: { [orderBy]: orderDirection },
       take: limit,
       skip: (page - 1) * limit,
@@ -121,6 +126,7 @@ class MaterialServiceForSSR {
     isPublic?: boolean | null;
     organizationId?: string;
     userId?: string;
+    originalOnly?: boolean
   }): Promise<{ materials: TCatalogMaterial[]; totalCount: number; totalPages: number }> {
     const { 
       page = 1, 
@@ -130,7 +136,8 @@ class MaterialServiceForSSR {
       type, 
       isPublic = true,
       organizationId,
-      userId 
+      userId,
+      originalOnly = true
     } = searchParams;
 
     const validatedType = this.validateType(type);
@@ -160,9 +167,12 @@ class MaterialServiceForSSR {
       if (organizationId)
         conditions.push(Prisma.sql`m."organizationId" = ${organizationId}`);
 
+      if (originalOnly)
+        conditions.push(Prisma.sql`m."originalId" IS NULL`);
+
       if (userId)
         conditions.push(Prisma.sql`o."userId" = ${userId}`);
-      
+
       if (searchTerm) {
         conditions.push(Prisma.sql`(
           m.title ILIKE ${`%${searchTerm}%`}

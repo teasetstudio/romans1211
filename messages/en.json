@@ -197,7 +197,12 @@
       "make_public": "Make this material public",
       "material_settings": "Material Settings",
       "type": "Type",
-      "saving": "Saving..."
+      "saving": "Saving...",
+      "public": "Public",
+      "private": "Private"
+    },
+    "filter-panel": {
+      "original_only": "Only Original Translation"
     }
   }
 }

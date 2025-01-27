@@ -15,7 +15,7 @@ interface IProps {
 const DashboardLibraryFilter = ({ searchParams, className }: IProps) => {
   const t = useTranslations(NAMESPACE_DASHBOARD);
 
-  const { type, 'search-term': searchTerm, tags } = searchParams
+  const { type, 'search-term': searchTerm, tags, originalOnly = "true" } = searchParams
   const router = useRouter()
   const pathname = usePathname()
 
@@ -23,13 +23,15 @@ const DashboardLibraryFilter = ({ searchParams, className }: IProps) => {
   const [search, setSearch] = useState(searchTerm || '')
   const [materialType, setMaterialType] = useState(type || '')
   const [tagInput, setTagInput] = useState(tags || '')
+  const [isOriginalOnly, setIsOriginalOnly] = useState(originalOnly === 'true')
 
   // Update state when props change
   useEffect(() => {
     setSearch(searchTerm || '')
     setMaterialType(type || '')
     setTagInput(tags || '')
-  }, [searchTerm, type, tags])
+    setIsOriginalOnly(originalOnly === 'true')
+  }, [searchTerm, type, tags, originalOnly])
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -39,6 +41,7 @@ const DashboardLibraryFilter = ({ searchParams, className }: IProps) => {
     if (search) params.append('search-term', search)
     if (materialType) params.append('type', materialType)
     if (tagInput) params.append('tags', tagInput)
+    if (!isOriginalOnly) params.append('originalOnly', 'false')
 
     // Reset to page 1 when filter changes
     params.set('page', '1')
@@ -49,8 +52,23 @@ const DashboardLibraryFilter = ({ searchParams, className }: IProps) => {
 
   return (
     <div className={className}>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <div className="flex flex-wrap gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+        {/* Original Only Checkbox */}
+        <div className="flex items-center ml-1">
+          <input
+            type="checkbox"
+            id="originalOnly"
+            name="originalOnly"
+            checked={isOriginalOnly}
+            onChange={(e) => setIsOriginalOnly(e.target.checked)}
+            className="w-3 h-3 text-primary border-gray-200 rounded focus:ring-primary cursor-pointer"
+          />
+          <label htmlFor="originalOnly" className="ml-2 text-gray-700 cursor-pointer select-none text-sm">
+            {t('filter-panel.original_only')}
+          </label>
+        </div>
+
+        <div className="flex flex-wrap gap-3">
           {/* Search Input */}
           <div className="flex-1 min-w-[240px]">
             <div className="relative">
@@ -62,17 +80,17 @@ const DashboardLibraryFilter = ({ searchParams, className }: IProps) => {
                 placeholder={`${t('search_materials')}...`}
                 className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
               />
-              <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400" />
+              <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             </div>
           </div>
 
           {/* Material Type Select */}
-          <div className="w-full sm:w-auto">
+          <div className="w-[180px]">
             <select
               name="type"
               value={materialType}
               onChange={(e) => setMaterialType(e.target.value)}
-              className="w-full sm:w-[180px] px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-800 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors appearance-none cursor-pointer"
+              className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-800 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors appearance-none cursor-pointer"
             >
               <option value="">{t('all_materials')}</option>
               <option value="text">{t('texts')}</option>
@@ -82,21 +100,21 @@ const DashboardLibraryFilter = ({ searchParams, className }: IProps) => {
           </div>
 
           {/* Tags Input */}
-          <div className="w-full sm:w-auto">
+          <div className="w-[180px]">
             <input
               type="text"
               name="tags"
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
               placeholder={t('tags_placeholder')}
-              className="w-full sm:w-[200px] px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+              className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
             />
           </div>
 
           {/* Submit Button */}
           <button
             type="submit"
-            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
           >
             {t('search')}
           </button>

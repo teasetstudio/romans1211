@@ -41,7 +41,7 @@ export default function MaterialTypeBadge({ type, className }: MaterialTypeBadge
       config.colors,
       className
     )}>
-      <Icon className="h-4 w-4" />
+      <Icon className="h-3 w-3" />
       <span>{config.label}</span>
     </div>
   );
