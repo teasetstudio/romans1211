@@ -199,7 +199,8 @@
       "type": "Type",
       "saving": "Saving...",
       "public": "Public",
-      "private": "Private"
+      "private": "Private",
+      "create_translation": "Create Translation"
     },
     "filter-panel": {
       "original_only": "Only Original Translation"
