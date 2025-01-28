@@ -22,8 +22,8 @@ const TopBanner = ({ className = '' }: IProps) => {
       className={`${className} bg-dark md:mr-0 md:ml-5 xl:ml-10 rounded-none md:rounded-l-[36px] md:rounded-r-none relative overflow-hidden`}
     >
       <div className="md:pr-5 xl:pr-10 relative z-20">
-        <div className="container py-14 sm:py-18 lg:py-24">
-          <div className="flex flex-col-reverse md:flex-row items-center gap-8 md:gap-12">
+        <div className="container py-14 sm:py-18 lg:py-24 relative">
+          <div className="flex flex-col-reverse md:flex-row items-center gap-8 md:gap-12 z-10 relative">
             <div className="max-w-md md:max-w-none w-full md:w-7/12 lg:w-5/12 mx-auto md:mx-0 text-center md:text-left">
               <H2 color="text-white" className="mb-7">
                 {t('top_banner.title')}
@@ -62,10 +62,10 @@ const TopBanner = ({ className = '' }: IProps) => {
               </div>
             </div>
           </div>
+
+          <Gradient className="opacity-80 md:opacity-100 -top-36 md:top-[-1100px] right-[-500px] md:-right-[560px] w-[1500px] h-[900px] z-0 md:w-[1500px] md:h-[1800px]" />
         </div>
       </div>
-
-      <Gradient className="opacity-80 md:opacity-100 -top-36 md:top-[-1100px] right-[-400px] md:-right-96 w-[1500px] h-[900px] z-0 md:w-[1500px] md:h-[1800px]" />
     </div>
   )
 }

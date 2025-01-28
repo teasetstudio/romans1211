@@ -1,5 +1,6 @@
 export const NAMESPACE_COMMON = "common";
 export const NAMESPACE_HOME = "home";
+export const NAMESPACE_NOT_FOUND = "NotFound";
 export const NAMESPACE_CONTACT = "contact";
 export const NAMESPACE_BANNERS = "banners";
 export const NAMESPACE_DASHBOARD = "dashboard";
