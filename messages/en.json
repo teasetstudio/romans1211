@@ -199,7 +199,8 @@
       "type": "Type",
       "saving": "Saving...",
       "public": "Public",
-      "private": "Private"
+      "private": "Private",
+      "create_translation": "Create Translation"
     },
     "filter-panel": {
       "original_only": "Only Original Translation"
@@ -209,5 +210,10 @@
     "made_all_public": "All materials in group are now public",
     "made_all_private": "All materials in group are now private",
     "error_updating_visibility": "Failed to update visibility"
+  },
+  "NotFound": {
+    "title": "Page Not Found",
+    "description": "Sorry, we couldn't find the page you're looking for.",
+    "back_home": "Back to Home"
   }
 }

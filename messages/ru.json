@@ -146,6 +146,11 @@
     "deleting": "Удаление...",
     "cancel": "Отменить"
   },
+  "NotFound": {
+    "title": "Страница не найдена",
+    "description": "Извините, мы не смогли найти страницу, которую вы ищете.",
+    "back_home": "На главную"
+  },
   "dashboard": {
     "all_materials": "Все материалы",
     "browse_library": "Моя Библиотека",
@@ -208,7 +213,8 @@
       "invalid_tags": "Неверный формат тегов",
       "saving": "Сохранение...",
       "public": "Публичный",
-      "private": "Приватный"
+      "private": "Приватный",
+      "create_translation": "Создать перевод"
     },
     "filter-panel": {
       "original_only": "Только оригиналные переводы"

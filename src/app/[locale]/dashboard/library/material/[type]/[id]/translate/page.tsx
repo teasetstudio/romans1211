@@ -8,6 +8,7 @@ import { materialService } from '@/lib/MaterialServiceForSSR';
 import CreateTranslationForm from '../../../../components/CreateTranslationForm';
 import { Link } from '@/i18n/routing';
 import { getDashboardMaterialUrl } from '@/utils/urls';
+import Expandable from '@/components/widgets/ui/Expandable';
 
 type Included = Required<TMaterialsIncludedTags & TMaterialsIncludedOrganization>;
 
@@ -54,15 +55,39 @@ export default async function MaterialTranslatePage({ params }: IdAndTypeParams)
   return (
     <div className="container mx-auto p-6">
       <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Create Translation</h1>
-          <p className="text-gray-600">
-            Creating a translation for: <span className="font-medium">{material.title}</span>
-          </p>
-          <div className="mt-2 text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded-full inline-block">
-            Original Language: {material.language.toUpperCase()}
+        <Expandable 
+          title={
+            <div className='flex items-center gap-3'>
+              <h2 className="text-2xl font-bold text-secondary">{material.title}</h2>
+              <div className="flex gap-2">
+                <span className="px-2.5 py-1 bg-primary text-gray4 rounded-md text-sm font-medium">
+                  Original Translation: {material.language.toUpperCase()}
+                </span>
+              </div>
+            </div>
+          }
+          className="mb-8 outline-none border border-gray2 rounded-2xl"
+          defaultExpanded={false}
+        >
+          <div className="space-y-4">
+            <div>
+              <h6 className="font-thin text-gray-400 mb-2">Content:</h6>
+              <div className="tiptap-wrapper rounded-xl" dangerouslySetInnerHTML={{ __html: material.content }} />
+            </div>
+            {material.tags && material.tags.length > 0 && (
+              <div>
+                <h6 className="font-medium text-gray-700 mb-2">Tags:</h6>
+                <div className="flex flex-wrap gap-2">
+                  {material.tags.map(tag => (
+                    <span key={tag.id} className="px-3 py-1 bg-gray5 text-gray1 rounded-full text-sm">
+                      {tag.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-        </div>
+        </Expandable>
 
         <CreateTranslationForm material={material} type={type} />
       </div>

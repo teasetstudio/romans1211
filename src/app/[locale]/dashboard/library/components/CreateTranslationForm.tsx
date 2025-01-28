@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import MaterialForm, { ISubmitData } from '@/components/forms/MaterialForm';
 import { TMaterial, TMaterialsIncludedTags, TMaterialType } from '@/types/Materials';
 import { getDashboardMaterialUrl } from '@/utils/urls';
+import { NAMESPACE_DASHBOARD } from '@/res/namespaces';
+import { useTranslations } from 'next-intl';
 
 interface CreateTranslationFormProps {
   material: TMaterial & Required<TMaterialsIncludedTags>;
@@ -13,6 +15,7 @@ interface CreateTranslationFormProps {
 
 export default function CreateTranslationForm({ material, type }: CreateTranslationFormProps) {
   const router = useRouter();
+  const t = useTranslations(NAMESPACE_DASHBOARD);
 
   const onAddTranslation = async (data: ISubmitData) => {
     const response = await fetch('/api/materials', {
@@ -59,7 +62,8 @@ export default function CreateTranslationForm({ material, type }: CreateTranslat
         }}
         onSubmit={onAddTranslation}
         editType={type}
-        submitLabel="Create Translation"
+        formTitle={t('form.create_translation')}
+        submitLabel={t('form.create_translation')}
         cancelHref={getDashboardMaterialUrl({ type, id: material.id })}
       />
     </>

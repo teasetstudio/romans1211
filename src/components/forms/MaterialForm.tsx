@@ -51,6 +51,7 @@ interface MaterialFormProps {
   cancelHref?: string;
   editType?: 'text' | 'song' | 'game';
   submitLabel?: string;
+  formTitle?: string;
 }
 
 export default function MaterialForm({
@@ -67,10 +68,11 @@ export default function MaterialForm({
   editType,
   cancelHref,
   submitLabel: submitLabelProp,
+  formTitle,
 }: MaterialFormProps) {
   const t = useTranslations(NAMESPACE_DASHBOARD);
 
-  const submitLabel = submitLabelProp || initialData.id ? t('save_changes') : t('create_material');
+  const submitLabel = submitLabelProp ? submitLabelProp : initialData.id ? t('save_changes') : t('create_material');
 
   const [title, setTitle] = useState(initialData.title);
   const [content, setContent] = useState(initialData.content);
@@ -132,7 +134,7 @@ export default function MaterialForm({
       {/* Header */}
       <div className="flex justify-between items-center pb-4 border-b">
         <h1 className="text-2xl font-bold text-gray-900">
-          {initialData.id ? t('edit_material') : t('create_new_material')}
+          {formTitle? formTitle : initialData.id ? t('edit_material') : t('create_new_material')}
         </h1>
         {cancelHref && (
           <Link
