@@ -5,6 +5,7 @@ import { Resend } from 'resend';
 import crypto from 'crypto';
 import { VerificationEmailTemplate } from "../../send/templates/verification-email";
 import { defaultResendEmail } from "@/res/consts";
+import { sendEmail } from "@/lib/email";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -95,13 +96,17 @@ export async function POST(req: Request) {
 
     // Send verification email
     const verificationUrl = `${process.env.NEXTAUTH_URL}/verify-email?token=${verificationToken}`;
-
-    await resend.emails.send({
-      from: defaultResendEmail,
-      to: [email],
+    await sendEmail({
+      toEmails: [email],
       subject: 'Verify your email address',
-      react: VerificationEmailTemplate({ name, verificationUrl }),
+      react: VerificationEmailTemplate({ name, verificationUrl })
     });
+    // await resend.emails.send({
+    //   from: defaultResendEmail,
+    //   to: [email],
+    //   subject: 'Verify your email address',
+    //   react: VerificationEmailTemplate({ name, verificationUrl }),
+    // });
 
     return NextResponse.json(
       { message: "Registration successful. Please check your email to verify your account." },

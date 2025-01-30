@@ -12,9 +12,10 @@ import { IconUser } from '@/res/icons'
 import { NAMESPACE_COMMON } from '@/res/namespaces'
 import { ROUTE_DASHBOARD, ROUTE_SETTINGS } from '@/res/routes'
 import Spinner from '../widgets/ui/Spinner';
-import AuthPopup from './AuthPopup';
+import dynamic from 'next/dynamic';
+// import AuthPopup from './AuthPopup';
 
-// const AuthPopup = dynamic(() => import('@/components/popups/AuthPopup'), { ssr: false })
+const AuthPopup = dynamic(() => import('@/components/popups/AuthPopup'), { ssr: false })
 
 interface IProps {
   onClick?: () => void

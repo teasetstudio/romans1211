@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { OrganizationProvider } from "@/components/contexts/OrganizationContext";
 import { getSession } from "@/lib/auth";
 import { organizationService } from "@/lib/OrganizationServiceForSSR";
+import { Toaster } from 'react-hot-toast';
 
 interface IProps {
   children: ReactNode
@@ -18,6 +19,7 @@ export default async function Layout({ children }: IProps) {
   return (
     <OrganizationProvider organizations={organizations}>
       <Sidebar>{children}</Sidebar>
+      <Toaster/>
     </OrganizationProvider>
   );
 }

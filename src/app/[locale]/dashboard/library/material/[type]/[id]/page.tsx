@@ -11,7 +11,6 @@ import { TMaterialsIncluded } from '@/types/Materials';
 import '@/styles/tiptap-components.css';
 import { materialService } from '@/lib/MaterialServiceForSSR';
 import { isValidMaterialType } from '@/utils';
-import { Toaster } from 'react-hot-toast';
 import MaterialStateProvider from '../../../components/MaterialStateProvider';
 
 type Included = Required<TMaterialsIncluded>
@@ -76,7 +75,6 @@ export default async function MaterialPage({ params }: IdAndTypeParams) {
           </div>
         </MaterialStateProvider>
       </div>
-      <Toaster />
     </div>
   );
 }
