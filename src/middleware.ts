@@ -61,7 +61,7 @@ export async function middleware(request: NextRequest) {
   if (cleanPath.startsWith('/login') || 
       cleanPath.startsWith('/register') || 
       cleanPath.startsWith('/forgot-password') ||
-      cleanPath.startsWith('/reset-password') ||
+      // cleanPath.startsWith('/reset-password') || used in dashboard's forgot password form
       cleanPath.startsWith('/verify-email')) {
     const authResult = await handleAuthRoutes(request);
     if (authResult.status !== 200) {
