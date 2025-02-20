@@ -2,29 +2,28 @@ import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { TMaterialWithType } from "@/types/Materials";
 import { materialService } from "@/lib/MaterialServiceForSSR";
-import { DailyVerse } from '@/app/[locale]/dashboard/components/DailyVerse';
 import { QuickActions } from "./components/QuickActions";
 import { RecentMaterials } from "./components/RecentMaterials";
 import DashboardHeader from "./components/DashboardHeader";
 import { MaterialStats } from "./components/MaterialStats";
+import { organizationService } from "@/lib/OrganizationServiceForSSR";
+import { DailyVerse } from "./components/DailyVerse";
 
 export default async function Dashboard() {
   const session = await getSession();
   if (!session?.user?.id) return null;
 
   // Get default organization
-  const defaultOrg = await prisma.organization.findFirst({
-    where: { userId: session.user.id, isDefault: true },
-  });
+  const organization = await organizationService.getSelectedOrganization(session.user.id);
 
-  if (!defaultOrg) return null;
+  if (!organization) return null;
 
-  const songsCount = await prisma.song.count({ where: { organizationId: defaultOrg.id, originalId: null }});
-  const gamesCount = await prisma.game.count({ where: { organizationId: defaultOrg.id, originalId: null }});
-  const textsCount = await prisma.text.count({ where: { organizationId: defaultOrg.id, originalId: null }});
+  const songsCount = await prisma.song.count({ where: { organizationId: organization.id, originalId: null }});
+  const gamesCount = await prisma.game.count({ where: { organizationId: organization.id, originalId: null }});
+  const textsCount = await prisma.text.count({ where: { organizationId: organization.id, originalId: null }});
 
   // Get the most recent materials
-  const recentMaterials: TMaterialWithType[] = await materialService.findLatestMaterials(defaultOrg.id, 3);
+  const recentMaterials: TMaterialWithType[] = await materialService.findLatestMaterials(organization.id, 3);
 
   const totalMaterials = songsCount + gamesCount + textsCount;
 

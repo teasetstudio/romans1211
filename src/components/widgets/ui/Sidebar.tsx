@@ -2,10 +2,13 @@
 
 import React, { useEffect, useState } from 'react'
 import { Link } from '@/i18n/routing';
+import { useOrganization } from '@/components/contexts/OrganizationContext';
 
 import { IconClose, IconDashboard, IconHome, IconLibrary, IconProfile, IconBurger } from '@/res/icons'
 import LogoutBtn from '../../client/LogoutBtn'
-import { ROUTE_DASHBOARD, ROUTE_DASHBOARD_LIBRARY, ROUTE_SETTINGS } from '@/res/routes'
+import { ROUTE_DASHBOARD, ROUTE_DASHBOARD_LIBRARY, ROUTE_DASHBOARD_ORGANIZATIONS, ROUTE_SETTINGS } from '@/res/routes'
+import OrganizationSwitcher from './OrganizationSwitcher';
+import OrganizationIcon from './OrganizationIcon';
 
 interface IProps {
   children: React.ReactNode
@@ -13,6 +16,7 @@ interface IProps {
 
 const Sidebar = ({ children }: IProps) => {
   const [isExpanded, setIsExpanded] = useState(false)
+  const { selectedOrganization } = useOrganization();
 
   useEffect(() => {
     
@@ -42,11 +46,24 @@ const Sidebar = ({ children }: IProps) => {
           {isExpanded ? <IconClose size={16} /> : <IconBurger size={16} />}
         </button>
 
-        <div className="flex flex-col flex-1 overflow-hidden">
+        <div className="flex flex-col flex-1 overflow-hidden bg-gray-50">
           <div className="flex flex-col flex-1 overflow-y-auto bg-gradient-to-b from-dark to-primary p-2 gap-2 rounded-2xl">
             <div className='flex-auto'>
+              <div className="pb-2 border-b mb-2">
+                {isExpanded
+                  ? <OrganizationSwitcher />
+                  : <LinkItem 
+                      href={ROUTE_DASHBOARD_ORGANIZATIONS} 
+                      text={selectedOrganization?.name || ''} 
+                      icon={() => <OrganizationIcon name={selectedOrganization?.name || ''} />} 
+                      isExpanded={isExpanded}
+                      setIsExpanded={setIsExpanded} 
+                    />
+                }
+                
+              </div>
               <LinkItem href='/' text='Home' icon={IconHome} isExpanded={isExpanded} />
-              <div className={`text-gray-300 my-5 ${!isExpanded && 'md:hidden'}`}>Organization</div>
+              {/* <div className={`text-gray-300 my-5 ${!isExpanded && 'md:hidden'}`}>Organization</div> */}
               <nav className="flex flex-col flex-1 gap-2">
                 <LinkItem href={ROUTE_DASHBOARD} text='Dashboard' icon={IconDashboard} isExpanded={isExpanded} setIsExpanded={setIsExpanded} />
                 <LinkItem href={ROUTE_DASHBOARD_LIBRARY} text='Library' icon={IconLibrary} isExpanded={isExpanded} setIsExpanded={setIsExpanded} />

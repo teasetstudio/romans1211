@@ -7,6 +7,9 @@ export const ROUTE_ABOUT = '/about'
 export const ROUTE_CONTACT = '/contact'
 // Dashboard
 export const ROUTE_DASHBOARD = '/dashboard'
+export const ROUTE_DASHBOARD_ORGANIZATIONS = '/dashboard/organizations'
+export const ROUTE_DASHBOARD_ORGANIZATIONS_NEW = '/dashboard/organizations/new'
+export const ROUTE_DASHBOARD_ORGANIZATIONS_SETTINGS = (id: string) => `${ROUTE_DASHBOARD_ORGANIZATIONS}/${id}/settings/profile`
 export const ROUTE_DASHBOARD_LIBRARY = '/dashboard/library'
 export const ROUTE_DASHBOARD_MATERIAL = '/dashboard/library/material'
 export const ROUTE_DASHBOARD_MATERIAL_CREATE = '/dashboard/library/material/create'
