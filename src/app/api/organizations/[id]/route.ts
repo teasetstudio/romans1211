@@ -14,21 +14,21 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { name } = await req.json();
+    const { name, description } = await req.json();
     const { id } = await params;
 
-    const updatedMaterial = await prisma.organization.update({
-      where: { id, userId: session.user.id, },
-      data: { name },
+    const updatedOrganization = await prisma.organization.update({
+      where: { id, ownerId: session.user.id, },
+      data: { name, description },
     });
 
 
-    if (!updatedMaterial) {
+    if (!updatedOrganization) {
       return NextResponse.json({ error: 'organization not updated' }, { status: 404 });
     }
 
 
-    return NextResponse.json(updatedMaterial);
+    return NextResponse.json(updatedOrganization);
   } catch (error) {
     console.error('Error updating organization:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -52,7 +52,7 @@ export async function PATCH(
     const updatedOrganization = await prisma.organization.update({
       where: { 
         id, 
-        userId: session.user.id 
+        ownerId: session.user.id 
       },
       data: { name },
     });
@@ -84,7 +84,7 @@ export async function DELETE(
     const organization = await prisma.organization.delete({
       where: { 
         id,
-        userId: session.user.id 
+        ownerId: session.user.id 
       },
     });
 

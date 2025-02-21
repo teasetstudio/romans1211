@@ -3,9 +3,12 @@
 import { useOrganization } from "@/components/contexts/OrganizationContext";
 import { ROUTE_DASHBOARD_ORGANIZATIONS_NEW, ROUTE_DASHBOARD_ORGANIZATIONS_SETTINGS } from "@/res/routes";
 import { Link } from "@/i18n/routing";
+import { useSession } from "next-auth/react";
 
 export default function OrganizationsPage() {
   const { organizations, selectedOrganization } = useOrganization();
+  const { data: session } = useSession();
+  console.log('session', session)
 
   return (
     <div className="flex-1 p-8">
@@ -39,7 +42,7 @@ export default function OrganizationsPage() {
                     <div>
                       <h3 className="font-medium text-gray-900">{org.name}</h3>
                       <p className="text-sm text-gray-500">
-                        {org.isDefault ? 'Default Organization' : 'Member'}
+                        {org.isDefault ? 'Default Organization' : org.ownerId === session?.user?.id ? 'Owner' : 'Member'}
                       </p>
                     </div>
                   </div>

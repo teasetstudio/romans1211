@@ -39,7 +39,7 @@ class MaterialServiceForAPI {
     }
   }
 
-  async findByIdAndUserId(id: string, userId: string, include?: {
+  async findByIdAndOwnerId(id: string, ownerId: string, include?: {
     tags?: boolean,
     organization?: boolean,
     translations?: boolean,
@@ -47,15 +47,15 @@ class MaterialServiceForAPI {
   }): Promise<(TMaterialWithType & Partial<TMaterialsIncluded>) | null> {
     const [text, song, game] = await Promise.all([
       prisma.text.findFirst({
-        where: { id, organization: { userId } },
+        where: { id, organization: { ownerId } },
         include,
       }),
       prisma.song.findFirst({
-        where: { id, organization: { userId } },
+        where: { id, organization: { ownerId } },
         include,
       }),
       prisma.game.findFirst({
-        where: { id, organization: { userId } },
+        where: { id, organization: { ownerId } },
         include,
       }),
     ]);
@@ -177,9 +177,9 @@ class MaterialServiceForAPI {
     return this.getModel(type).delete({ where: { id } });
   }
 
-  async deleteByIdAndUserId(type: TMaterialType, id: string, userId: string): Promise<void> {
-    return await this.getModel(type).delete({
-      where: { id, organization: { userId } },
+  async deleteByIdAndOwnerId(type: TMaterialType, id: string, ownerId: string): Promise<void> {
+    await this.getModel(type).delete({
+      where: { id, organization: { ownerId } },
     });
   }
 

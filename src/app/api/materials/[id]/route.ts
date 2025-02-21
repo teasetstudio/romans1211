@@ -19,7 +19,7 @@ export async function PUT(
     const { id } = await params;
 
     // Verify material belongs to user's organization
-    const material = await materialApiService.findByIdAndUserId(id, session.user.id, {
+    const material = await materialApiService.findByIdAndOwnerId(id, session.user.id, {
       tags: true,
     });
 
@@ -84,7 +84,7 @@ export async function DELETE(
     const deleteAll = searchParams.get('deleteAll') === 'true';
 
     // Find the material and check if it has translations
-    const material = await materialApiService.findByIdAndUserId(id, session.user.id, {
+    const material = await materialApiService.findByIdAndOwnerId(id, session.user.id, {
       translations: true,
     });
 

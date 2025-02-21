@@ -6,8 +6,14 @@ import { useRouter } from 'next/navigation';
 export interface Organization {
   id: string;
   name: string;
+  description?: string | null;
   isDefault: boolean;
-  userId: string;
+  ownerId: string;
+}
+
+export interface OrganizationCreateAttr {
+  name: string;
+  description?: string | null;
 }
 
 interface OrganizationContextType {
@@ -15,7 +21,7 @@ interface OrganizationContextType {
   setOrganizations: (orgs: Organization[]) => void;
   selectedOrganization: Organization | null;
   setSelectedOrganization: (org: Organization, options?: { refresh?: boolean }) => void;
-  updateOrganization: (id: string, data: { name: string }) => Promise<void>;
+  updateOrganization: (id: string, data: OrganizationCreateAttr) => Promise<void>;
   // isLoading: boolean;
   // error: string | null;
 }
