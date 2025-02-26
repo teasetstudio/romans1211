@@ -90,7 +90,7 @@ export async function POST(req: Request) {
       data: {
         name,
         isDefault: true,
-        userId: user.id,
+        ownerId: user.id,
       },
     });
 

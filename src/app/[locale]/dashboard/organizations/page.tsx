@@ -8,7 +8,6 @@ import { useSession } from "next-auth/react";
 export default function OrganizationsPage() {
   const { organizations, selectedOrganization } = useOrganization();
   const { data: session } = useSession();
-  console.log('session', session)
 
   return (
     <div className="flex-1 p-8">

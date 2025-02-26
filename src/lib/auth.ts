@@ -44,7 +44,7 @@ export const authOptions: NextAuthOptions = {
           data: {
             name: profile.name,
             isDefault: true,
-            userId: user.id,
+            ownerId: user.id,
           },
         });
 

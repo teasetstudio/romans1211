@@ -13,6 +13,10 @@
     "messages": "i18nexus pull",
     "generate": "npx prisma generate",
     "migrate": "npx prisma migrate dev --name",
+    "migrate:create": "npx prisma migrate dev --create-only --name",
+    "migrate:deploy": "npx prisma migrate deploy",
+    "migrate:reset": "npx prisma migrate reset",
+    "migrate:status": "npx prisma migrate status",
     "postgres": "docker compose -f docker-compose.dev.yml up -d"
   },
   "dependencies": {
@@ -20,6 +24,7 @@
     "@headlessui/react": "^2.2.0",
     "@hookform/resolvers": "^3.9.1",
     "@prisma/client": "^6.0.1",
+    "@radix-ui/react-popover": "^1.0.7",
     "@tabler/icons-react": "^3.28.1",
     "@tiptap/extension-highlight": "^2.10.3",
     "@tiptap/extension-link": "^2.11.2",
@@ -44,7 +49,8 @@
     "resend": "^4.0.1",
     "sharp": "^0.33.5",
     "tailwind-merge": "^2.6.0",
-    "yup": "^1.5.0"
+    "yup": "^1.5.0",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@svgr/webpack": "^8.1.0",

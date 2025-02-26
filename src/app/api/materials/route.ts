@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     const organization = await prisma.organization.findFirst({
       where: {
         id: organizationId,
-        userId: session.user.id,
+        ownerId: session.user.id,
       },
     });
 

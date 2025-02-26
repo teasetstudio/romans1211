@@ -218,6 +218,36 @@
     "made_all_private": "All materials in group are now private",
     "error_updating_visibility": "Failed to update visibility"
   },
+  "events": {
+    "title": "Events",
+    "description": "Manage your event blueprints and schedule events",
+    "createBlueprint": "Create Blueprint",
+    "createFirstBlueprint": "Create your first blueprint",
+    "loading": "Loading blueprints...",
+    "noBlueprints": "No event blueprints found",
+    "selectOrganization": "Please select an organization to view events",
+    "table": {
+      "title": "Title",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "duration": "Duration",
+      "location": "Location",
+      "actions": "Actions"
+    },
+    "createDialog": {
+      "title": "Create Event Blueprint",
+      "fields": {
+        "title": "Title",
+        "description": "Description",
+        "location": "Location",
+        "startDate": "Start Date",
+        "endDate": "End Date",
+        "defaultDuration": "Default Duration (minutes)"
+      },
+      "cancel": "Cancel",
+      "create": "Create"
+    }
+  },
   "NotFound": {
     "title": "Page Not Found",
     "description": "Sorry, we couldn't find the page you're looking for.",
