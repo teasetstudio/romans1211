@@ -44,6 +44,7 @@ import IconClock from "@assets/icons/clock.svg";
 import IconMapPin from "@assets/icons/map-pin.svg";
 import IconEmail from "@assets/icons/email.svg";
 import IconCopy from "@assets/icons/copy.svg";
+import IconCompass from "@assets/icons/compass.svg";
 
 export {
   IconBurger,
@@ -92,4 +93,5 @@ export {
   IconMapPin,
   IconEmail,
   IconCopy,
+  IconCompass,
 };

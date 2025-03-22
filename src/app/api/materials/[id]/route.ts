@@ -3,11 +3,12 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { materialApiService } from '@/lib/MaterialServiceForAPI';
 import { apiTagService } from '@/lib/TagServiceForAPI';
+import { AsyncIdParam } from '@/types/Params';
 
 // PUT /api/materials/[id]
 export async function PUT(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: AsyncIdParam }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -19,7 +20,7 @@ export async function PUT(
     const { id } = await params;
 
     // Verify material belongs to user's organization
-    const material = await materialApiService.findByIdAndUserId(id, session.user.id, {
+    const material = await materialApiService.findByIdAndOwnerId(id, session.user.id, {
       tags: true,
     });
 
@@ -84,7 +85,7 @@ export async function DELETE(
     const deleteAll = searchParams.get('deleteAll') === 'true';
 
     // Find the material and check if it has translations
-    const material = await materialApiService.findByIdAndUserId(id, session.user.id, {
+    const material = await materialApiService.findByIdAndOwnerId(id, session.user.id, {
       translations: true,
     });
 

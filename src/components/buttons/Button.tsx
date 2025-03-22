@@ -26,7 +26,7 @@ interface IButton {
 
 const Button: React.FC<IButton> = ({
   children,
-  bgColor = 'bg-white',
+  bgColor = '',
   className = '',
   size,
   rounded = 'rounded-xl',

@@ -1,19 +1,27 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-interface Organization {
+export interface Organization {
   id: string;
   name: string;
+  description?: string | null;
   isDefault: boolean;
-  userId: string;
+  ownerId: string;
+}
+
+export interface OrganizationCreateAttr {
+  name: string;
+  description?: string | null;
 }
 
 interface OrganizationContextType {
   organizations: Organization[];
   setOrganizations: (orgs: Organization[]) => void;
   selectedOrganization: Organization | null;
-  setSelectedOrganization: (org: Organization) => void;
+  setSelectedOrganization: (org: Organization, options?: { refresh?: boolean }) => void;
+  updateOrganization: (id: string, data: OrganizationCreateAttr) => Promise<void>;
   // isLoading: boolean;
   // error: string | null;
 }
@@ -21,44 +29,79 @@ interface OrganizationContextType {
 const OrganizationContext = createContext<OrganizationContextType | undefined>(undefined);
 
 interface IProps {
-  children: ReactNode;
+  children: React.ReactNode;
   organizations: Organization[];
+  // Cookies received gtom the server side
+  cookieSelectedOrganizationId?: string
 }
 
-export function OrganizationProvider({ children, organizations: orgData }: IProps) {
-  const [organizations, setOrganizations] = useState<Organization[]>(orgData);
+export function OrganizationProvider({ children, organizations: orgs, cookieSelectedOrganizationId }: IProps) {
+  const [organizations, setOrganizations] = useState<Organization[]>(orgs);
+  
+  const router = useRouter()
 
-  const defaultOrg = orgData.find((org: Organization) => org.isDefault);
-  const [selectedOrganization, setSelectedOrganization] = useState<Organization>(defaultOrg || orgData[0]);
-  // const [isLoading, setIsLoading] = useState(true);
-  // const [error, setError] = useState<string | null>(null);
+  const getCookieOrg = (): Organization | null => {
+    if (cookieSelectedOrganizationId) {
+      const org = orgs.find((org: Organization) => org.id === cookieSelectedOrganizationId);
+      return org || null;
+    } else {
+      if (typeof document === 'undefined') return null;
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; selectedOrganizationId=`);
+      if (parts.length === 2) {
+        const orgId = parts.pop()?.split(';').shift();
+        const org = orgs.find((org: Organization) => org.id === orgId);
+        return org || null;
+      }
+      return null;
+    }
+  };
 
-  // useEffect(() => {
-  //   const fetchOrganizations = async () => {
-  //     try {
-  //       const response = await fetch('/api/organizations');
-  //       if (!response.ok) {
-  //         throw new Error('Failed to fetch organizations');
-  //       }
-  //       const data = await response.json();
-  //       setOrganizations(data);
+  const getDefaultOrg = (): Organization | null => {
+    const defaultOrg = orgs.find((org: Organization) => org.isDefault);
+    return defaultOrg || null;
+  };
 
-  //       // Set default organization
-  //       const defaultOrg = data.find((org: Organization) => org.isDefault);
-  //       if (defaultOrg) {
-  //         setSelectedOrganization(defaultOrg);
-  //       } else if (data.length > 0) {
-  //         setSelectedOrganization(data[0]);
-  //       }
-  //     } catch (err) {
-  //       setError(err instanceof Error ? err.message : 'Failed to fetch organizations');
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
+  const selectedOrg = getCookieOrg() || getDefaultOrg();
+  const [selectedOrganization, setSelectedOrganization] = useState<Organization | null>(selectedOrg);
 
-  //   fetchOrganizations();
-  // }, []);
+  const handleSetSelectedOrganization = (org: Organization, { refresh }: { refresh?: boolean } = { refresh: true }) => {
+    setSelectedOrganization(org);
+    // Set cookie with 30 days expiry
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + 30);
+    document.cookie = `selectedOrganizationId=${org.id}; expires=${expiryDate.toUTCString()}; path=/`;
+    
+    if (refresh) router.refresh();
+  };
+
+  const updateOrganization = async (id: string, data: { name: string }) => {
+    try {
+      const response = await fetch(`/api/organizations/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) throw new Error('Failed to update organization');
+      
+      const updatedOrg = await response.json();
+      
+      // Update organizations list
+      const updatedOrgs = organizations.map(org => org.id === id ? updatedOrg : org);
+      setOrganizations(updatedOrgs);
+
+      // Update selected organization if it's the one being updated
+      if (selectedOrganization?.id === id) {
+        setSelectedOrganization(updatedOrg);
+      }
+    } catch (error) {
+      console.error('Error updating organization:', error);
+      throw error;
+    }
+  };
 
   return (
     <OrganizationContext.Provider
@@ -66,7 +109,8 @@ export function OrganizationProvider({ children, organizations: orgData }: IProp
         organizations,
         setOrganizations,
         selectedOrganization,
-        setSelectedOrganization,
+        setSelectedOrganization: handleSetSelectedOrganization,
+        updateOrganization,
         // isLoading,
         // error,
       }}

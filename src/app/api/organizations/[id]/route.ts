@@ -2,11 +2,44 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from "next-auth/next"
 import prisma from '@/lib/prisma';
 import { authOptions } from '@/lib/auth';
+import { AsyncIdParam } from '@/types/Params';
 
 // PUT /api/organizations/[id]
 export async function PUT(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: AsyncIdParam }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { name, description } = await req.json();
+    const { id } = await params;
+
+    const updatedOrganization = await prisma.organization.update({
+      where: { id, ownerId: session.user.id, },
+      data: { name, description },
+    });
+
+
+    if (!updatedOrganization) {
+      return NextResponse.json({ error: 'organization not updated' }, { status: 404 });
+    }
+
+
+    return NextResponse.json(updatedOrganization);
+  } catch (error) {
+    console.error('Error updating organization:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+// PATCH /api/organizations/[id]
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: AsyncIdParam }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -17,18 +50,19 @@ export async function PUT(
     const { name } = await req.json();
     const { id } = await params;
 
-    const updatedMaterial = await prisma.organization.update({
-      where: { id, userId: session.user.id, },
+    const updatedOrganization = await prisma.organization.update({
+      where: { 
+        id, 
+        ownerId: session.user.id 
+      },
       data: { name },
     });
 
-
-    if (!updatedMaterial) {
-      return NextResponse.json({ error: 'organization not updated' }, { status: 404 });
+    if (!updatedOrganization) {
+      return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
     }
 
-
-    return NextResponse.json(updatedMaterial);
+    return NextResponse.json(updatedOrganization);
   } catch (error) {
     console.error('Error updating organization:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -38,7 +72,7 @@ export async function PUT(
 // DELETE /api/organizations/[id]
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: AsyncIdParam }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -49,14 +83,17 @@ export async function DELETE(
     const { id } = await params;
 
     const organization = await prisma.organization.delete({
-      where: { id },
+      where: { 
+        id,
+        ownerId: session.user.id 
+      },
     });
 
     if (!organization) {
-      return NextResponse.json({ error: 'organization not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json(organization);
   } catch (error) {
     console.error('Error deleting organization:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

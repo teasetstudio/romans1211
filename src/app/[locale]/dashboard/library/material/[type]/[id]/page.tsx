@@ -23,7 +23,7 @@ export default async function MaterialPage({ params }: IdAndTypeParams) {
 
   if (!isValidMaterialType(type)) notFound();
 
-  const material = await materialService.findByTypeAndIdAndUserId<Included>(type, id, session.user.id, {
+  const material = await materialService.findByTypeAndIdAndOwnerId<Included>(type, id, session.user.id, {
     organization: true, 
     tags: true, 
     translations: true, 

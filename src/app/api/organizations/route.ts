@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     const body = await req.json();
-    const { name, isDefault = false } = body;
+    const { name, description = null, isDefault } = body;
 
     if (!name) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -20,8 +20,9 @@ export async function POST(req: NextRequest) {
     const organization = await prisma.organization.create({
       data: {
         name,
+        description,
         isDefault,
-        userId: session.user.id,
+        ownerId: session.user.id,
       },
     }).catch((err) => {
       console.error('err', err.stack)
@@ -44,7 +45,7 @@ export async function GET() {
 
     const organizations = await prisma.organization.findMany({
       where: {
-        userId: session.user.id,
+        ownerId: session.user.id,
       },
     });
 

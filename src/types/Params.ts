@@ -16,3 +16,5 @@ export interface ILibraryCatalogSearchParams {
 
 export type ILibrarySearchParams = AsyncParams<{}, ILibraryCatalogSearchParams>
 export type IdAndTypeParams = AsyncParams<{ id: string; type: TMaterialType }>;
+
+export type AsyncIdParam = Promise<{ id: string }>

@@ -1,5 +1,4 @@
 import { ROUTE_DASHBOARD_LIBRARY } from "@/res/routes";
-import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { materialService } from "@/lib/MaterialServiceForSSR";
 import { ILibrarySearchParams } from '@/types/Params';
@@ -10,6 +9,7 @@ import Pagination from '@/components/widgets/Pagination';
 import { appendParamsToUrl } from '@/utils/urls';
 import LibraryHeader from "./components/LibraryHeader";
 import LibraryCardGrid from "./components/LibraryCardGrid";
+import { organizationService } from "@/lib/OrganizationServiceForSSR";
 
 export default async function Library({ searchParams }: ILibrarySearchParams) {
   const session = await getSession();
@@ -21,20 +21,17 @@ export default async function Library({ searchParams }: ILibrarySearchParams) {
   const parsedPage = parseInt(page);
   const tagsArray = tags ? tags.split(',') : [];
 
-  // Get default organization
-  const defaultOrg = await prisma.organization.findFirst({
-    where: { userId: session.user.id, isDefault: true },
-  });
+  const organization = await organizationService.getSelectedOrganization(session.user.id);
 
-  // Cant be, anyway redirect to create org or show a corresponding message
-  if (!defaultOrg) return null
+  // Can't be, anyway redirect to create org or show a corresponding message
+  if (!organization) return null
 
   // Find organization's materials
   const { materials, totalCount, totalPages } = await materialService.findInCatalog({
     type,
     searchTerm,
     tags: tagsArray,
-    organizationId: defaultOrg.id, 
+    organizationId: organization.id, 
     page: parsedPage,
     isPublic: null,
     limit,
@@ -78,7 +75,7 @@ export default async function Library({ searchParams }: ILibrarySearchParams) {
         <div className="flex justify-center mt-8">
           <Pagination
             currentPage={parsedPage}
-            totalPages={4}
+            totalPages={totalPages}
             buildUrl={buildUrl}
           />
         </div>

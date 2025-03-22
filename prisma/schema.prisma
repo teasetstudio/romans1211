@@ -9,30 +9,213 @@ datasource db {
 }
 
 model User {
-  id              String         @id @default(cuid())
-  name            String
-  email           String         @unique
-  hashedPassword  String?
-  emailVerified   DateTime?
+  id                String         @id @default(cuid())
+  name              String
+  email             String         @unique
+  hashedPassword    String?
+  emailVerified     DateTime?
   verificationToken String?      @unique
-  resetToken      String?       @unique
-  resetTokenExpiry DateTime?
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-  organizations   Organization[]
+  resetToken        String?        @unique
+  resetTokenExpiry  DateTime?
+  organizations     Organization[]
+  memberships       OrganizationMember[]
+
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+}
+
+enum OrganizationPermission {
+  ADMIN                     // Full control over the organization
+  
+  // General permissions
+  MANAGE                    // Can manage organization resources
+  EDIT                      // Can edit organization resources
+  VIEW                      // Can view organization resources
+  
+  // Library permissions
+  ADMIN_LIBRARY             // Full control over the library
+  MANAGE_LIBRARY            // Can create, edit, delete any library content
+  EDIT_LIBRARY              // Can edit existing library content
+  VIEW_LIBRARY              // Can view library content
+
+  // Event permissions
+  ADMIN_EVENT_COURSES    // Full control over the event course
+  MANAGE_EVENT_COURSES   // Can create, edit, delete any events
+  EDIT_EVENT_COURSES     // Can edit existing events
+  VIEW_EVENT_COURSES     // Can view events
+}
+
+enum CourseRole {
+  ADMIN            // Full control over the event course (+add new members, assign roles)
+  MANAGER          // Can create, edit, delete any events
+  EDITOR           // Can edit event details
+  VIEWER           // Can view events
+}
+
+enum EventRole {
+  ADMIN          // Full control over the event (+add new members, assign roles)
+  MANAGER        // Can create, edit, delete any item in the event
+  EDITOR         // Can edit event details
+  VIEWER         // Can view event details and participate
+}
+
+enum EventPlanItemType {
+  SONG
+  TEXT
+  GAME
+  COMMENT
+}
+
+model OrganizationMember {
+  id             String           @id @default(cuid())
+  userId         String
+  organizationId String
+  permissions    OrganizationPermission[]
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  courseRoles    CourseMember[]
+  eventRoles     EventMember[]
+
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@unique([userId, organizationId])
+  @@index([organizationId])
+  @@index([userId])
 }
 
 model Organization {
-  id        String     @id @default(cuid())
-  userId    String
-  name      String
-  isDefault Boolean    @default(false)
-  texts     Text[]
-  songs     Song[]
-  games     Game[]
-  user      User       @relation(fields: [userId], references: [id])
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id          String              @id @default(cuid())
+  ownerId     String
+  name        String
+  description String?             @db.VarChar(30000)
+  isDefault   Boolean             @default(false)
+
+  texts       Text[]
+  songs       Song[]
+  games       Game[]
+
+  events      EventCourse[]
+  user        User                @relation(fields: [ownerId], references: [id])
+  members     OrganizationMember[]
+
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+}
+
+model EventCourse {
+  id                String            @id @default(cuid())
+  title             String
+  description       String?           @db.Text
+  organizationId    String
+  organization      Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  startDate         DateTime          // Series start date
+  endDate           DateTime?         // Optional series end date
+
+  events            Event[]           // All events in this course
+  defaultDuration   Int               // Duration in minutes
+  location          String?
+  members           CourseMember[]
+
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@index([organizationId])
+  @@index([startDate])
+  @@index([endDate])
+}
+
+model Event {
+  id                String           @id @default(cuid())
+  title             String           // Can override course title
+  description       String?          @db.Text // Can override course description
+  // Timings
+  startTime         DateTime
+  endTime           DateTime
+  location          String?          // Can override course location
+
+  organizationId    String
+  courseId          String?          // Optional reference to event course
+  course            EventCourse?     @relation(fields: [courseId], references: [id])
+  isCancelled       Boolean          @default(false) // For cancelling individual occurrences
+  members           EventMember[]
+  eventPlanItems    EventPlanItem[]
+
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  @@index([organizationId])
+  @@index([courseId])
+  @@index([startTime])
+  @@index([endTime])
+}
+
+model EventPlanItem {
+  id          String            @id @default(cuid())
+  type        EventPlanItemType
+  title       String?           // Optional title for comments
+  description String?           @db.Text // Optional description/notes
+  order       Int               // Order field for sorting items
+
+  // Timings
+  duration    Int?              // Duration in minutes (optional)
+  startHour   Int?              // Hour of the day (0-23)
+  startMinute Int?              // Minute (0-59)
+  endHour     Int?              // Hour of the day (0-23)
+  endMinute   Int?              // Minute (0-59)
+
+  // Content references
+  songId      String?
+  textId      String?
+  gameId      String?
+  
+  // Relations
+  song        Song?          @relation(fields: [songId], references: [id])
+  text        Text?          @relation(fields: [textId], references: [id])
+  game        Game?          @relation(fields: [gameId], references: [id])
+  
+  // Event relation
+  eventId     String
+  event       Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([eventId])
+  @@index([order])
+}
+
+model CourseMember {
+  id                   String             @id @default(cuid())
+  courseId             String
+  organizationMemberId String
+  role                 CourseRole
+  course               EventCourse        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  organizationMember   OrganizationMember @relation(fields: [organizationMemberId], references: [id], onDelete: Cascade)
+
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  @@unique([courseId, organizationMemberId])
+  @@index([courseId])
+  @@index([organizationMemberId])
+}
+
+model EventMember {
+  id                   String             @id @default(cuid())
+  eventId              String
+  organizationMemberId String
+  role                 EventRole
+  event                Event              @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  organizationMember   OrganizationMember @relation(fields: [organizationMemberId], references: [id], onDelete: Cascade)
+
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  @@unique([eventId, organizationMemberId])
+  @@index([eventId])
+  @@index([organizationMemberId])
 }
 
 model Text {
@@ -47,6 +230,8 @@ model Text {
   translations   Text[]       @relation("Translations")
   organization   Organization @relation(fields: [organizationId], references: [id])
   tags           Wtag[]
+  eventPlanItems EventPlanItem[]
+
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
@@ -67,6 +252,8 @@ model Song {
   translations   Song[]       @relation("Translations")
   organization   Organization @relation(fields: [organizationId], references: [id])
   tags           Wtag[]
+  eventPlanItems EventPlanItem[]
+
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
@@ -87,6 +274,8 @@ model Game {
   translations   Game[]       @relation("Translations")
   organization   Organization @relation(fields: [organizationId], references: [id])
   tags           Wtag[]
+  eventPlanItems EventPlanItem[]
+
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
@@ -95,15 +284,14 @@ model Game {
   @@index([title])
 }
 
-// Wtag is Tag. It is done to simplify the prisma client to avoid creating the middle many-to-many table
-// Wtag alphabetically below Text. Tag not below Text...
-// It creates _TagToText instead of _TextToTag
 model Wtag {
   id        String     @id @default(cuid())
   name      String     @unique
+
   texts     Text[]
   songs     Song[]
   games     Game[]
+
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 

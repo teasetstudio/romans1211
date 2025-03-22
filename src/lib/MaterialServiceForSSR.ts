@@ -41,13 +41,13 @@ class MaterialServiceForSSR {
     return this.getModel(type).findUnique({ where: { id }, include });
   }
 
-  async findByTypeAndIdAndUserId<ReturnIncludedType = Partial<TMaterialsIncluded>>(type: TMaterialType, id: string, userId: string, include?: {
+  async findByTypeAndIdAndOwnerId<ReturnIncludedType = Partial<TMaterialsIncluded>>(type: TMaterialType, id: string, ownerId: string, include?: {
     tags?: boolean,
     organization?: boolean,
     original?: boolean | { include?: { translations?: boolean } },
     translations?: boolean
   }): Promise<(TMaterial & ReturnIncludedType) | null> {
-    return this.getModel(type).findUnique({ where: { id, organization: { userId } }, include });
+    return this.getModel(type).findUnique({ where: { id, organization: { ownerId } }, include });
   }
 
   async findPublicById(type: TMaterialType, id: string): Promise<TMaterialWithIncluded | null> {
@@ -125,7 +125,7 @@ class MaterialServiceForSSR {
     searchTerm?: string;
     isPublic?: boolean | null;
     organizationId?: string;
-    userId?: string;
+    ownerId?: string;
     originalOnly?: boolean
   }): Promise<{ materials: TCatalogMaterial[]; totalCount: number; totalPages: number }> {
     const { 
@@ -136,7 +136,7 @@ class MaterialServiceForSSR {
       type, 
       isPublic = true,
       organizationId,
-      userId,
+      ownerId,
       originalOnly = true
     } = searchParams;
 
@@ -170,8 +170,8 @@ class MaterialServiceForSSR {
       if (originalOnly)
         conditions.push(Prisma.sql`m."originalId" IS NULL`);
 
-      if (userId)
-        conditions.push(Prisma.sql`o."userId" = ${userId}`);
+      if (ownerId)
+        conditions.push(Prisma.sql`o."ownerId" = ${ownerId}`);
 
       if (searchTerm) {
         conditions.push(Prisma.sql`(

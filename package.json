@@ -2,6 +2,9 @@
   "name": "ephesians412",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "prisma migrate deploy && prisma generate && next build",
@@ -10,13 +13,19 @@
     "messages": "i18nexus pull",
     "generate": "npx prisma generate",
     "migrate": "npx prisma migrate dev --name",
+    "migrate:create": "npx prisma migrate dev --create-only --name",
+    "migrate:deploy": "npx prisma migrate deploy",
+    "migrate:reset": "npx prisma migrate reset",
+    "migrate:status": "npx prisma migrate status",
     "postgres": "docker compose -f docker-compose.dev.yml up -d"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.4",
     "@headlessui/react": "^2.2.0",
+    "@hello-pangea/dnd": "^18.0.1",
     "@hookform/resolvers": "^3.9.1",
     "@prisma/client": "^6.0.1",
+    "@radix-ui/react-popover": "^1.0.7",
     "@tabler/icons-react": "^3.28.1",
     "@tiptap/extension-highlight": "^2.10.3",
     "@tiptap/extension-link": "^2.11.2",
@@ -28,6 +37,9 @@
     "@types/bcryptjs": "^2.4.6",
     "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "joi": "^17.13.3",
     "next": "15.0.4",
     "next-auth": "^4.24.11",
@@ -41,7 +53,9 @@
     "resend": "^4.0.1",
     "sharp": "^0.33.5",
     "tailwind-merge": "^2.6.0",
-    "yup": "^1.5.0"
+    "tailwindcss-animate": "^1.0.7",
+    "yup": "^1.5.0",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@svgr/webpack": "^8.1.0",
