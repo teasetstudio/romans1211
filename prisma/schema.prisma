@@ -64,6 +64,7 @@ enum EventPlanItemType {
   TEXT
   GAME
   COMMENT
+  CUSTOM
 }
 
 model OrganizationMember {

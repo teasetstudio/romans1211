@@ -1,11 +1,13 @@
 "use client"
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { TMaterial, TMaterialType } from "@/types/Materials";
 import { Event, EventPlanItem } from "@prisma/client";
-import { IconSearch, IconFilter } from '@tabler/icons-react';
 import { toast } from "react-hot-toast";
+import EventPlanItemsFilter from "./EventPlanItemsFilter";
+import { IconChevronDown, IconChevronUp } from "@tabler/icons-react";
+import CustomItemModal from "./CustomItemModal";
 
 // Extend the Event type to include eventPlanItems
 interface EventWithPlanItems extends Event {
@@ -23,8 +25,9 @@ interface IMaterialItem {
 interface IPlanItem {
   id: string
   title: string
-  type: TMaterialType
-  materialId: string
+  type: TMaterialType | "CUSTOM"
+  materialId: string | null
+  description?: string | null
 }
 
 interface Columns {
@@ -41,55 +44,19 @@ interface SaveResponse {
   message: string;
 }
 
+// Create constant for the custom plan item type to avoid mismatches
+const CUSTOM_PLAN_ITEM_TYPE = "CUSTOM";
+
 const EventPlanItems = ({ event }: IProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<TMaterialType | "all">("all");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [originalOnly, setOriginalOnly] = useState(true);
-  const [showFilters, setShowFilters] = useState(false);
-  const [materials, setMaterials] = useState<IMaterialItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [allTags, setAllTags] = useState<string[]>([]);
-
-  // Initial data fetch
-  useEffect(() => {
-    const fetchInitialData = async () => {
-      try {
-        const params = new URLSearchParams();
-        params.append("organizationId", event.organizationId);
-        params.append("originalOnly", "true");
-
-        const response = await fetch(`/api/materials?${params.toString()}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch materials');
-        }
-
-        const data = await response.json();
-        setMaterials(data.materials);
-        
-        // Extract unique tags from all materials
-        const uniqueTags = Array.from(new Set(
-          data.materials.flatMap((material: IMaterialItem) => 
-            material.tags?.map((tag: { name: string }) => tag.name) || []
-          )
-        )).sort() as string[];
-        setAllTags(uniqueTags);
-
-        // Update columns with the materials
-        setColumns(prev => ({
-          ...prev,
-          materials: data.materials as IMaterialItem[]
-        }));
-      } catch (error) {
-        console.error('Error fetching initial materials:', error);
-        toast.error('Failed to fetch materials');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchInitialData();
-  }, [event.organizationId]);
+  const [showCustomItemModal, setShowCustomItemModal] = useState(false);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [expandedDescriptions, setExpandedDescriptions] = useState<Set<string>>(new Set());
 
   // Fetch materials when filters change
   useEffect(() => {
@@ -107,12 +74,12 @@ const EventPlanItems = ({ event }: IProps) => {
         if (searchQuery) {
           params.append("searchTerm", searchQuery);
         }
-        
+
         // Add tags if selected
         selectedTags.forEach(tag => {
           params.append("tags", tag);
         });
-        
+
         // Add original only filter
         if (originalOnly) {
           params.append("originalOnly", "true");
@@ -127,8 +94,8 @@ const EventPlanItems = ({ event }: IProps) => {
         }
 
         const data = await response.json();
-        setMaterials(data.materials);
-        
+        console.log('fetched data', data)
+
         // Update columns with the new materials
         setColumns(prev => ({
           ...prev,
@@ -150,15 +117,26 @@ const EventPlanItems = ({ event }: IProps) => {
   // Update columns with materials from API
   const [columns, setColumns] = useState<Columns>({
     planItems: event.eventPlanItems.map(item => {
+      // Use a type assertion here
+      if ((item.type as string) === CUSTOM_PLAN_ITEM_TYPE) {
+        return {
+          id: item.id,
+          type: CUSTOM_PLAN_ITEM_TYPE,
+          materialId: null,
+          title: item.title || "Custom Item",
+          description: item.description
+        }
+      }
+
       const type = item.type.toLowerCase() as TMaterialType
       // @ts-ignore
       const material = item[type] as unknown as TMaterial
-      const materialId = material.id
+      const materialId = material?.id || ""
       return {
         id: item.id,
         type,
         materialId,
-        title: material.title,
+        title: material?.title || "Unknown",
       }
     }),
     materials: [],
@@ -166,12 +144,22 @@ const EventPlanItems = ({ event }: IProps) => {
 
   // Track which materials have been used
   const [usedMaterials, setUsedMaterials] = useState<Set<string>>(new Set(
-    event.eventPlanItems.map(item => {
-      const type = item.type.toLowerCase() as TMaterialType
-      // @ts-ignore
-      const material = item[type] as unknown as TMaterial
-      return material.id
-    })
+    event.eventPlanItems
+      .filter(item => {
+        // Skip CUSTOM items or items without a proper type
+        if ((item.type as string) === CUSTOM_PLAN_ITEM_TYPE) return false;
+
+        const type = item.type.toLowerCase() as TMaterialType;
+        // @ts-ignore
+        const material = item[type] as unknown as TMaterial;
+        return material != null; // Only include items with valid materials
+      })
+      .map(item => {
+        const type = item.type.toLowerCase() as TMaterialType;
+        // @ts-ignore
+        const material = item[type] as unknown as TMaterial;
+        return material.id;
+      })
   ));
 
   // Track if we're currently dragging from right to left (for visual feedback)
@@ -226,7 +214,7 @@ const EventPlanItems = ({ event }: IProps) => {
     // Reset states
     setIsDraggingRightToLeft(false);
     setHoveredMaterialId(null);
-    
+
     const { source, destination } = result;
     if (!destination) return;
 
@@ -276,7 +264,7 @@ const EventPlanItems = ({ event }: IProps) => {
       
       // Remove the item from usedMaterials
       const newUsedMaterials = new Set(usedMaterials);
-      newUsedMaterials.delete(removedItem.materialId);
+      newUsedMaterials.delete(removedItem.materialId || "");
       setUsedMaterials(newUsedMaterials);
       
       setColumns({
@@ -300,19 +288,119 @@ const EventPlanItems = ({ event }: IProps) => {
     });
   };
 
+  // Add a new custom plan item
+  const addCustomPlanItem = (item: Partial<IPlanItem>) => {
+    const newItem: IPlanItem = {
+      id: `custom-${Date.now()}`,
+      title: item.title || "",
+      type: CUSTOM_PLAN_ITEM_TYPE,
+      materialId: null,
+      description: item.description || null
+    };
+    
+    setColumns(prev => ({
+      ...prev,
+      planItems: [...prev.planItems, newItem]
+    }));
+    
+    // Close modal
+    setShowCustomItemModal(false);
+  };
+
+  // Start editing a custom item
+  const startEditingCustomItem = (item: IPlanItem) => {
+    setEditingItemId(item.id);
+    setShowCustomItemModal(true);
+  };
+
+  // Save the edited custom item
+  const saveCustomItem = (updatedItemData: Partial<IPlanItem>) => {
+    if (!editingItemId) {
+      // Add new item
+      addCustomPlanItem(updatedItemData);
+      return;
+    }
+    
+    // Update existing item
+    setColumns(prev => ({
+      ...prev,
+      planItems: prev.planItems.map(item => 
+        item.id === editingItemId
+          ? { 
+              ...item, 
+              title: updatedItemData.title || item.title,
+              description: updatedItemData.description 
+            }
+          : item
+      )
+    }));
+    
+    // Reset state
+    setEditingItemId(null);
+    setShowCustomItemModal(false);
+  };
+
+  // Delete a custom plan item
+  const deleteCustomItem = (itemId: string) => {
+    // Remove the item from the columns.planItems
+    setColumns(prev => ({
+      ...prev,
+      planItems: prev.planItems.filter(item => item.id !== itemId)
+    }));
+    
+    // Reset state and close modal
+    setEditingItemId(null);
+    setShowCustomItemModal(false);
+    
+    // Show success notification
+    toast.success("Custom item deleted");
+  };
+
+  // Toggle description expansion
+  const toggleDescriptionExpansion = (itemId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExpandedDescriptions(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(itemId)) {
+        newSet.delete(itemId);
+      } else {
+        newSet.add(itemId);
+      }
+      return newSet;
+    });
+  };
+
   const handleSave = async () => {
     setIsSaving(true);
     setSaveStatus(null);
 
     try {
       // Map plan items to the format expected by the API
-      const planItemsData = columns.planItems.map((item, index) => ({
-        type: item.type,
-        order: index,
-        title: item.title,
-        [getItemIdField(item.type)]: item.materialId,
-        eventId: event.id,
-      }));
+      const planItemsData = columns.planItems.map((item, index) => {
+        // If it's a custom item
+        if (item.type === CUSTOM_PLAN_ITEM_TYPE) {
+          return {
+            // Use a type assertion here
+            type: CUSTOM_PLAN_ITEM_TYPE as any,
+            order: index,
+            title: item.title,
+            description: item.description || "",
+            eventId: event.id,
+          };
+        }
+        
+        // Otherwise it's a material item
+        const materialId = item.materialId === null ? "" : item.materialId;
+        return {
+          // Use a type assertion here
+          type: item.type.toUpperCase() as any,
+          order: index,
+          title: item.title,
+          // Use the string materialId
+          [getItemIdField(item.type as TMaterialType)]: materialId,
+          eventId: event.id,
+        };
+      });
 
       const response = await fetch('/api/event-plan-items', {
         method: 'POST',
@@ -361,108 +449,42 @@ const EventPlanItems = ({ event }: IProps) => {
 
   return (
     <div>
-      {/* Add filter UI */}
-      <div className="mb-4 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <IconSearch size={20} className="text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search materials..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  const input = document.querySelector('input[type="text"]') as HTMLInputElement;
-                  if (input) {
-                    input.blur();
-                  }
-                }
-              }}
-              className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            />
-            <button
-              onClick={() => {
-                const input = document.querySelector('input[type="text"]') as HTMLInputElement;
-                if (input) {
-                  input.blur();
-                }
-              }}
-              className="px-3 py-2 bg-indigo-600 text-white rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-            >
-              Enter
-            </button>
-          </div>
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center space-x-2 px-3 py-2 border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-          >
-            <IconFilter size={20} className="text-gray-400" />
-            <span>Filters</span>
-          </button>
-        </div>
+      {/* Filter UI Component */}
+      <EventPlanItemsFilter
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        selectedType={selectedType}
+        setSelectedType={setSelectedType}
+        selectedTags={selectedTags}
+        setSelectedTags={setSelectedTags}
+        originalOnly={originalOnly}
+        setOriginalOnly={setOriginalOnly}
+        allTags={allTags}
+        organizationId={event.organizationId}
+      />
 
-        {showFilters && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Material Type
-              </label>
-              <select
-                value={selectedType}
-                onChange={(e) => setSelectedType(e.target.value as TMaterialType | "all")}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              >
-                <option value="all">All Types</option>
-                <option value="song">Songs</option>
-                <option value="text">Texts</option>
-                <option value="game">Games</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tags
-              </label>
-              <div className="max-h-32 overflow-y-auto border border-gray-300 rounded-md p-2">
-                {allTags.map((tag) => (
-                  <label key={tag} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      checked={selectedTags.includes(tag)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectedTags([...selectedTags, tag]);
-                        } else {
-                          setSelectedTags(selectedTags.filter(t => t !== tag));
-                        }
-                      }}
-                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                    />
-                    <span className="text-sm text-gray-700">{tag}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Original Only
-              </label>
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  checked={originalOnly}
-                  onChange={(e) => setOriginalOnly(e.target.checked)}
-                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                />
-                <span className="text-sm text-gray-700">Show only original materials</span>
-              </label>
-            </div>
-          </div>
-        )}
+      {/* Add Custom Item Button */}
+      <div className="mb-6 flex justify-center">
+        <button
+          onClick={() => setShowCustomItemModal(true)}
+          className="px-4 py-2 bg-indigo-600 text-white rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+        >
+          + Add Custom Item
+        </button>
       </div>
+
+      {/* Custom Item Modal */}
+      <CustomItemModal
+        isOpen={showCustomItemModal}
+        onClose={() => {
+          setShowCustomItemModal(false);
+          setEditingItemId(null);
+        }}
+        onSave={saveCustomItem}
+        onDelete={deleteCustomItem}
+        editingItem={editingItemId ? columns.planItems.find(item => item.id === editingItemId) || null : null}
+        isEditing={!!editingItemId}
+      />
 
       <DragDropContext 
         onDragStart={onDragStart} 
@@ -565,7 +587,7 @@ const EventPlanItems = ({ event }: IProps) => {
                   ref={provided.innerRef}
                   {...provided.droppableProps}
                   style={{
-                    width: "200px",
+                    width: "300px", // Wider to accommodate HTML content
                     minHeight: "300px",
                     padding: "10px",
                     background: "#f0f0f0",
@@ -587,13 +609,60 @@ const EventPlanItems = ({ event }: IProps) => {
                           style={{
                             padding: "10px",
                             margin: "5px 0",
-                            background: "white",
+                            background: item.type === "CUSTOM" ? "#e6f7ff" : "white",
                             borderRadius: "4px",
                             boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
                             ...provided.draggableProps.style,
                           }}
                         >
-                          {item.title}
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="font-medium">{item.title}</div>
+                              {item.type === "CUSTOM" && item.description && (
+                                <div className="mt-1">
+                                  <div 
+                                    className="flex items-center text-xs text-indigo-600 cursor-pointer mb-1 hover:text-indigo-800"
+                                    onClick={(e) => toggleDescriptionExpansion(item.id, e)}
+                                  >
+                                    {expandedDescriptions.has(item.id) ? (
+                                      <>
+                                        <IconChevronUp size={14} className="mr-1" />
+                                        <span>Hide description</span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <IconChevronDown size={14} className="mr-1" />
+                                        <span>Show description</span>
+                                      </>
+                                    )}
+                                  </div>
+                                  
+                                  {expandedDescriptions.has(item.id) && (
+                                    <div 
+                                      className="text-xs text-gray-600 max-h-40 overflow-y-auto p-2 bg-white rounded border border-gray-100"
+                                      dangerouslySetInnerHTML={{ __html: item.description || "" }}
+                                    />
+                                  )}
+                                </div>
+                              )}
+                              {item.type !== "CUSTOM" && (
+                                <div className="text-xs mt-1 text-gray-500">
+                                  {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
+                                </div>
+                              )}
+                            </div>
+                            {item.type === "CUSTOM" && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  startEditingCustomItem(item);
+                                }}
+                                className="ml-2 p-1 text-indigo-600 hover:text-indigo-800 text-xs"
+                              >
+                                Edit
+                              </button>
+                            )}
+                          </div>
                         </div>
                       )}
                     </Draggable>

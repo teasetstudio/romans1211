@@ -122,6 +122,7 @@ export async function POST(request: NextRequest) {
       eventId,
       type: data.type.toUpperCase() as EventPlanItemType,
       title: data.title,
+      description: data.description || null,
       duration: data.duration || 0,
       order: data.order,
       songId: data.songId || null,

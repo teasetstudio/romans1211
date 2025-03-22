@@ -148,7 +148,7 @@ export async function PATCH(
       data: {
         title: data.title !== undefined ? data.title : undefined,
         duration: data.duration !== undefined ? data.duration : undefined,
-        description: data.comment !== undefined ? data.comment : undefined,
+        description: data.description !== undefined ? data.description : undefined,
         order: data.order !== undefined ? data.order : undefined,
         type: data.type !== undefined ? data.type as EventPlanItemType : undefined,
         songId: data.songId !== undefined ? data.songId : undefined,

@@ -90,7 +90,7 @@ export default function EventDetails({ event: initialEvent }: EventDetailsProps)
 
   return (
     <>
-      <div className="bg-white shadow-sm border-b border-gray-200 mb-6">
+      <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
