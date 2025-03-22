@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { materialApiService } from '@/lib/MaterialServiceForAPI';
+import { AsyncIdParam } from '@/types/Params';
 
 // PATCH /api/materials/[id]/make-original
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: AsyncIdParam }
 ) {
   try {
     const session = await getServerSession(authOptions);

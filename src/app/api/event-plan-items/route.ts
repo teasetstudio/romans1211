@@ -1,128 +1,51 @@
 import { NextRequest, NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import prisma from "@/lib/prisma";
-import { z } from "zod";
+import { EventPlanItemType } from "@prisma/client";
+import { AsyncIdParam } from "@/types/Params";
 
-// Schema for creating an event plan item
-const createEventPlanItemSchema = z.object({
-  type: z.enum(["SONG", "TEXT", "GAME", "COMMENT"]),
-  title: z.string().optional(),
-  description: z.string().optional(),
-  order: z.number().int(),
-  duration: z.number().int().optional(),
-  startHour: z.number().int().min(0).max(23).optional(),
-  startMinute: z.number().int().min(0).max(59).optional(),
-  endHour: z.number().int().min(0).max(23).optional(),
-  endMinute: z.number().int().min(0).max(59).optional(),
-  songId: z.string().optional(),
-  textId: z.string().optional(),
-  gameId: z.string().optional(),
-  eventId: z.string(),
-});
-
-// GET /api/event-plan-items
-export async function GET(request: NextRequest) {
+// GET /api/event-plan-items - Get all plan items for an event
+export async function GET(
+  request: NextRequest,
+) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { searchParams } = new URL(request.url);
-    const eventId = searchParams.get("eventId");
-    const itemId = searchParams.get("id");
+    // Check if the event exists and user has access
+    // const event = await prisma.event.findUnique({
+    //   where: { id: eventId },
+    //   include: {
+    //     members: {
+    //       where: { userId: session.user.id },
+    //     },
+    //   },
+    // });
 
-    // Get single item
-    if (itemId) {
-      const item = await prisma.eventPlanItem.findUnique({
-        where: { id: itemId },
-        include: {
-          event: {
-            include: {
-              members: {
-                include: {
-                  organizationMember: {
-                    include: {
-                      user: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-          song: true,
-          text: true,
-          game: true,
-        },
-      });
+    // if (!event) {
+    //   return NextResponse.json({ error: "Event not found" }, { status: 404 });
+    // }
 
-      if (!item) {
-        return NextResponse.json(
-          { error: "Event plan item not found" },
-          { status: 404 }
-        );
-      }
+    // if (event.members.length === 0) {
+    //   // Check if user is a member of the organization
+    //   const orgMember = await prisma.organizationMember.findFirst({
+    //     where: {
+    //       userId: session.user.id,
+    //       organizationId: event.organizationId,
+    //     },
+    //   });
 
-      // Check if user has access to the event
-      const hasAccess = item.event.members.some(
-        (member) => member.organizationMember.user.email === session.user.email
-      );
+    //   if (!orgMember) {
+    //     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    //   }
+    // }
 
-      if (!hasAccess) {
-        return NextResponse.json(
-          { error: "No access to this event" },
-          { status: 403 }
-        );
-      }
-
-      return NextResponse.json(item);
-    }
-
-    // List items for an event
-    if (!eventId) {
-      return NextResponse.json(
-        { error: "eventId is required" },
-        { status: 400 }
-      );
-    }
-
-    // Check if user has access to the event
-    const event = await prisma.event.findUnique({
-      where: { id: eventId },
-      include: {
-        members: {
-          include: {
-            organizationMember: {
-              include: {
-                user: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    if (!event) {
-      return NextResponse.json(
-        { error: "Event not found" },
-        { status: 404 }
-      );
-    }
-
-    const hasAccess = event.members.some(
-      (member) => member.organizationMember.user.email === session.user.email
-    );
-
-    if (!hasAccess) {
-      return NextResponse.json(
-        { error: "No access to this event" },
-        { status: 403 }
-      );
-    }
-
-    const items = await prisma.eventPlanItem.findMany({
-      where: { eventId },
+    // Get all plan items for the event
+    const planItems = await prisma.eventPlanItem.findMany({
+      where: { eventId: "asd" },
       include: {
         song: true,
         text: true,
@@ -131,17 +54,17 @@ export async function GET(request: NextRequest) {
       orderBy: { order: "asc" },
     });
 
-    return NextResponse.json(items);
+    return NextResponse.json(planItems);
   } catch (error) {
-    console.error("Error in GET /api/event-plan-items:", error);
+    console.error("Error fetching event plan items:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Failed to fetch event plan items" },
       { status: 500 }
     );
   }
 }
 
-// POST /api/event-plan-items
+// POST /api/event-plan-items - Create a new plan item for an event
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -149,61 +72,73 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const json = await request.json();
-    const validatedData = createEventPlanItemSchema.parse(json);
+    const { planItems, eventId } = await request.json();
 
-    // Check if user has access to the event
+    if (!Array.isArray(planItems)) {
+      return NextResponse.json(
+        { error: "Invalid data format" },
+        { status: 400 }
+      );
+    }
+
+    // Validate each item
+    const orderSet = new Set();
+    for (const item of planItems) {
+      if (!item.title || item.order === undefined || !item.type || item.eventId !== eventId) {
+        return NextResponse.json(
+          { error: "Each item must have a title, order, type, and the same eventId" },
+          { status: 400 }
+        );
+      }
+      if (orderSet.has(item.order)) {
+        return NextResponse.json(
+          { error: "Order values must be unique" },
+          { status: 400 }
+        );
+      }
+      orderSet.add(item.order);
+    }
+
+    // Check if the event exists and user has access
     const event = await prisma.event.findUnique({
-      where: { id: validatedData.eventId },
-      include: {
-        members: {
-          include: {
-            organizationMember: {
-              include: {
-                user: true,
-              },
-            },
-          },
-        },
-      },
+      where: { id: eventId },
     });
 
     if (!event) {
-      return NextResponse.json(
-        { error: "Event not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Event not found" }, { status: 404 });
     }
 
-    const hasAccess = event.members.some(
-      (member) => member.organizationMember.user.email === session.user.email
-    );
-
-    if (!hasAccess) {
-      return NextResponse.json(
-        { error: "No access to this event" },
-        { status: 403 }
-      );
-    }
-
-    // Create the event plan item
-    const item = await prisma.eventPlanItem.create({
-      data: validatedData,
-      include: {
-        song: true,
-        text: true,
-        game: true,
-      },
+    // Delete existing items for the event
+    await prisma.eventPlanItem.deleteMany({
+      where: { eventId },
     });
 
-    return NextResponse.json(item, { status: 201 });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.errors }, { status: 400 });
+    if (planItems.length === 0) {
+      return NextResponse.json([], { status: 200 });
     }
-    console.error("Error in POST /api/event-plan-items:", error);
+
+    // Prepare data for createMany
+    const dataToCreate = planItems.map(data => ({
+      eventId,
+      type: data.type.toUpperCase() as EventPlanItemType,
+      title: data.title,
+      duration: data.duration || 0,
+      order: data.order,
+      songId: data.songId || null,
+      textId: data.textId || null,
+      gameId: data.gameId || null,
+    }));
+
+    // Create new plan items
+    const createdItems = await prisma.eventPlanItem.createMany({
+      data: dataToCreate,
+    });
+
+    return NextResponse.json(createdItems, { status: 201 });
+  } catch (error) {
+    console.error("Error creating event plan item:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Failed to create event plan item" },
       { status: 500 }
     );
   }

@@ -26,6 +26,12 @@ model User {
 
 enum OrganizationPermission {
   ADMIN                     // Full control over the organization
+  
+  // General permissions
+  MANAGE                    // Can manage organization resources
+  EDIT                      // Can edit organization resources
+  VIEW                      // Can view organization resources
+  
   // Library permissions
   ADMIN_LIBRARY             // Full control over the library
   MANAGE_LIBRARY            // Can create, edit, delete any library content
@@ -33,14 +39,14 @@ enum OrganizationPermission {
   VIEW_LIBRARY              // Can view library content
 
   // Event permissions
-  ADMIN_EVENT_BLUEPRINTS    // Full control over the event blueprint
-  MANAGE_EVENT_BLUEPRINTS   // Can create, edit, delete any events
-  EDIT_EVENT_BLUEPRINTS     // Can edit existing events
-  VIEW_EVENT_BLUEPRINTS     // Can view events
+  ADMIN_EVENT_COURSES    // Full control over the event course
+  MANAGE_EVENT_COURSES   // Can create, edit, delete any events
+  EDIT_EVENT_COURSES     // Can edit existing events
+  VIEW_EVENT_COURSES     // Can view events
 }
 
-enum EventBlueprintRole {
-  ADMIN            // Full control over the event blueprint (+add new members, assign roles)
+enum CourseRole {
+  ADMIN            // Full control over the event course (+add new members, assign roles)
   MANAGER          // Can create, edit, delete any events
   EDITOR           // Can edit event details
   VIEWER           // Can view events
@@ -60,31 +66,14 @@ enum EventPlanItemType {
   COMMENT
 }
 
-model OrganizationRole {
-  id             String           @id @default(cuid())
-  name           String
-  description    String?
-  organizationId String
-  permissions    OrganizationPermission[]
-  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  members        OrganizationMember[]
-
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-
-  @@unique([organizationId, name])
-  @@index([organizationId])
-}
-
 model OrganizationMember {
   id             String           @id @default(cuid())
   userId         String
   organizationId String
-  roleId         String
+  permissions    OrganizationPermission[]
   user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  role           OrganizationRole @relation(fields: [roleId], references: [id])
-  blueprintRoles EventBlueprintMember[]
+  courseRoles    CourseMember[]
   eventRoles     EventMember[]
 
   createdAt      DateTime         @default(now())
@@ -93,7 +82,6 @@ model OrganizationMember {
   @@unique([userId, organizationId])
   @@index([organizationId])
   @@index([userId])
-  @@index([roleId])
 }
 
 model Organization {
@@ -107,8 +95,7 @@ model Organization {
   songs       Song[]
   games       Game[]
 
-  events      EventBlueprint[]
-  roles       OrganizationRole[]
+  events      EventCourse[]
   user        User                @relation(fields: [ownerId], references: [id])
   members     OrganizationMember[]
 
@@ -116,7 +103,7 @@ model Organization {
   updatedAt   DateTime            @updatedAt
 }
 
-model EventBlueprint {
+model EventCourse {
   id                String            @id @default(cuid())
   title             String
   description       String?           @db.Text
@@ -126,10 +113,10 @@ model EventBlueprint {
   startDate         DateTime          // Series start date
   endDate           DateTime?         // Optional series end date
 
-  events            Event[]           // All events in this blueprint
+  events            Event[]           // All events in this course
   defaultDuration   Int               // Duration in minutes
   location          String?
-  members           EventBlueprintMember[]
+  members           CourseMember[]
 
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
@@ -141,16 +128,16 @@ model EventBlueprint {
 
 model Event {
   id                String           @id @default(cuid())
-  title             String           // Can override blueprint title
-  description       String?          @db.Text // Can override blueprint description
+  title             String           // Can override course title
+  description       String?          @db.Text // Can override course description
   // Timings
   startTime         DateTime
   endTime           DateTime
-  location          String?          // Can override blueprint location
+  location          String?          // Can override course location
 
   organizationId    String
-  blueprintId       String?          // Optional reference to event blueprint
-  blueprint         EventBlueprint?  @relation(fields: [blueprintId], references: [id])
+  courseId          String?          // Optional reference to event course
+  course            EventCourse?     @relation(fields: [courseId], references: [id])
   isCancelled       Boolean          @default(false) // For cancelling individual occurrences
   members           EventMember[]
   eventPlanItems    EventPlanItem[]
@@ -159,7 +146,7 @@ model Event {
   updatedAt         DateTime         @updatedAt
 
   @@index([organizationId])
-  @@index([blueprintId])
+  @@index([courseId])
   @@index([startTime])
   @@index([endTime])
 }
@@ -199,19 +186,19 @@ model EventPlanItem {
   @@index([order])
 }
 
-model EventBlueprintMember {
+model CourseMember {
   id                   String             @id @default(cuid())
-  blueprintId          String
+  courseId             String
   organizationMemberId String
-  role                 EventBlueprintRole
-  blueprint            EventBlueprint     @relation(fields: [blueprintId], references: [id], onDelete: Cascade)
+  role                 CourseRole
+  course               EventCourse        @relation(fields: [courseId], references: [id], onDelete: Cascade)
   organizationMember   OrganizationMember @relation(fields: [organizationMemberId], references: [id], onDelete: Cascade)
 
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
 
-  @@unique([blueprintId, organizationMemberId])
-  @@index([blueprintId])
+  @@unique([courseId, organizationMemberId])
+  @@index([courseId])
   @@index([organizationMemberId])
 }
 

@@ -4,9 +4,9 @@ import React, { useEffect, useState } from 'react'
 import { Link } from '@/i18n/routing';
 import { useOrganization } from '@/components/contexts/OrganizationContext';
 
-import { IconClose, IconDashboard, IconHome, IconLibrary, IconProfile, IconBurger } from '@/res/icons'
+import { IconClose, IconDashboard, IconHome, IconLibrary, IconProfile, IconBurger, IconCompass } from '@/res/icons'
 import LogoutBtn from '../../client/LogoutBtn'
-import { ROUTE_DASHBOARD, ROUTE_DASHBOARD_LIBRARY, ROUTE_DASHBOARD_ORGANIZATIONS, ROUTE_SETTINGS } from '@/res/routes'
+import { ROUTE_DASHBOARD, ROUTE_DASHBOARD_COURSES, ROUTE_DASHBOARD_LIBRARY, ROUTE_DASHBOARD_ORGANIZATIONS, ROUTE_SETTINGS } from '@/res/routes'
 import OrganizationSwitcher from './OrganizationSwitcher';
 import OrganizationIcon from './OrganizationIcon';
 
@@ -18,9 +18,9 @@ const Sidebar = ({ children }: IProps) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const { selectedOrganization } = useOrganization();
 
-  useEffect(() => {
+  // useEffect(() => {
     
-  }, [isExpanded])
+  // }, [isExpanded])
 
   return (
     <div className="flex h-screen w-screen bg-gray-100">
@@ -55,18 +55,18 @@ const Sidebar = ({ children }: IProps) => {
                   : <LinkItem 
                       href={ROUTE_DASHBOARD_ORGANIZATIONS} 
                       text={selectedOrganization?.name || ''} 
-                      icon={() => <OrganizationIcon name={selectedOrganization?.name || ''} />} 
+                      icon={() => <OrganizationIcon name={selectedOrganization?.name || ''} />}
                       isExpanded={isExpanded}
                       setIsExpanded={setIsExpanded} 
                     />
                 }
-                
               </div>
               <LinkItem href='/' text='Home' icon={IconHome} isExpanded={isExpanded} />
               {/* <div className={`text-gray-300 my-5 ${!isExpanded && 'md:hidden'}`}>Organization</div> */}
               <nav className="flex flex-col flex-1 gap-2">
                 <LinkItem href={ROUTE_DASHBOARD} text='Dashboard' icon={IconDashboard} isExpanded={isExpanded} setIsExpanded={setIsExpanded} />
                 <LinkItem href={ROUTE_DASHBOARD_LIBRARY} text='Library' icon={IconLibrary} isExpanded={isExpanded} setIsExpanded={setIsExpanded} />
+                <LinkItem href={ROUTE_DASHBOARD_COURSES} text='Courses' icon={IconCompass} isExpanded={isExpanded} setIsExpanded={setIsExpanded} />
                 <LinkItem href={ROUTE_SETTINGS} text='Profile' icon={IconProfile} isExpanded={isExpanded} setIsExpanded={setIsExpanded} />
               </nav>
             </div>
@@ -110,16 +110,18 @@ const LinkItem = ({ href, text, icon: Icon, isExpanded = true, setIsExpanded }: 
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 840);
     };
-    
+
     // Initial check
     checkMobile();
 
     // Add resize listener
     window.addEventListener('resize', checkMobile);
-    
+
     // Cleanup
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
@@ -135,7 +137,7 @@ const LinkItem = ({ href, text, icon: Icon, isExpanded = true, setIsExpanded }: 
     <Link
       href={href}
       className="flex items-center gap-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded-lg p-2 transition-colors"
-      onClick={onClick}
+      // onClick={onClick}
     >
       <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
         <Icon className="w-full h-full" />

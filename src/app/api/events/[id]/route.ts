@@ -54,15 +54,15 @@ export async function PUT(
     const event = await prisma.event.findUnique({
       where: { id },
       include: {
-        members: {
-          include: {
-            organizationMember: {
-              include: {
-                user: true,
-              },
-            },
-          },
-        },
+        // members: {
+        //   include: {
+        //     organizationMember: {
+        //       include: {
+        //         user: true,
+        //       },
+        //     },
+        //   },
+        // },
         eventPlanItems: true,
       },
     });
@@ -75,16 +75,16 @@ export async function PUT(
     }
 
     // Check if user is a member of the event
-    const isMember = event.members.some(
-      (member) => member.organizationMember.user.email === session.user.email
-    );
+    // const isMember = event.members.some(
+    //   (member) => member.organizationMember.user.email === session.user.email
+    // );
 
-    if (!isMember) {
-      return NextResponse.json(
-        { error: "No access to this event" },
-        { status: 403 }
-      );
-    }
+    // if (!isMember) {
+    //   return NextResponse.json(
+    //     { error: "No access to this event" },
+    //     { status: 403 }
+    //   );
+    // }
 
     // Update event and handle plan items if provided
     const updateData: any = {
@@ -134,22 +134,22 @@ export async function PUT(
       where: { id },
       data: updateData,
       include: {
-        blueprint: true,
-        members: {
-          include: {
-            organizationMember: {
-              include: {
-                user: {
-                  select: {
-                    id: true,
-                    name: true,
-                    email: true,
-                  },
-                },
-              },
-            },
-          },
-        },
+        course: true,
+        // members: {
+        //   include: {
+        //     organizationMember: {
+        //       include: {
+        //         user: {
+        //           select: {
+        //             id: true,
+        //             name: true,
+        //             email: true,
+        //           },
+        //         },
+        //       },
+        //     },
+        //   },
+        // },
         eventPlanItems: {
           include: {
             song: true,
@@ -193,15 +193,15 @@ export async function DELETE(
     const event = await prisma.event.findUnique({
       where: { id },
       include: {
-        members: {
-          include: {
-            organizationMember: {
-              include: {
-                user: true,
-              },
-            },
-          },
-        },
+        // members: {
+        //   include: {
+        //     organizationMember: {
+        //       include: {
+        //         user: true,
+        //       },
+        //     },
+        //   },
+        // },
       },
     });
 
@@ -213,18 +213,18 @@ export async function DELETE(
     }
 
     // Check if user is an admin member of the event
-    const userMembership = event.members.find(
-      (member) =>
-        member.organizationMember.user.email === session.user.email &&
-        member.role === "ADMIN"
-    );
+    // const userMembership = event.members.find(
+    //   (member) =>
+    //     member.organizationMember.user.email === session.user.email &&
+    //     member.role === "ADMIN"
+    // );
 
-    if (!userMembership) {
-      return NextResponse.json(
-        { error: "No permission to delete this event" },
-        { status: 403 }
-      );
-    }
+    // if (!userMembership) {
+    //   return NextResponse.json(
+    //     { error: "No permission to delete this event" },
+    //     { status: 403 }
+    //   );
+    // }
 
     await prisma.event.delete({
       where: { id },

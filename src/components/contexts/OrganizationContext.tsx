@@ -31,23 +31,30 @@ const OrganizationContext = createContext<OrganizationContextType | undefined>(u
 interface IProps {
   children: React.ReactNode;
   organizations: Organization[];
+  // Cookies received gtom the server side
+  cookieSelectedOrganizationId?: string
 }
 
-export function OrganizationProvider({ children, organizations: orgs }: IProps) {
+export function OrganizationProvider({ children, organizations: orgs, cookieSelectedOrganizationId }: IProps) {
   const [organizations, setOrganizations] = useState<Organization[]>(orgs);
   
   const router = useRouter()
 
   const getCookieOrg = (): Organization | null => {
-    if (typeof document === 'undefined') return null;
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; selectedOrganizationId=`);
-    if (parts.length === 2) {
-      const orgId = parts.pop()?.split(';').shift();
-      const org = orgs.find((org: Organization) => org.id === orgId);
+    if (cookieSelectedOrganizationId) {
+      const org = orgs.find((org: Organization) => org.id === cookieSelectedOrganizationId);
       return org || null;
+    } else {
+      if (typeof document === 'undefined') return null;
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; selectedOrganizationId=`);
+      if (parts.length === 2) {
+        const orgId = parts.pop()?.split(';').shift();
+        const org = orgs.find((org: Organization) => org.id === orgId);
+        return org || null;
+      }
+      return null;
     }
-    return null;
   };
 
   const getDefaultOrg = (): Organization | null => {

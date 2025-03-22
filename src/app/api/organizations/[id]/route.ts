@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from "next-auth/next"
 import prisma from '@/lib/prisma';
 import { authOptions } from '@/lib/auth';
+import { AsyncIdParam } from '@/types/Params';
 
 // PUT /api/organizations/[id]
 export async function PUT(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: AsyncIdParam }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -38,7 +39,7 @@ export async function PUT(
 // PATCH /api/organizations/[id]
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: AsyncIdParam }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -71,7 +72,7 @@ export async function PATCH(
 // DELETE /api/organizations/[id]
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: AsyncIdParam }
 ) {
   try {
     const session = await getServerSession(authOptions);

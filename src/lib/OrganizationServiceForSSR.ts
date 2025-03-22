@@ -28,11 +28,17 @@ class OrganizationServiceForSSR {
     const cookieStore = await cookies();
     const selectedOrgId = cookieStore.get('selectedOrganizationId')?.value;
 
-    const organization = await prisma.organization.findFirst({
+    let organization = await prisma.organization.findFirst({
       where: selectedOrgId 
         ? { id: selectedOrgId, ownerId }
         : { ownerId, isDefault: true },
     });
+
+    if (!organization && selectedOrgId) {
+      organization = await prisma.organization.findFirst({
+        where: { ownerId, isDefault: true }
+      });
+    }
 
     return organization;
   }

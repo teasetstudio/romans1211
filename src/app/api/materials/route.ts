@@ -2,6 +2,48 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession, Session } from 'next-auth';
 import prisma from '@/lib/prisma';
 import { authOptions } from '@/lib/auth';
+import { materialService } from '@/lib/MaterialServiceForSSR';
+
+// GET /api/materials
+export async function GET(req: NextRequest) {
+  try {
+    const session: Session | null = await getServerSession(authOptions);
+
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Get search parameters from URL
+    const searchParams = req.nextUrl.searchParams;
+    const type = searchParams.get('type');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '20');
+    const searchTerm = searchParams.get('searchTerm');
+    const tags = searchParams.getAll('tags');
+    const isPublic = searchParams.get('isPublic') === 'true' ? true : 
+                     searchParams.get('isPublic') === 'false' ? false : null;
+    const organizationId = searchParams.get('organizationId');
+    const originalOnly = searchParams.get('originalOnly') === 'true';
+
+    // Get materials using the service
+    const result = await materialService.findInCatalog({
+      type: type || undefined,
+      page,
+      limit,
+      searchTerm: searchTerm || undefined,
+      tags: tags.length > 0 ? tags : undefined,
+      isPublic,
+      organizationId: organizationId || undefined,
+      ownerId: session.user.id,
+      originalOnly,
+    });
+
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error('Error fetching materials:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
 
 // POST /api/materials
 export async function POST(req: NextRequest) {

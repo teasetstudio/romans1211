@@ -22,6 +22,7 @@
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.4",
     "@headlessui/react": "^2.2.0",
+    "@hello-pangea/dnd": "^18.0.1",
     "@hookform/resolvers": "^3.9.1",
     "@prisma/client": "^6.0.1",
     "@radix-ui/react-popover": "^1.0.7",
@@ -36,6 +37,9 @@
     "@types/bcryptjs": "^2.4.6",
     "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "joi": "^17.13.3",
     "next": "15.0.4",
     "next-auth": "^4.24.11",
@@ -49,6 +53,7 @@
     "resend": "^4.0.1",
     "sharp": "^0.33.5",
     "tailwind-merge": "^2.6.0",
+    "tailwindcss-animate": "^1.0.7",
     "yup": "^1.5.0",
     "zod": "^3.24.2"
   },

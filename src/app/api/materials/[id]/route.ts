@@ -3,11 +3,12 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { materialApiService } from '@/lib/MaterialServiceForAPI';
 import { apiTagService } from '@/lib/TagServiceForAPI';
+import { AsyncIdParam } from '@/types/Params';
 
 // PUT /api/materials/[id]
 export async function PUT(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: AsyncIdParam }
 ) {
   try {
     const session = await getServerSession(authOptions);

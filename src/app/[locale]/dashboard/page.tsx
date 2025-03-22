@@ -12,10 +12,10 @@ import { DailyVerse } from "./components/DailyVerse";
 export default async function Dashboard() {
   const session = await getSession();
   if (!session?.user?.id) return null;
-
+  
   // Get default organization
   const organization = await organizationService.getSelectedOrganization(session.user.id);
-
+  
   if (!organization) return null;
 
   const songsCount = await prisma.song.count({ where: { organizationId: organization.id, originalId: null }});

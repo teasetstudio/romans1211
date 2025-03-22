@@ -12,7 +12,7 @@ const createEventSchema = z.object({
   endTime: z.string().transform((str) => new Date(str)),
   location: z.string().optional(),
   organizationId: z.string(),
-  blueprintId: z.string().optional(),
+  courseId: z.string().optional(),
   eventPlanItems: z
     .array(
       z.object({
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const organizationId = searchParams.get("organizationId");
     const eventId = searchParams.get("id");
-    const blueprintId = searchParams.get("blueprintId");
+    const courseId = searchParams.get("courseId");
     const startFrom = searchParams.get("startFrom");
     const startTo = searchParams.get("startTo");
 
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
       const event = await prisma.event.findUnique({
         where: { id: eventId },
         include: {
-          blueprint: true,
+          course: true,
           members: {
             include: {
               organizationMember: {
@@ -102,8 +102,8 @@ export async function GET(request: NextRequest) {
 
     const where: any = { organizationId };
     
-    if (blueprintId) {
-      where.blueprintId = blueprintId;
+    if (courseId) {
+      where.courseId = courseId;
     }
 
     if (startFrom || startTo) {
@@ -119,7 +119,7 @@ export async function GET(request: NextRequest) {
     const events = await prisma.event.findMany({
       where,
       include: {
-        blueprint: true,
+        course: true,
         members: {
           include: {
             organizationMember: {
@@ -167,6 +167,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const userId = session.user.id;
+
     const json = await request.json();
     const validatedData = createEventSchema.parse(json);
 
@@ -174,11 +176,16 @@ export async function POST(request: NextRequest) {
     const userMembership = await prisma.organizationMember.findFirst({
       where: {
         organizationId: validatedData.organizationId,
-        user: { email: session.user.email },
+        user: { id: userId },
       },
     });
 
-    if (!userMembership) {
+    // check if user is the owner of the organization
+    const organization = await prisma.organization.findUnique({
+      where: { id: validatedData.organizationId, ownerId: userId },
+    });
+
+    if (!userMembership && !organization) {
       return NextResponse.json(
         { error: "No access to this organization" },
         { status: 403 }
@@ -194,13 +201,13 @@ export async function POST(request: NextRequest) {
         endTime: validatedData.endTime,
         location: validatedData.location,
         organizationId: validatedData.organizationId,
-        blueprintId: validatedData.blueprintId,
-        members: {
-          create: {
-            organizationMemberId: userMembership.id,
-            role: "ADMIN",
-          },
-        },
+        courseId: validatedData.courseId,
+        // members: {
+        //   create: {
+        //     organizationMemberId: userMembership.id,
+        //     role: "ADMIN",
+        //   },
+        // },
         eventPlanItems: validatedData.eventPlanItems
           ? {
               create: validatedData.eventPlanItems,
@@ -208,22 +215,22 @@ export async function POST(request: NextRequest) {
           : undefined,
       },
       include: {
-        blueprint: true,
-        members: {
-          include: {
-            organizationMember: {
-              include: {
-                user: {
-                  select: {
-                    id: true,
-                    name: true,
-                    email: true,
-                  },
-                },
-              },
-            },
-          },
-        },
+        course: true,
+        // members: {
+        //   include: {
+        //     organizationMember: {
+        //       include: {
+        //         user: {
+        //           select: {
+        //             id: true,
+        //             name: true,
+        //             email: true,
+        //           },
+        //         },
+        //       },
+        //     },
+        //   },
+        // },
         eventPlanItems: {
           include: {
             song: true,

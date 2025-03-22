@@ -12,7 +12,7 @@ interface IBasicProps {
   maxLength?: number
   btnLabel?: string
   onClick?(): void
-  type?: 'text' | 'password'
+  type?: 'text' | 'password' | 'number'
 }
 
 interface IPropsWithoutBtn extends IBasicProps {
