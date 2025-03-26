@@ -5,7 +5,7 @@ import { Event } from "@prisma/client";
 import { format } from "date-fns";
 import Button from "@/components/buttons/Button";
 import { Text } from "@/components/typo/Text";
-import { IconEdit, IconTrash } from "@tabler/icons-react";
+import { IconTrash } from "@tabler/icons-react";
 import { NAMESPACE_DASHBOARD_COURSES } from "@/res/namespaces";
 
 interface EventListProps {
@@ -71,29 +71,21 @@ export function EventList({ events, onDelete, onEdit }: EventListProps) {
                 </span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <div className="flex justify-end gap-2">
-                  <Button
-                    bgColor="bg-transparent"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onEdit(event.id);
-                    }}
-                  >
-                    <IconEdit size={20} />
-                  </Button>
-                  <Button
-                    bgColor="bg-transparent"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDelete(event.id);
-                    }}
-                  >
-                    <IconTrash size={20} />
-                  </Button>
-                </div>
-              </td>
+                  <div className="flex justify-center">
+                    <Button
+                      bgColor="bg-transparent"
+                      size="sm"
+                      paddingClass="p-1"
+                      className="text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-full w-10 h-10 flex items-center justify-center transition-all !min-w-0"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete(event.id);
+                      }}
+                    >
+                      <IconTrash size={20} />
+                    </Button>
+                  </div>
+                </td>
             </tr>
           ))}
         </tbody>

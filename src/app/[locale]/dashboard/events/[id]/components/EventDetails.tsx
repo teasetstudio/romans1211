@@ -111,6 +111,9 @@ export default function EventDetails({ event: initialEvent }: EventDetailsProps)
                     </span>
                   )}
                 </div>
+                {event.description && (
+                  <p className="mt-1 text-sm text-gray-600 line-clamp-1">{event.description}</p>
+                )}
                 <div className="mt-1 flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-gray-500">
                   <div className="flex items-center gap-1">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -134,21 +137,20 @@ export default function EventDetails({ event: initialEvent }: EventDetailsProps)
                     </div>
                   )}
                 </div>
-                {event.description && (
-                  <p className="mt-1 text-sm text-gray-600 line-clamp-1">{event.description}</p>
-                )}
               </div>
               <div className="flex shrink-0 gap-2 self-start sm:self-center">
                 <Button
                   onClick={() => setIsEditing(true)}
-                  className="inline-flex items-center text-gray-700 hover:text-primary px-3 py-1 rounded-md transition-colors gap-1.5 text-sm border border-transparent hover:border-primary"
+                  paddingClass="py-3 px-4"
+                  className="inline-flex items-center text-gray-700 hover:text-primary rounded-md transition-colors gap-1.5 text-sm border border-transparent hover:border-primary"
                 >
                   <IconEdit className="w-4 h-4" />
                   <span>{t("edit")}</span>
                 </Button>
                 <Button
                   onClick={handleDelete}
-                  className="inline-flex items-center text-gray-700 hover:text-red-600 px-3 py-1 rounded-md transition-colors gap-1.5 text-sm border border-transparent hover:border-red-600"
+                  paddingClass="py-3 px-4"
+                  className="inline-flex items-center text-gray-700 hover:text-red-600 rounded-md transition-colors gap-1.5 text-sm border border-transparent hover:border-red-600"
                   disabled={isDeleting}
                 >
                   <IconTrash className="w-4 h-4" />

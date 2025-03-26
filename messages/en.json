@@ -268,8 +268,9 @@
       "endTime": "End Time",
       "status": "Status"
     },
-    "createDialog": {
-      "title": "Create Event Blueprint",
+    "courseDialog": {
+      "createTitle": "Create Course",
+      "editTitle": "Edit Course",
       "fields": {
         "title": "Title",
         "description": "Description",
@@ -278,21 +279,9 @@
         "endDate": "End Date",
         "defaultDuration": "Default Duration (minutes)"
       },
+      "save": "Save",
       "cancel": "Cancel",
       "create": "Create"
-    },
-    "editDialog": {
-      "title": "Edit Event Blueprint",
-      "fields": {
-        "title": "Title",
-        "description": "Description",
-        "location": "Location",
-        "startDate": "Start Date",
-        "endDate": "End Date",
-        "defaultDuration": "Default Duration (minutes)"
-      },
-      "cancel": "Cancel",
-      "save": "Save"
     },
     "fields": {
       "title": "Title",
@@ -350,7 +339,8 @@
       "cancel": "Cancel",
       "create": "Create",
       "created": "Event created successfully",
-      "save": "Save"
+      "save": "Save",
+      "updated": "Event updated successfully"
     }
   },
   "NotFound": {

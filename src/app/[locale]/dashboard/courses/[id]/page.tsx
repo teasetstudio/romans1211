@@ -29,7 +29,8 @@ export default async function CoursePage({ params }: EventCoursePageProps) {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div>
+    {/* <div className="container mx-auto px-4 py-8"> */}
       <CourseDetails course={course} />
     </div>
   );

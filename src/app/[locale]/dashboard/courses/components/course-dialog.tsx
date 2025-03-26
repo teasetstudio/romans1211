@@ -40,7 +40,7 @@ export function CourseDialog({
   course,
   mode,
 }: CourseDialogProps) {
-  const t = useTranslations(`${NAMESPACE_DASHBOARD_COURSES}.${mode === 'create' ? 'createDialog' : 'editDialog'}`);
+  const t = useTranslations(`${NAMESPACE_DASHBOARD_COURSES}.courseDialog`);
   const methods = useForm<CourseFormData>({
     resolver: zodResolver(courseSchema),
     defaultValues: mode === 'edit' && course ? {
@@ -100,13 +100,13 @@ export function CourseDialog({
     <Dialog open={open} onClose={() => onOpenChange(false)} className="relative z-50">
       <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="mx-auto max-w-sm rounded-lg bg-white p-6 shadow-xl">
-          <DialogTitle className="text-lg font-medium leading-6 text-gray-900 mb-4">
-            {t("title")}
+        <DialogPanel className="mx-auto w-full max-w-2xl rounded-xl bg-white p-8 shadow-xl">
+          <DialogTitle className="text-2xl font-semibold leading-7 text-gray-900 mb-6">
+            {t(mode === 'create' ? 'createTitle' : 'editTitle')}
           </DialogTitle>
 
           <FormProvider {...methods}>
-            <form onSubmit={methods.handleSubmit(handleSubmit)} className="space-y-4">
+            <form onSubmit={methods.handleSubmit(handleSubmit)} className="space-y-6">
               <Input
                 name="title"
                 placeholder={t("fields.title")}
@@ -142,13 +142,18 @@ export function CourseDialog({
                 max={1440}
               />
 
-              <div className="flex justify-end gap-2">
+              <div className="flex justify-end gap-3 pt-2">
                 <Button
                   onClick={() => onOpenChange(false)}
+                  paddingClass="px-6 py-2.5"
                 >
                   {t("cancel")}
                 </Button>
-                <Button type="submit">
+                <Button 
+                  type="submit"
+                  paddingClass="px-6 py-2.5"
+                  className="bg-primary hover:bg-primary/90 text-white font-medium"
+                >
                   {mode === 'create' ? t("create") : t("save")}
                 </Button>
               </div>

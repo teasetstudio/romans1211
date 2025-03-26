@@ -128,7 +128,8 @@ const CoursesHeader = ({ setIsCreateDialogOpen, className = "" }: IProps) => {
       </div>
       <Button
         onClick={() => setIsCreateDialogOpen(true)}
-        className="flex items-center gap-2 border border-primary text-primary hover:bg-primary/10 px-3 py-2 transition-colors"
+        paddingClass="px-3 py-2"
+        className="flex items-center gap-2 border border-primary text-primary hover:bg-primary/10 transition-colors"
       >
         <IconPlus size={20} />
         {t("create")}
