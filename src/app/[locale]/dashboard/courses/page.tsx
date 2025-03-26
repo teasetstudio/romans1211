@@ -49,17 +49,21 @@ export default function CoursesPage() {
     setIsCreateDialogOpen(false);
   };
 
-  const handleDeleteCourses = async (courseId: string) => {
+  const handleDeleteCourses = async (courseId: string, force?: boolean) => {
     try {
-      const response = await fetch(`/api/courses/${courseId}`, {
+      const response = await fetch(`/api/courses/${courseId}${force ? '?force=true' : ''}`, {
         method: "DELETE",
       });
-      if (!response.ok) throw new Error("Failed to delete course");
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to delete course");
+      }
       setCourses((prev) =>
         prev.filter((course) => course.id !== courseId)
       );
     } catch (error) {
       console.error("Error deleting course:", error);
+      // You might want to show an error toast here
     }
   };
 
@@ -84,7 +88,10 @@ export default function CoursesPage() {
       ) : courses.length === 0 ? (
         <div className="flex h-64 flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed">
           <Text className="text-muted-foreground">{t("noCourses")}</Text>
-          <Button onClick={() => setIsCreateDialogOpen(true)} className="px-6 py-2">
+          <Button 
+            onClick={() => setIsCreateDialogOpen(true)} 
+            className="px-8 py-3 bg-primary hover:bg-primary/90 text-white font-medium shadow-sm hover:shadow-md transition-all"
+          >
             {t("createFirstCourse")}
           </Button>
         </div>
@@ -121,7 +128,7 @@ const CoursesHeader = ({ setIsCreateDialogOpen, className = "" }: IProps) => {
       </div>
       <Button
         onClick={() => setIsCreateDialogOpen(true)}
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 border border-primary text-primary hover:bg-primary/10 px-3 py-2 transition-colors"
       >
         <IconPlus size={20} />
         {t("create")}

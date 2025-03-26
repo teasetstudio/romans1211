@@ -448,72 +448,58 @@ const EventPlanItems = ({ event }: IProps) => {
   };
 
   return (
-    <div>
-      {/* Filter UI Component */}
-      <EventPlanItemsFilter
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        selectedType={selectedType}
-        setSelectedType={setSelectedType}
-        selectedTags={selectedTags}
-        setSelectedTags={setSelectedTags}
-        originalOnly={originalOnly}
-        setOriginalOnly={setOriginalOnly}
-        allTags={allTags}
-        organizationId={event.organizationId}
-      />
+    <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 mt-2">
+      {/* Header Menu */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        {/* Filter Column */}
+        <div className="bg-white rounded-lg shadow-sm p-3">
+          <EventPlanItemsFilter
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            selectedType={selectedType}
+            setSelectedType={setSelectedType}
+            selectedTags={selectedTags}
+            setSelectedTags={setSelectedTags}
+            originalOnly={originalOnly}
+            setOriginalOnly={setOriginalOnly}
+            allTags={allTags}
+            organizationId={event.organizationId}
+          />
+        </div>
 
-      {/* Add Custom Item Button */}
-      <div className="mb-6 flex justify-center">
-        <button
-          onClick={() => setShowCustomItemModal(true)}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-        >
-          + Add Custom Item
-        </button>
+        {/* Add Custom Item Column */}
+        <div className="bg-white rounded-lg shadow-sm p-3 flex items-center">
+          <button
+            onClick={() => setShowCustomItemModal(true)}
+            className="w-full px-4 py-2 text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-lg hover:bg-indigo-100 hover:border-indigo-200 transition-all duration-200 text-sm font-medium"
+          >
+            + Add Custom Item
+          </button>
+        </div>
       </div>
 
-      {/* Custom Item Modal */}
-      <CustomItemModal
-        isOpen={showCustomItemModal}
-        onClose={() => {
-          setShowCustomItemModal(false);
-          setEditingItemId(null);
-        }}
-        onSave={saveCustomItem}
-        onDelete={deleteCustomItem}
-        editingItem={editingItemId ? columns.planItems.find(item => item.id === editingItemId) || null : null}
-        isEditing={!!editingItemId}
-      />
-
+      {/* Main Content */}
       <DragDropContext 
         onDragStart={onDragStart} 
         onDragUpdate={onDragUpdate}
         onDragEnd={onDragEnd}
       >
-        <div style={{ display: "flex", gap: "20px", justifyContent: "center" }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* MATERIALS */}
-          <Droppable 
-            droppableId="materials"
-            isDropDisabled={false}
-          >
+          <div className="bg-white rounded-lg shadow-sm p-3">
+            <h3 className="text-lg font-medium mb-3">Available Materials</h3>
+            <Droppable 
+              droppableId="materials"
+              isDropDisabled={false}
+            >
               {(provided, snapshot) => (
                 <div
                   ref={provided.innerRef}
                   {...provided.droppableProps}
-                  style={{
-                    width: "200px",
-                    minHeight: "300px",
-                    padding: "10px",
-                    background: "#f0f0f0",
-                    borderRadius: "8px",
-                    border: isDraggingRightToLeft && snapshot.isDraggingOver ?
-                      "2px dashed #ff6b6b" : "2px solid transparent",
-                  }}
+                  className="min-h-[400px]"
                 >
-                  <h3>Available Materials:</h3>
                   {isLoading ? (
-                    <div className="flex items-center justify-center h-full">
+                    <div className="flex items-center justify-center h-[400px]">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
                     </div>
                   ) : (
@@ -530,42 +516,51 @@ const EventPlanItems = ({ event }: IProps) => {
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...(!usedMaterials.has(item.id) && provided.dragHandleProps)}
+                              className={`p-2 mb-2 rounded-lg border ${
+                                item.type === 'song' 
+                                  ? 'bg-purple-50 border-purple-100 hover:border-purple-200' 
+                                  : item.type === 'text'
+                                  ? 'bg-blue-50 border-blue-100 hover:border-blue-200'
+                                  : 'bg-green-50 border-green-100 hover:border-green-200'
+                              } ${
+                                usedMaterials.has(item.id) ? 'opacity-50' : ''
+                              }`}
                               style={{
-                                padding: "10px",
-                                margin: "5px 0",
                                 background: hoveredMaterialId === item.id && isDraggingRightToLeft
-                                  ? "#ffebeb" // Light red highlight when hovered
-                                  : "white",
-                                borderRadius: "4px",
-                                boxShadow: hoveredMaterialId === item.id && isDraggingRightToLeft
-                                  ? "0 0 0 2px #ff6b6b" // Red border when hovered
-                                  : "0 2px 5px rgba(0,0,0,0.2)",
-                                opacity: usedMaterials.has(item.id) ? 0.5 : 1,
+                                  ? "#ffebeb"
+                                  : undefined,
                                 ...(isDraggingRightToLeft ? {} : provided.draggableProps.style),
                               }}
                             >
-                              {item.title}
-                              {usedMaterials.has(item.id) && (
-                                <span style={{
-                                  marginLeft: "8px",
-                                  color: "green",
-                                  fontSize: "12px"
-                                }}>
-                                  ✓ Used
-                                </span>
-                              )}
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <span className={`text-sm font-medium ${
+                                    item.type === 'song' 
+                                      ? 'text-purple-900' 
+                                      : item.type === 'text'
+                                      ? 'text-blue-900'
+                                      : 'text-green-900'
+                                  }`}>{item.title}</span>
+                                  <div className={`text-xs mt-0.5 ${
+                                    item.type === 'song' 
+                                      ? 'text-purple-600' 
+                                      : item.type === 'text'
+                                      ? 'text-blue-600'
+                                      : 'text-green-600'
+                                  }`}>
+                                    {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
+                                  </div>
+                                </div>
+                                {usedMaterials.has(item.id) && (
+                                  <span className="text-xs font-medium text-green-600 bg-green-100 px-2 py-0.5 rounded">
+                                    Used
+                                  </span>
+                                )}
+                              </div>
                             </div>
-                            {snapshot.isDragging && isDraggingFromRight &&  (
+                            {snapshot.isDragging && isDraggingFromRight && (
                               <div
-                                style={{
-                                  width: "100%",
-                                  height: "100%",
-                                  background: "white",
-                                  borderRadius: "4px",
-                                  boxShadow: "0 0 10px rgba(0,0,0,0.2)",
-                                  opacity: 1,
-                                  pointerEvents: "none",
-                                }}
+                                className="bg-gray-100 rounded-lg pointer-events-none p-2 mb-2"
                               >
                                 {item.title}
                               </div>
@@ -579,22 +574,18 @@ const EventPlanItems = ({ event }: IProps) => {
                 </div>
               )}
             </Droppable>
+          </div>
 
-            {/* PLAN ITEMS */}
+          {/* PLAN ITEMS */}
+          <div className="bg-white rounded-lg shadow-sm p-3">
+            <h3 className="text-lg font-medium mb-3">Event Plan</h3>
             <Droppable droppableId="planItems">
               {(provided) => (
                 <div
                   ref={provided.innerRef}
                   {...provided.droppableProps}
-                  style={{
-                    width: "300px", // Wider to accommodate HTML content
-                    minHeight: "300px",
-                    padding: "10px",
-                    background: "#f0f0f0",
-                    borderRadius: "8px",
-                  }}
+                  className="min-h-[400px]"
                 >
-                  <h3>Event Plan:</h3>
                   {columns.planItems.map((item, index) => (
                     <Draggable
                       key={`${item.id}-${index}`}
@@ -606,28 +597,38 @@ const EventPlanItems = ({ event }: IProps) => {
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
-                          style={{
-                            padding: "10px",
-                            margin: "5px 0",
-                            background: item.type === "CUSTOM" ? "#e6f7ff" : "white",
-                            borderRadius: "4px",
-                            boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
-                            ...provided.draggableProps.style,
-                          }}
+                          className={`p-2 mb-2 rounded-lg border transition-all duration-200 ${
+                            item.type === "CUSTOM" 
+                              ? 'bg-amber-50 border-amber-100 hover:border-amber-200'
+                              : item.type === 'song'
+                              ? 'bg-purple-50 border-purple-100 hover:border-purple-200'
+                              : item.type === 'text'
+                              ? 'bg-blue-50 border-blue-100 hover:border-blue-200'
+                              : 'bg-green-50 border-green-100 hover:border-green-200'
+                          }`}
+                          style={provided.draggableProps.style}
                         >
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
-                              <div className="font-medium">{item.title}</div>
+                              <div className={`text-sm font-medium ${
+                                item.type === "CUSTOM"
+                                  ? 'text-amber-900'
+                                  : item.type === 'song'
+                                  ? 'text-purple-900'
+                                  : item.type === 'text'
+                                  ? 'text-blue-900'
+                                  : 'text-green-900'
+                              }`}>{item.title}</div>
                               {item.type === "CUSTOM" && item.description && (
                                 <div className="mt-1">
                                   <div 
-                                    className="flex items-center text-xs text-indigo-600 cursor-pointer mb-1 hover:text-indigo-800"
+                                    className="flex items-center text-xs text-amber-600 cursor-pointer hover:text-amber-800"
                                     onClick={(e) => toggleDescriptionExpansion(item.id, e)}
                                   >
                                     {expandedDescriptions.has(item.id) ? (
                                       <>
                                         <IconChevronUp size={14} className="mr-1" />
-                                        <span>Hide description</span>
+                                        <span>Show description</span>
                                       </>
                                     ) : (
                                       <>
@@ -639,14 +640,20 @@ const EventPlanItems = ({ event }: IProps) => {
                                   
                                   {expandedDescriptions.has(item.id) && (
                                     <div 
-                                      className="text-xs text-gray-600 max-h-40 overflow-y-auto p-2 bg-white rounded border border-gray-100"
+                                      className="mt-1.5 text-sm text-amber-800 max-h-40 overflow-y-auto p-2 bg-amber-100/50 rounded"
                                       dangerouslySetInnerHTML={{ __html: item.description || "" }}
                                     />
                                   )}
                                 </div>
                               )}
                               {item.type !== "CUSTOM" && (
-                                <div className="text-xs mt-1 text-gray-500">
+                                <div className={`text-xs mt-0.5 ${
+                                  item.type === 'song'
+                                    ? 'text-purple-600'
+                                    : item.type === 'text'
+                                    ? 'text-blue-600'
+                                    : 'text-green-600'
+                                }`}>
                                   {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
                                 </div>
                               )}
@@ -657,7 +664,7 @@ const EventPlanItems = ({ event }: IProps) => {
                                   e.stopPropagation();
                                   startEditingCustomItem(item);
                                 }}
-                                className="ml-2 p-1 text-indigo-600 hover:text-indigo-800 text-xs"
+                                className="text-xs font-medium text-amber-600 hover:text-amber-800 bg-amber-100 px-2 py-0.5 rounded"
                               >
                                 Edit
                               </button>
@@ -671,40 +678,51 @@ const EventPlanItems = ({ event }: IProps) => {
                 </div>
               )}
             </Droppable>
+          </div>
         </div>
       </DragDropContext>
 
+      {/* Custom Item Modal */}
+      <CustomItemModal
+        isOpen={showCustomItemModal}
+        onClose={() => {
+          setShowCustomItemModal(false);
+          setEditingItemId(null);
+        }}
+        onSave={saveCustomItem}
+        onDelete={deleteCustomItem}
+        editingItem={editingItemId ? columns.planItems.find(item => item.id === editingItemId) || null : null}
+        isEditing={!!editingItemId}
+      />
+
       {/* Add save button and status message */}
-      <div style={{ marginTop: "20px", textAlign: "center" }}>
+      {saveStatus && (
+        <div
+          className={`mt-3 p-2 rounded text-sm border text-center ${
+            saveStatus.isError 
+              ? "bg-red-50 text-red-700 border-red-200" 
+              : "bg-indigo-50 text-indigo-700 border-indigo-200"
+          }`}
+        >
+          {saveStatus.message}
+        </div>
+      )}
+
+      <div className="mt-4 text-center">
         <button
           onClick={handleSave}
           disabled={isSaving}
-          style={{
-            padding: "10px 20px",
-            backgroundColor: "#4CAF50",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor: isSaving ? "not-allowed" : "pointer",
-            opacity: isSaving ? 0.7 : 1,
-          }}
+          className="inline-flex items-center justify-center px-6 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 active:bg-indigo-800 shadow-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-indigo-600 min-w-[120px]"
         >
-          {isSaving ? "Saving..." : "Save Plan"}
+          {isSaving ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/20 border-t-white/100 mr-2"></div>
+              Saving...
+            </>
+          ) : (
+            "Save Plan"
+          )}
         </button>
-
-        {saveStatus && (
-          <div
-            style={{
-              marginTop: "10px",
-              padding: "10px",
-              borderRadius: "4px",
-              backgroundColor: saveStatus.isError ? "#ffebee" : "#e8f5e9",
-              color: saveStatus.isError ? "#c62828" : "#2e7d32",
-            }}
-          >
-            {saveStatus.message}
-          </div>
-        )}
       </div>
     </div>
   );

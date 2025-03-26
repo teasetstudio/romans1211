@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
 
     if (courseId) {
       // Get single event blueprint
-      const blueprint = await prisma.eventCourse.findUnique({
+      const course = await prisma.eventCourse.findUnique({
         where: { id: courseId },
         include: {
           events: true,
@@ -52,14 +52,14 @@ export async function GET(request: NextRequest) {
         },
       });
 
-      if (!blueprint) {
+      if (!course) {
         return NextResponse.json(
-          { error: "Blueprint not found" },
+          { error: "Course not found" },
           { status: 404 }
         );
       }
 
-      return NextResponse.json(blueprint);
+      return NextResponse.json(course);
     }
 
     // Get all blueprints for organization

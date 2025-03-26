@@ -108,14 +108,10 @@ const EventPlanItemsFilter = ({
   ];
 
   return (
-    <div className="mb-6 bg-white rounded-xl shadow-md overflow-hidden p-5 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+    <div className="flex flex-col space-y-4">
+      <div className="flex items-center gap-4">
         {/* Search Input */}
-        <div className="md:col-span-4 space-y-2">
-          <div className="flex items-center gap-2 mb-1">
-            <IconSearch size={16} className="text-indigo-500" />
-            <label className="text-sm font-medium text-gray-700">Search</label>
-          </div>
+        <div className="flex-1">
           <div className="relative">
             <input
               type="text"
@@ -128,22 +124,19 @@ const EventPlanItemsFilter = ({
                   e.currentTarget.blur();
                 }
               }}
-              className="block w-full pl-3 pr-3 py-2 border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+              className="block w-full pl-8 pr-3 py-1.5 border border-gray-200 rounded-lg bg-white focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
             />
+            <IconSearch size={16} className="text-gray-400 absolute left-2.5 top-1/2 transform -translate-y-1/2" />
           </div>
         </div>
 
-        {/* Material Type Selection - Now as a Select */}
-        <div className="md:col-span-3 space-y-2">
-          <div className="flex items-center gap-2 mb-1">
-            <IconAdjustments size={16} className="text-indigo-500" />
-            <label htmlFor="materialType" className="text-sm font-medium text-gray-700">Material Type</label>
-          </div>
+        {/* Material Type Selection */}
+        <div className="w-40">
           <select
             id="materialType"
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value as TMaterialType | "all")}
-            className="block w-full pl-3 pr-10 py-2 border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+            className="block w-full pl-3 pr-8 py-1.5 border border-gray-200 rounded-lg bg-white focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
           >
             {typeOptions.map(option => (
               <option key={option.value} value={option.value}>
@@ -152,123 +145,93 @@ const EventPlanItemsFilter = ({
             ))}
           </select>
         </div>
-        
-        {/* Tags Selection with Search Input */}
-        <div className="md:col-span-3 space-y-2">
-          <div className="flex items-center gap-2 mb-1">
-            <IconTag size={16} className="text-indigo-500" />
-            <label className="text-sm font-medium text-gray-700">Tags</label>
-            {selectedTags.length > 0 && (
-              <span className="text-xs bg-indigo-100 text-indigo-800 rounded-full px-2 py-0.5">
-                {selectedTags.length} selected
-              </span>
-            )}
-          </div>
-          
-          {/* Selected tags display */}
-          {selectedTags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-2">
-              {selectedTags.map(tag => (
-                <span 
-                  key={tag} 
-                  className="inline-flex items-center gap-1 px-2 py-1 bg-indigo-100 text-indigo-800 rounded-full text-xs font-medium"
-                >
-                  {tag}
-                  <button 
-                    onClick={() => removeTag(tag)}
-                    className="text-indigo-600 hover:text-indigo-800"
-                  >
-                    <IconX size={12} />
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
-          
-          {/* Tag search form */}
-          <div className="relative">
+
+        {/* Original Content Filter */}
+        <div className="flex items-center gap-2">
+          <label htmlFor="originalOnly" className="text-sm text-gray-600 cursor-pointer whitespace-nowrap">
+            Original only
+          </label>
+          <div className="relative inline-block w-8 align-middle select-none">
             <input
-              type="text"
-              placeholder="Search or add new tag..."
-              value={tagSearchQuery}
-              onChange={(e) => setTagSearchQuery(e.target.value)}
-              onFocus={() => setIsTagMenuOpen(true)}
-              onBlur={() => setTimeout(() => setIsTagMenuOpen(false), 200)}
-              className="block w-full pl-3 pr-10 py-2 border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+              type="checkbox"
+              name="originalOnly"
+              id="originalOnly"
+              checked={originalOnly}
+              onChange={(e) => setOriginalOnly(e.target.checked)}
+              className="opacity-0 absolute w-full h-full cursor-pointer peer"
             />
-            <button 
-              onClick={handleTagSubmit}
-              className="absolute inset-y-0 right-0 px-3 flex items-center text-indigo-600 hover:text-indigo-800"
-            >
-              {isLoadingTags ? (
-                <IconLoader2 size={16} className="animate-spin" />
-              ) : (
-                <IconCheck size={16} />
-              )}
-            </button>
+            <div className="w-8 h-4 bg-gray-300 rounded-full shadow-inner peer-checked:bg-indigo-500 transition-colors"></div>
+            <div className="absolute inset-y-0 left-0 w-4 h-4 bg-white rounded-full shadow transform transition-transform peer-checked:translate-x-4"></div>
           </div>
+        </div>
+      </div>
+      
+      {/* Tags Selection */}
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <input
+            type="text"
+            placeholder="Search or add tags..."
+            value={tagSearchQuery}
+            onChange={(e) => setTagSearchQuery(e.target.value)}
+            onFocus={() => setIsTagMenuOpen(true)}
+            onBlur={() => setTimeout(() => setIsTagMenuOpen(false), 200)}
+            className="block w-full pl-8 pr-3 py-1.5 border border-gray-200 rounded-lg bg-white focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+          />
+          <IconTag size={16} className="text-gray-400 absolute left-2.5 top-1/2 transform -translate-y-1/2" />
+          {isLoadingTags && (
+            <IconLoader2 size={16} className="absolute right-2.5 top-1/2 transform -translate-y-1/2 animate-spin text-indigo-500" />
+          )}
           
           {/* Tag suggestions */}
           {isTagMenuOpen && suggestedTags.length > 0 && (
-            <div className="absolute z-10 max-w-sm bg-white border border-gray-200 rounded-lg shadow-lg">
-              <div className="max-h-40 overflow-y-auto p-2">
-                {isLoadingTags && suggestedTags.length === 0 ? (
-                  <div className="flex justify-center items-center py-3">
-                    <IconLoader2 size={16} className="animate-spin text-indigo-500 mr-2" />
-                    <span className="text-sm text-gray-500">Loading tags...</span>
-                  </div>
-                ) : suggestedTags.length === 0 ? (
-                  <div className="text-center py-3 text-sm text-gray-500">
-                    No matching tags found
-                  </div>
-                ) : (
-                  suggestedTags.map((tag) => (
-                    <button
-                      key={tag}
-                      onClick={() => {
-                        if (selectedTags.includes(tag)) {
-                          setSelectedTags(selectedTags.filter(t => t !== tag));
-                        } else {
-                          setSelectedTags([...selectedTags, tag]);
-                          setTagSearchQuery("");
-                        }
-                      }}
-                      className={`w-full text-left px-3 py-2 text-sm rounded-md mb-1 transition-colors ${
-                        selectedTags.includes(tag)
-                          ? "bg-indigo-100 text-indigo-800" 
-                          : "hover:bg-gray-100"
-                      }`}
-                    >
-                      {tag}
-                    </button>
-                  ))
-                )}
+            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
+              <div className="max-h-32 overflow-y-auto p-1">
+                {suggestedTags.map((tag) => (
+                  <button
+                    key={tag}
+                    onClick={() => {
+                      if (selectedTags.includes(tag)) {
+                        setSelectedTags(selectedTags.filter(t => t !== tag));
+                      } else {
+                        setSelectedTags([...selectedTags, tag]);
+                        setTagSearchQuery("");
+                      }
+                    }}
+                    className={`w-full text-left px-2 py-1 text-sm rounded ${
+                      selectedTags.includes(tag)
+                        ? "bg-indigo-50 text-indigo-700" 
+                        : "hover:bg-gray-50"
+                    }`}
+                  >
+                    {tag}
+                  </button>
+                ))}
               </div>
             </div>
           )}
         </div>
-        
-        {/* Original Content Filter */}
-        <div className="md:col-span-2 flex items-end pb-1">
-          <div className="flex items-center gap-2">
-            <label htmlFor="originalOnly" className="text-sm font-medium text-gray-700 cursor-pointer whitespace-nowrap">
-              Original only
-            </label>
-            <div className="relative inline-block w-10 align-middle select-none">
-              <input
-                type="checkbox"
-                name="originalOnly"
-                id="originalOnly"
-                checked={originalOnly}
-                onChange={(e) => setOriginalOnly(e.target.checked)}
-                className="opacity-0 absolute w-full h-full cursor-pointer peer"
-              />
-              <div className="w-10 h-5 bg-gray-300 rounded-full shadow-inner peer-checked:bg-indigo-500 transition-colors"></div>
-              <div className="absolute inset-y-0 left-0 w-5 h-5 bg-white rounded-full shadow transform transition-transform peer-checked:translate-x-5"></div>
-            </div>
-          </div>
-        </div>
       </div>
+
+      {/* Selected tags display */}
+      {selectedTags.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {selectedTags.map(tag => (
+            <span 
+              key={tag} 
+              className="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded text-xs"
+            >
+              {tag}
+              <button 
+                onClick={() => removeTag(tag)}
+                className="text-indigo-400 hover:text-indigo-600"
+              >
+                <IconX size={12} />
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

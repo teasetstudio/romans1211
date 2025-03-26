@@ -10,6 +10,7 @@ import Input from "@/components/inputs/Input";
 import NumberInput from "@/components/inputs/NumberInput";
 import Button from "@/components/buttons/Button";
 import { DatePicker } from "@/components/inputs/DatePicker";
+import { NAMESPACE_DASHBOARD_COURSES } from "@/res/namespaces";
 
 const courseSchema = z.object({
   title: z.string().min(1),
@@ -39,7 +40,7 @@ export function CourseDialog({
   course,
   mode,
 }: CourseDialogProps) {
-  const t = useTranslations(`dashboard.courses.${mode === 'create' ? 'createDialog' : 'editDialog'}`);
+  const t = useTranslations(`${NAMESPACE_DASHBOARD_COURSES}.${mode === 'create' ? 'createDialog' : 'editDialog'}`);
   const methods = useForm<CourseFormData>({
     resolver: zodResolver(courseSchema),
     defaultValues: mode === 'edit' && course ? {
