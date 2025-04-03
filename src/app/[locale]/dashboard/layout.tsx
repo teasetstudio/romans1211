@@ -18,7 +18,7 @@ export default async function Layout({ children }: IProps) {
   const cookieStore = cookies();
   const cookieSelectedOrganizationId = (await cookieStore).get('selectedOrganizationId')?.value
 
-  const organizations = await organizationService.getUserOrganizations(session.user)
+  const organizations = await organizationService.getUserAccessibleOrganizations(session.user)
 
   return (
     <OrganizationProvider organizations={organizations} cookieSelectedOrganizationId={cookieSelectedOrganizationId}>

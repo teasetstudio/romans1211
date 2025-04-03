@@ -18,7 +18,7 @@ export async function GET(
 
     const { id } = await params;
 
-    const course = await prisma.eventCourse.findUnique({
+    const course = await prisma.course.findUnique({
       where: { id },
       include: {
         events: true,
@@ -48,7 +48,6 @@ const updateCoursesSchema = z.object({
   description: z.string().optional(),
   startDate: z.string().transform((str) => new Date(str)),
   endDate: z.string().nullable().transform((str) => str ? new Date(str) : null),
-  defaultDuration: z.number().int().min(1),
   location: z.string().optional(),
 });
 
@@ -68,7 +67,7 @@ export async function PUT(
     const validatedData = updateCoursesSchema.parse(json);
 
     // Check if course exists and user has access
-    const course = await prisma.eventCourse.findUnique({
+    const course = await prisma.course.findUnique({
       where: { id },
     });
 
@@ -79,7 +78,7 @@ export async function PUT(
       );
     }
 
-    const updatedCourse = await prisma.eventCourse.update({
+    const updatedCourse = await prisma.course.update({
       where: { id },
       data: validatedData,
     });
@@ -113,7 +112,7 @@ export async function DELETE(
     const force = searchParams.get("force") === "true";
 
     // Check if course exists and user has access
-    const course = await prisma.eventCourse.findUnique({
+    const course = await prisma.course.findUnique({
       where: { id },
       // include: {
       //   members: {
@@ -159,7 +158,7 @@ export async function DELETE(
       );
     }
 
-    await prisma.eventCourse.delete({
+    await prisma.course.delete({
       where: { id },
     });
 

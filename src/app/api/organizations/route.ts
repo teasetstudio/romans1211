@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import prisma from '@/lib/prisma';
 import { authOptions } from '@/lib/auth';
+import { organizationService } from '@/lib/OrganizationServiceForSSR';
 
 // POST /api/organizations
 export async function POST(req: NextRequest) {
@@ -17,16 +18,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const organization = await prisma.organization.create({
-      data: {
-        name,
-        description,
-        isDefault,
-        ownerId: session.user.id,
-      },
-    }).catch((err) => {
-      console.error('err', err.stack)
-    });
+    const organization = await organizationService.createOrganization({ name, description, ownerId: session.user.id, isDefault });
 
     return NextResponse.json(organization);
   } catch (error) {
@@ -45,8 +37,25 @@ export async function GET() {
 
     const organizations = await prisma.organization.findMany({
       where: {
-        ownerId: session.user.id,
+        OR: [
+          { ownerId: session.user.id },
+          {
+            members: {
+              some: {
+                userId: session.user.id,
+              }
+            }
+          }
+        ]
       },
+      include: {
+        members: {
+          where: {
+            userId: session.user.id
+          }
+        }
+      },
+      orderBy: { createdAt: 'asc' }
     });
 
     return NextResponse.json(organizations);

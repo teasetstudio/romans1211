@@ -11,7 +11,6 @@ const createEventBlueprintSchema = z.object({
   organizationId: z.string(),
   startDate: z.string().transform((str) => new Date(str)),
   endDate: z.string().nullable().optional().transform((str) => str ? new Date(str) : null),
-  defaultDuration: z.number().int().min(1),
   location: z.string().optional(),
 });
 
@@ -26,11 +25,10 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const organizationId = searchParams.get("organizationId");
     const courseId = searchParams.get("id");
-    console.log("organizationId", organizationId)
 
     if (courseId) {
       // Get single event blueprint
-      const course = await prisma.eventCourse.findUnique({
+      const course = await prisma.course.findUnique({
         where: { id: courseId },
         include: {
           events: true,
@@ -70,7 +68,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const courses = await prisma.eventCourse.findMany({
+    const courses = await prisma.course.findMany({
       where: {
         organizationId,
         // members: {
@@ -123,7 +121,6 @@ export async function POST(request: NextRequest) {
     let json;
     try {
       json = await request.json();
-      console.log('Received request payload:', json);
     } catch (error) {
       console.error('Error parsing request body:', error);
       return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 });
@@ -157,7 +154,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create blueprint
-    const blueprint = await prisma.eventCourse.create({
+    const blueprint = await prisma.course.create({
       data: {
         ...validatedData,
       //   members: {

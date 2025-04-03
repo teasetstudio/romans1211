@@ -87,7 +87,7 @@ export async function PUT(
     // }
 
     // Update event and handle plan items if provided
-    const updateData: any = {
+    const updateData = {
       ...validatedData,
       eventPlanItems: undefined, // Handle plan items separately
     };

@@ -1,9 +1,10 @@
 "use client"
 
 import { TMaterialType } from "@/types/Materials";
-import { IconSearch, IconAdjustments, IconTag, IconCheck, IconX, IconLoader2 } from '@tabler/icons-react';
+import { IconSearch, IconTag, IconX, IconLoader2 } from '@tabler/icons-react';
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-hot-toast";
+import debounce from "lodash.debounce";
 
 interface IProps {
   searchQuery: string;
@@ -14,7 +15,6 @@ interface IProps {
   setSelectedTags: (tags: string[]) => void;
   originalOnly: boolean;
   setOriginalOnly: (original: boolean) => void;
-  allTags: string[];
   organizationId: string;
 }
 
@@ -27,21 +27,14 @@ const EventPlanItemsFilter = ({
   setSelectedTags,
   originalOnly,
   setOriginalOnly,
-  allTags,
   organizationId
 }: IProps) => {
   const [tagSearchQuery, setTagSearchQuery] = useState("");
   const [isTagMenuOpen, setIsTagMenuOpen] = useState(false);
-  const [suggestedTags, setSuggestedTags] = useState<string[]>(allTags);
+  const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
   const [isLoadingTags, setIsLoadingTags] = useState(false);
-  
-  // Debounced tag search function
+
   const searchTags = useCallback(async (query: string) => {
-    if (!query.trim()) {
-      setSuggestedTags(allTags);
-      return;
-    }
-    
     setIsLoadingTags(true);
     try {
       const params = new URLSearchParams({
@@ -59,40 +52,23 @@ const EventPlanItemsFilter = ({
     } catch (error) {
       console.error('Error fetching tags:', error);
       toast.error('Failed to fetch tags');
-      setSuggestedTags(allTags);
+      setSuggestedTags([]);
     } finally {
       setIsLoadingTags(false);
     }
-  }, [allTags, organizationId]);
-  
+  }, [organizationId]);
+  // Debounced tag search function
+  const debouncedSearch = useCallback(
+    debounce((query) => {
+      searchTags(query);
+    }, 300),
+    []
+  );
+
   // Use effect to search tags when tagSearchQuery changes
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (isTagMenuOpen) {
-        searchTags(tagSearchQuery);
-      }
-    }, 300); // 300ms debounce
-    
-    return () => clearTimeout(timeoutId);
-  }, [tagSearchQuery, isTagMenuOpen, searchTags]);
-  
-  // Filter tags based on search query for local filtering
-  const filteredTags = tagSearchQuery.trim() === "" 
-    ? allTags 
-    : suggestedTags.filter(tag => 
-        tag.toLowerCase().includes(tagSearchQuery.toLowerCase())
-      );
-      
-  // Handle tag input submission
-  const handleTagSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmedQuery = tagSearchQuery.trim();
-    
-    if (trimmedQuery && !selectedTags.includes(trimmedQuery)) {
-      setSelectedTags([...selectedTags, trimmedQuery]);
-      setTagSearchQuery("");
-    }
-  };
+    if (isTagMenuOpen) debouncedSearch(tagSearchQuery);
+  }, [tagSearchQuery, isTagMenuOpen, debouncedSearch]);
   
   // Remove a selected tag
   const removeTag = (tagToRemove: string) => {

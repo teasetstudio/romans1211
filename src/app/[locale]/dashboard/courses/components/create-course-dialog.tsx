@@ -1,12 +1,12 @@
 "use client"
 
-import { EventCourse } from "@prisma/client";
+import { Course } from "@prisma/client";
 import { CourseDialog } from "./course-dialog";
 
 interface CreateCourseDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (course: EventCourse) => void;
+  onSubmit: (course: Course) => void;
   organizationId: string;
 }
 

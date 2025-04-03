@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client';
 import prisma from './prisma';
 import { TMaterialType, TMaterialsIncludedTags, TMaterial, TMaterialWithType, TMaterialsIncluded } from '@/types/Materials';
+import { orgPermissions, TOrgPermissions } from './permissions';
 
 type PrismaClientDelegate = Prisma.TextDelegate | Prisma.SongDelegate | Prisma.GameDelegate
 type UpdateMaterial = TMaterial & {
@@ -39,25 +40,38 @@ class MaterialServiceForAPI {
     }
   }
 
-  async findByIdAndOwnerId(id: string, ownerId: string, include?: {
+  async findByIdAndUserId(_where: {
+    id: string,
+    userId: string,
+    orgPermissions: TOrgPermissions
+  }, _include?: {
     tags?: boolean,
-    organization?: boolean,
     translations?: boolean,
     original?: boolean | { include?: { translations?: boolean } },
   }): Promise<(TMaterialWithType & Partial<TMaterialsIncluded>) | null> {
+    const where = {
+      id: _where.id,
+      organization: {
+        OR: [
+          { ownerId: _where.userId },
+          { members: { some: { userId: _where.userId, permissions: { hasSome: orgPermissions[_where.orgPermissions] } } } }
+        ]
+      }
+    }
+    const include: any = {
+      ..._include,
+      organization: {
+        include: {
+          members: {
+            where: { userId: _where.userId }
+          }
+        }
+      }
+    }
     const [text, song, game] = await Promise.all([
-      prisma.text.findFirst({
-        where: { id, organization: { ownerId } },
-        include,
-      }),
-      prisma.song.findFirst({
-        where: { id, organization: { ownerId } },
-        include,
-      }),
-      prisma.game.findFirst({
-        where: { id, organization: { ownerId } },
-        include,
-      }),
+      prisma.text.findFirst({ where, include }),
+      prisma.song.findFirst({ where, include }),
+      prisma.game.findFirst({ where, include }),
     ]);
 
     const type = text ? 'text' : song ? 'song' : game ? 'game' : null;

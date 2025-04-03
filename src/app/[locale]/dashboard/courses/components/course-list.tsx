@@ -1,9 +1,9 @@
 "use client"
 
-import { EventCourse } from "@prisma/client";
+import { Course } from "@prisma/client";
 import { useTranslations } from "next-intl";
 import { format } from "date-fns";
-import { IconTrash, IconEdit } from "@tabler/icons-react";
+import { IconTrash } from "@tabler/icons-react";
 import Button from "@/components/buttons/Button";
 import { Text } from "@/components/typo/Text";
 import { NAMESPACE_DASHBOARD_COURSES } from "@/res/namespaces";
@@ -11,7 +11,7 @@ import DeleteConfirmationPopup from "@/components/popups/DeleteConfirmationPopup
 import { useState } from "react";
 
 interface CourseListProps {
-  courses: EventCourse[];
+  courses: Course[];
   onDelete: (id: string, force?: boolean) => void;
   onEdit: (id: string) => void;
 }
@@ -86,9 +86,6 @@ export function CourseList({ courses, onDelete, onEdit }: CourseListProps) {
                 {t("table.endDate")}
               </th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t("table.duration")}
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t("table.location")}
               </th>
               <th scope="col" className="relative px-6 py-3">
@@ -111,9 +108,6 @@ export function CourseList({ courses, onDelete, onEdit }: CourseListProps) {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <Text>{course.endDate ? format(course.endDate, "PPP") : "-"}</Text>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <Text>{course.defaultDuration} min</Text>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <Text>{course.location || "-"}</Text>

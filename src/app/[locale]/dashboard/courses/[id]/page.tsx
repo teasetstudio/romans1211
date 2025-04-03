@@ -1,5 +1,3 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import { ROUTE_DASHBOARD_COURSES } from "@/res/routes";
@@ -13,7 +11,7 @@ interface EventCoursePageProps {
 
 export default async function CoursePage({ params }: EventCoursePageProps) {
   const { id } = await params;
-  const course = await prisma.eventCourse.findUnique({
+  const course = await prisma.course.findUnique({
     where: { id },
     include: {
       events: {

@@ -25,27 +25,34 @@ model User {
 }
 
 enum OrganizationPermission {
-  ADMIN                     // Full control over the organization
-  
+  OWNER
   // General permissions
+  ADMIN                     // Full control over the organization
   MANAGE                    // Can manage organization resources
+  CREATE                    // Can create organization resources
   EDIT                      // Can edit organization resources
-  VIEW                      // Can view organization resources
-  
-  // Library permissions
-  ADMIN_LIBRARY             // Full control over the library
-  MANAGE_LIBRARY            // Can create, edit, delete any library content
-  EDIT_LIBRARY              // Can edit existing library content
-  VIEW_LIBRARY              // Can view library content
+  DELETE                    // Can delete organization resources
+  READ                      // Can view organization resources
 
-  // Event permissions
-  ADMIN_EVENT_COURSES    // Full control over the event course
-  MANAGE_EVENT_COURSES   // Can create, edit, delete any events
-  EDIT_EVENT_COURSES     // Can edit existing events
-  VIEW_EVENT_COURSES     // Can view events
+  // Library permissions
+  ADMIN_LIBRARY             // Full control over the library (add/remove new members)
+  MANAGE_LIBRARY            // Can create, edit, delete any library content
+  CREATE_LIBRARY            // Can create library content
+  EDIT_LIBRARY              // Can edit existing library content
+  DELETE_LIBRARY            // Can delete existing library content
+  READ_LIBRARY              // Can view library content
+
+  // Course permissions
+  ADMIN_COURSES             // Full control over the courses (add/remove new members)
+  MANAGE_COURSES            // Can create, edit, delete any events
+  CREATE_COURSES            // Can create existing events
+  EDIT_COURSES              // Can edit existing events
+  DELETE_COURSES            // Can delete existing events
+  READ_COURSES              // Can view events
 }
 
 enum CourseRole {
+  OWNER            // Full control over the course and all its resources
   ADMIN            // Full control over the event course (+add new members, assign roles)
   MANAGER          // Can create, edit, delete any events
   EDITOR           // Can edit event details
@@ -53,6 +60,7 @@ enum CourseRole {
 }
 
 enum EventRole {
+  OWNER          // Full control over the event and all its resources
   ADMIN          // Full control over the event (+add new members, assign roles)
   MANAGER        // Can create, edit, delete any item in the event
   EDITOR         // Can edit event details
@@ -77,12 +85,17 @@ model OrganizationMember {
   courseRoles    CourseMember[]
   eventRoles     EventMember[]
 
+  isAccepted     Boolean          @default(false)
+  invitedAt      DateTime         @default(now())
+  acceptedAt     DateTime?
+
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
 
   @@unique([userId, organizationId])
   @@index([organizationId])
   @@index([userId])
+  @@index([isAccepted])
 }
 
 model Organization {
@@ -95,16 +108,15 @@ model Organization {
   texts       Text[]
   songs       Song[]
   games       Game[]
-
-  events      EventCourse[]
-  user        User                @relation(fields: [ownerId], references: [id])
+  courses     Course[]
+  owner       User                @relation(fields: [ownerId], references: [id])
   members     OrganizationMember[]
 
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
 }
 
-model EventCourse {
+model Course {
   id                String            @id @default(cuid())
   title             String
   description       String?           @db.Text
@@ -115,7 +127,6 @@ model EventCourse {
   endDate           DateTime?         // Optional series end date
 
   events            Event[]           // All events in this course
-  defaultDuration   Int               // Duration in minutes
   location          String?
   members           CourseMember[]
 
@@ -138,7 +149,7 @@ model Event {
 
   organizationId    String
   courseId          String?          // Optional reference to event course
-  course            EventCourse?     @relation(fields: [courseId], references: [id])
+  course            Course?          @relation(fields: [courseId], references: [id])
   isCancelled       Boolean          @default(false) // For cancelling individual occurrences
   members           EventMember[]
   eventPlanItems    EventPlanItem[]
@@ -192,7 +203,7 @@ model CourseMember {
   courseId             String
   organizationMemberId String
   role                 CourseRole
-  course               EventCourse        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course               Course             @relation(fields: [courseId], references: [id], onDelete: Cascade)
   organizationMember   OrganizationMember @relation(fields: [organizationMemberId], references: [id], onDelete: Cascade)
 
   createdAt            DateTime           @default(now())

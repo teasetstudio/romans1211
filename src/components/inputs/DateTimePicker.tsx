@@ -1,6 +1,6 @@
 import { forwardRef } from "react";
 import { Text } from "@/components/typo/Text";
-import { format, parse } from "date-fns";
+import { format } from "date-fns";
 
 interface DateTimePickerProps {
   selected: Date | null;
@@ -9,8 +9,6 @@ interface DateTimePickerProps {
   minDate?: Date;
   maxDate?: Date;
   isClearable?: boolean;
-  showTimeSelect?: boolean;
-  dateFormat?: string;
 }
 
 export const DateTimePicker = forwardRef<HTMLDivElement, DateTimePickerProps>(
@@ -22,8 +20,6 @@ export const DateTimePicker = forwardRef<HTMLDivElement, DateTimePickerProps>(
       minDate,
       maxDate,
       isClearable = false,
-      showTimeSelect = true,
-      dateFormat = "yyyy-MM-dd'T'HH:mm",
       ...props
     },
     ref

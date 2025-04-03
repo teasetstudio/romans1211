@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client';
 import prisma from './prisma';
 import { TMaterialType, TMaterial, TMaterialWithIncluded, TCatalogMaterial, TMaterialWithType, TMaterialsIncluded } from '@/types/Materials';
+import { ORG_READ_PERMISSIONS } from './permissions';
 
 type PrismaClientDelegate = Prisma.TextDelegate | Prisma.SongDelegate | Prisma.GameDelegate
 
@@ -41,13 +42,32 @@ class MaterialServiceForSSR {
     return this.getModel(type).findUnique({ where: { id }, include });
   }
 
-  async findByTypeAndIdAndOwnerId<ReturnIncludedType = Partial<TMaterialsIncluded>>(type: TMaterialType, id: string, ownerId: string, include?: {
+  async findByTypeAndIdAndUserId<ReturnIncludedType = Partial<TMaterialsIncluded>>(type: TMaterialType, id: string, userId: string, include?: {
     tags?: boolean,
-    organization?: boolean,
     original?: boolean | { include?: { translations?: boolean } },
     translations?: boolean
   }): Promise<(TMaterial & ReturnIncludedType) | null> {
-    return this.getModel(type).findUnique({ where: { id, organization: { ownerId } }, include });
+    return this.getModel(type).findUnique({
+      where: { 
+        id,
+        organization: {
+          OR: [
+            { ownerId: userId },
+            { members: { some: { userId, permissions: { hasSome: ORG_READ_PERMISSIONS } } } }
+          ]
+        }
+      },
+      include: {
+        ...include,
+        organization: {
+          include: {
+            members: {
+              where: { userId }
+            }
+          }
+        }
+      }
+    });
   }
 
   async findPublicById(type: TMaterialType, id: string): Promise<TMaterialWithIncluded | null> {

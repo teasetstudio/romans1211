@@ -3,24 +3,33 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { z } from "zod";
+import { ORG_ADMIN_PERMISSIONS, ORG_READ_PERMISSIONS } from "@/lib/permissions";
 
 // Schema for creating an organization member
 const createOrganizationMemberSchema = z.object({
   organizationId: z.string(),
   email: z.string().email(),
   permissions: z.array(z.enum([
-    "ADMIN", 
-    "MANAGE", 
-    "EDIT", 
-    "VIEW", 
-    "ADMIN_LIBRARY", 
-    "MANAGE_LIBRARY", 
-    "EDIT_LIBRARY", 
-    "VIEW_LIBRARY", 
-    "ADMIN_EVENT_COURSES", 
-    "MANAGE_EVENT_COURSES", 
-    "EDIT_EVENT_COURSES", 
-    "VIEW_EVENT_COURSES"
+    "ADMIN",
+    "MANAGE",
+    "CREATE",
+    "EDIT",
+    "DELETE",
+    "READ",
+
+    "ADMIN_LIBRARY",
+    "MANAGE_LIBRARY",
+    "CREATE_LIBRARY",
+    "EDIT_LIBRARY",
+    "DELETE_LIBRARY",
+    "READ_LIBRARY",
+
+    "ADMIN_COURSES",
+    "MANAGE_COURSES",
+    "CREATE_COURSES",
+    "EDIT_COURSES",
+    "DELETE_COURSES",
+    "READ_COURSES"
   ])),
 });
 
@@ -34,49 +43,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const organizationId = searchParams.get("organizationId");
-    const memberId = searchParams.get("id");
-
-    // Get single member
-    if (memberId) {
-      const member = await prisma.organizationMember.findUnique({
-        where: { id: memberId },
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
-          organization: true,
-        },
-      });
-
-      if (!member) {
-        return NextResponse.json(
-          { error: "Organization member not found" },
-          { status: 404 }
-        );
-      }
-
-      // Check if user has access to the organization
-      const userMembership = await prisma.organizationMember.findFirst({
-        where: {
-          organizationId: member.organizationId,
-          user: { email: session.user.email },
-          permissions: { has: "ADMIN" },
-        },
-      });
-
-      if (!userMembership) {
-        return NextResponse.json(
-          { error: "No access to this organization" },
-          { status: 403 }
-        );
-      }
-
-      return NextResponse.json(member);
-    }
+    const userId = session.user.id;
 
     // List members for an organization
     if (!organizationId) {
@@ -87,14 +54,17 @@ export async function GET(request: NextRequest) {
     }
 
     // Check if user has access to the organization
-    const userMembership = await prisma.organizationMember.findFirst({
+    // First check if user is the owner
+    const organization = await prisma.organization.findFirst({
       where: {
-        organizationId,
-        user: { email: session.user.email },
-      },
+        OR: [
+          { id: organizationId, ownerId: userId },
+          { id: organizationId, members: { some: { userId, permissions: { hasSome: ORG_READ_PERMISSIONS } } } }
+        ]
+      }
     });
 
-    if (!userMembership) {
+    if (!organization) {
       return NextResponse.json(
         { error: "No access to this organization" },
         { status: 403 }
@@ -140,16 +110,16 @@ export async function POST(request: NextRequest) {
     const json = await request.json();
     const validatedData = createOrganizationMemberSchema.parse(json);
 
-    // Check if user is an admin of the organization
-    const userMembership = await prisma.organizationMember.findFirst({
+    // Check if user is an admin or the owner of the organization
+    const isOwnerOrAdmin = await prisma.organizationMember.findFirst({
       where: {
         organizationId: validatedData.organizationId,
-        permissions: { has: "ADMIN" },
-        user: { email: session.user.email },
-      },
+        userId: session.user.id,
+        permissions: { hasSome: ORG_ADMIN_PERMISSIONS }
+      }
     });
 
-    if (!userMembership) {
+    if (!isOwnerOrAdmin) {
       return NextResponse.json(
         { error: "No permission to add members to this organization" },
         { status: 403 }
@@ -165,6 +135,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "User not found" },
         { status: 404 }
+      );
+    }
+    if (user.id === session.user.id) {
+      return NextResponse.json(
+        { error: "You cannot add yourself to the organization" },
+        { status: 400 }
       );
     }
 

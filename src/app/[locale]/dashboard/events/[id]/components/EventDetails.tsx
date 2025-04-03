@@ -4,26 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Event } from "@prisma/client";
-import { useForm, FormProvider } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import Input from "@/components/inputs/Input";
 import Button from "@/components/buttons/Button";
-import { DateTimePicker } from "@/components/inputs/DateTimePicker";
 import { toast } from "react-hot-toast";
 import Link from "next/link";
 import { IconEdit, IconTrash } from "@/res/icons";
 import EventFormDialog from "@/app/[locale]/dashboard/components/EventFormDialog";
-
-const eventSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  description: z.string().optional().nullable(),
-  location: z.string().optional().nullable(),
-  startTime: z.date(),
-  endTime: z.date(),
-});
-
-type EventFormData = z.infer<typeof eventSchema>;
 
 interface EventDetailsProps {
   event: Event;
@@ -35,29 +20,6 @@ export default function EventDetails({ event: initialEvent }: EventDetailsProps)
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [event, setEvent] = useState(initialEvent);
-
-  const methods = useForm<EventFormData>({
-    resolver: zodResolver(eventSchema),
-    defaultValues: {
-      title: event.title,
-      description: event.description || "",
-      location: event.location || "",
-      startTime: new Date(event.startTime),
-      endTime: new Date(event.endTime),
-    },
-  });
-
-  const startTime = methods.watch("startTime");
-
-  // Helper function to update end time when start time changes
-  const updateEndTime = (newStartTime: Date) => {
-    const currentEndTime = methods.getValues("endTime");
-    const currentDuration = currentEndTime.getTime() - methods.getValues("startTime").getTime();
-
-    // Preserve the duration when changing the start time
-    const newEndTime = new Date(newStartTime.getTime() + currentDuration);
-    methods.setValue("endTime", newEndTime);
-  };
 
   const handleSubmit = (updatedEvent: Event) => {
     setEvent(updatedEvent);

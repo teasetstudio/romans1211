@@ -19,7 +19,12 @@ export async function PATCH(
     const { isPublic } = await req.json();
 
     // Verify material exists and belongs to user's organization
-    const material = await materialApiService.findByIdAndOwnerId(id, session.user.id, {
+    const material = await materialApiService.findByIdAndUserId({
+      id,
+      userId: session.user.id,
+      orgPermissions: 'manage',
+    },
+    {
       translations: true,
     });
 

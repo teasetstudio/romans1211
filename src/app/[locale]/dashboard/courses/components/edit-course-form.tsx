@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { EventCourse } from "@prisma/client";
+import { Course } from "@prisma/client";
 import Button from "@/components/buttons/Button";
 import { useRouter } from "@/i18n/routing";
 import { useState } from "react";
@@ -12,7 +12,7 @@ import { Text } from "@/components/typo/Text";
 import { format } from "date-fns";
 
 interface EditCourseFormProps {
-  course: EventCourse;
+  course: Course;
 }
 
 export function EditCourseForm({ course }: EditCourseFormProps) {
@@ -20,7 +20,7 @@ export function EditCourseForm({ course }: EditCourseFormProps) {
   const router = useRouter();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const onSubmit = async (updatedCourse: EventCourse) => {
+  const onSubmit = async () => {
     router.refresh();
     setIsDialogOpen(false);
     router.push("/dashboard/courses");
@@ -41,10 +41,6 @@ export function EditCourseForm({ course }: EditCourseFormProps) {
           <div>
             <Text className="font-semibold">{t("fields.endDate")}:</Text>
             <Text>{course.endDate ? format(new Date(course.endDate), "PPP") : "-"}</Text>
-          </div>
-          <div>
-            <Text className="font-semibold">{t("fields.defaultDuration")}:</Text>
-            <Text>{course.defaultDuration} min</Text>
           </div>
           <div>
             <Text className="font-semibold">{t("fields.location")}:</Text>

@@ -3,6 +3,8 @@ import { getServerSession, Session } from 'next-auth';
 import prisma from '@/lib/prisma';
 import { authOptions } from '@/lib/auth';
 import { materialService } from '@/lib/MaterialServiceForSSR';
+import { ORG_CREATE_PERMISSIONS } from '@/lib/permissions';
+import { organizationService } from '@/lib/OrganizationServiceForSSR';
 
 // GET /api/materials
 export async function GET(req: NextRequest) {
@@ -25,6 +27,13 @@ export async function GET(req: NextRequest) {
     const organizationId = searchParams.get('organizationId');
     const originalOnly = searchParams.get('originalOnly') === 'true';
 
+    // Check if user has access to the organization
+    if (organizationId) {
+      const organization = await organizationService.getOrganizationByIdAndUserId(organizationId, session.user.id);
+      if (!organization) {
+        return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
+      }
+    }
     // Get materials using the service
     const result = await materialService.findInCatalog({
       type: type || undefined,
@@ -34,7 +43,7 @@ export async function GET(req: NextRequest) {
       tags: tags.length > 0 ? tags : undefined,
       isPublic,
       organizationId: organizationId || undefined,
-      ownerId: session.user.id,
+      // ownerId: session.user.id,
       originalOnly,
     });
 
@@ -72,12 +81,21 @@ export async function POST(req: NextRequest) {
     if (!title || !content || !organizationId || !type) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
-
+    const userId = session.user.id;
     // Verify organization belongs to user
     const organization = await prisma.organization.findFirst({
       where: {
-        id: organizationId,
-        ownerId: session.user.id,
+        OR: [
+          { id: organizationId, ownerId: userId },
+          { members: { some: { userId, permissions: { hasSome: ORG_CREATE_PERMISSIONS } } } }
+        ]
+      },
+      include: {
+        members: {
+          where: {
+            userId,
+          },
+        },
       },
     });
 

@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react";
-import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
+import { useState, useEffect } from "react";
+import { DragDropContext, Droppable, Draggable, DropResult, DragStart, DragUpdate } from "@hello-pangea/dnd";
 import { TMaterial, TMaterialType } from "@/types/Materials";
 import { Event, EventPlanItem } from "@prisma/client";
 import { toast } from "react-hot-toast";
@@ -35,6 +35,8 @@ interface Columns {
   materials: IMaterialItem[]
 }
 
+type TColumn = (IPlanItem | IMaterialItem)[]
+
 interface IProps {
   event: EventWithPlanItems;
 }
@@ -53,7 +55,6 @@ const EventPlanItems = ({ event }: IProps) => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [originalOnly, setOriginalOnly] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
-  const [allTags, setAllTags] = useState<string[]>([]);
   const [showCustomItemModal, setShowCustomItemModal] = useState(false);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [expandedDescriptions, setExpandedDescriptions] = useState<Set<string>>(new Set());
@@ -94,7 +95,6 @@ const EventPlanItems = ({ event }: IProps) => {
         }
 
         const data = await response.json();
-        console.log('fetched data', data)
 
         // Update columns with the new materials
         setColumns(prev => ({
@@ -178,7 +178,7 @@ const EventPlanItems = ({ event }: IProps) => {
   // Add new state for loading
   const [isSaving, setIsSaving] = useState(false);
 
-  const onDragStart = (start: any) => {
+  const onDragStart = (start: DragStart) => {
     // Check if dragging from planItems
     if (start.source.droppableId === "planItems") {
       setIsDraggingRightToLeft(true);
@@ -188,7 +188,7 @@ const EventPlanItems = ({ event }: IProps) => {
   };
 
   // Add a new onDragUpdate handler to track hover state
-  const onDragUpdate = (update: any) => {
+  const onDragUpdate = (update: DragUpdate) => {
     if (update.destination && update.destination.droppableId !== "materials" && update.source.droppableId === "materials") {
       setIsDraggingFromRight(true);
     } else {
@@ -229,7 +229,6 @@ const EventPlanItems = ({ event }: IProps) => {
 
     // If dragging from materials to planItems, create a copy instead of moving
     if (sourceCol === "materials" && destCol === "planItems") {
-      console.log('from right')
       const sourceMaterials = Array.from(columns.materials);
       const planItems = Array.from(columns.planItems);
       const movedMaterial = sourceMaterials[source.index];
@@ -275,8 +274,8 @@ const EventPlanItems = ({ event }: IProps) => {
     }
 
     // For other cases (within the same column), use the original logic
-    const sourceItems = Array.from(columns[sourceCol] as any);
-    const destItems = sourceCol === destCol ? sourceItems : Array.from(columns[destCol] as any);
+    const sourceItems = Array.from(columns[sourceCol] as TColumn);
+    const destItems = sourceCol === destCol ? sourceItems : Array.from(columns[destCol] as TColumn);
 
     const [movedItem] = sourceItems.splice(source.index, 1);
     destItems.splice(destination.index, 0, movedItem);
@@ -381,7 +380,7 @@ const EventPlanItems = ({ event }: IProps) => {
         if (item.type === CUSTOM_PLAN_ITEM_TYPE) {
           return {
             // Use a type assertion here
-            type: CUSTOM_PLAN_ITEM_TYPE as any,
+            type: CUSTOM_PLAN_ITEM_TYPE,
             order: index,
             title: item.title,
             description: item.description || "",
@@ -393,7 +392,7 @@ const EventPlanItems = ({ event }: IProps) => {
         const materialId = item.materialId === null ? "" : item.materialId;
         return {
           // Use a type assertion here
-          type: item.type.toUpperCase() as any,
+          type: item.type.toUpperCase(),
           order: index,
           title: item.title,
           // Use the string materialId
@@ -462,7 +461,6 @@ const EventPlanItems = ({ event }: IProps) => {
             setSelectedTags={setSelectedTags}
             originalOnly={originalOnly}
             setOriginalOnly={setOriginalOnly}
-            allTags={allTags}
             organizationId={event.organizationId}
           />
         </div>
@@ -492,7 +490,7 @@ const EventPlanItems = ({ event }: IProps) => {
               droppableId="materials"
               isDropDisabled={false}
             >
-              {(provided, snapshot) => (
+              {(provided) => (
                 <div
                   ref={provided.innerRef}
                   {...provided.droppableProps}
@@ -592,7 +590,7 @@ const EventPlanItems = ({ event }: IProps) => {
                       draggableId={`${item.id}-${index}`}
                       index={index}
                     >
-                      {(provided, snapshot) => (
+                      {(provided) => (
                         <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}

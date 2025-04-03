@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { Event, EventCourse } from "@prisma/client";
+import { Event, Course } from "@prisma/client";
 import Button from "@/components/buttons/Button";
 import { IconPlus, IconCalendar, IconEdit, IconMapPin } from "@tabler/icons-react";
 import { Text } from "@/components/typo/Text";
@@ -15,7 +15,7 @@ import { NAMESPACE_DASHBOARD_COURSES } from "@/res/namespaces";
 import EventFormDialog from "../../components/EventFormDialog";
 
 interface CourseDetailsProps {
-  course: EventCourse & {
+  course: Course & {
     events: Event[];
   };
 }
@@ -27,7 +27,7 @@ export function CourseDetails({ course }: CourseDetailsProps) {
   const [isEditCourseOpen, setIsEditCourseOpen] = useState(false);
   const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
 
-  const handleCourseUpdate = async (updatedCourse: EventCourse) => {
+  const handleCourseUpdate = async () => {
     router.refresh();
     setIsEditCourseOpen(false);
   };
@@ -93,20 +93,20 @@ export function CourseDetails({ course }: CourseDetailsProps) {
               </div>
               <div className="flex shrink-0 gap-2 self-start sm:self-center">
                 <Button
-                  onClick={() => setIsEditCourseOpen(true)}
-                  paddingClass="px-3 py-2"
-                  className="inline-flex items-center text-gray-700 hover:text-primary  rounded-md transition-colors gap-1.5 text-sm border border-transparent hover:border-primary"
-                >
-                  <IconEdit className="w-4 h-4" />
-                  <span>{t("edit")}</span>
-                </Button>
-                <Button
                   onClick={() => setIsCreateEventOpen(true)}
                   paddingClass="px-3 py-2"
                   className="inline-flex items-center text-gray-700 hover:text-primary rounded-md transition-colors gap-1.5 text-sm border border-transparent hover:border-primary"
                 >
                   <IconPlus className="w-4 h-4" />
                   {t("createEvent")}
+                </Button>
+                <Button
+                  onClick={() => setIsEditCourseOpen(true)}
+                  paddingClass="px-3 py-2"
+                  className="inline-flex items-center text-gray-700 hover:text-primary  rounded-md transition-colors gap-1.5 text-sm border border-transparent hover:border-primary"
+                >
+                  <IconEdit className="w-4 h-4" />
+                  <span>{t("edit")}</span>
                 </Button>
               </div>
             </div>

@@ -2,51 +2,84 @@
 
 import { useTranslations } from 'next-intl';
 import { NAMESPACE_DASHBOARD } from '@/res/namespaces';
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { OrganizationCreateAttr, useOrganization } from '@/components/contexts/OrganizationContext';
+import { useEffect, useState, useMemo } from 'react';
+import { useParams } from 'next/navigation';
+import { OrganizationMember, useOrganization } from '@/components/contexts/OrganizationContext';
+import OrganizationDetails from './components/OrganizationDetails';
+import OrganizationMembers from './components/OrganizationMembers';
+import AddOrganizationMember from './components/AddOrganizationMember';
+import MemberActions from './components/MemberActions';
+import { toast } from 'react-hot-toast';
+import { useSession } from 'next-auth/react';
+import { useRouter } from '@/i18n/routing';
 import { ROUTE_DASHBOARD_ORGANIZATIONS } from '@/res/routes';
+import { hasAdminPermission } from '@/utils/permissions';
 
 export default function OrganizationSettingsPage() {
   const t = useTranslations(NAMESPACE_DASHBOARD);
   const router = useRouter();
   const params = useParams();
-  const { organizations, updateOrganization } = useOrganization();
-  const [form, setForm] = useState<OrganizationCreateAttr>({ 
-    name: '', 
-    description: '' 
-  });
-  const [isLoading, setIsLoading] = useState(false);
+  const { selectedOrganization, organizations, setSelectedOrganization } = useOrganization();
+  const { data: session } = useSession();
 
+  // Update selected organization when params.id changes
   useEffect(() => {
-    const organization = organizations.find(org => org.id === params.id);
-    if (organization) {
-      setForm({ 
-        name: organization.name,
-        description: organization.description || ''
-      });
-    } else {
-      // Organization not found, redirect to organizations list
-      router.push(ROUTE_DASHBOARD_ORGANIZATIONS);
+    if (params.id && params.id !== selectedOrganization?.id) {
+      const org = organizations.find(org => org.id === params.id);
+      if (org) {
+        setSelectedOrganization(org);
+      } else {
+        router.push(ROUTE_DASHBOARD_ORGANIZATIONS);
+      }
     }
-  }, [organizations, params.id, router]);
+  }, [params.id]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      await updateOrganization(params.id as string, {
-        name: form.name,
-        description: form.description
-      });
+  // UseEffect to handle the case where the selected organization is not found
+  // or the URL is not the same as the selected organization (organization is changed via the sidebar organization switcher)
+  useEffect(() => {
+    if (!selectedOrganization) {
       router.push(ROUTE_DASHBOARD_ORGANIZATIONS);
-    } catch (error) {
-      console.error('Failed to update organization:', error);
+    } else if (params.id && params.id !== selectedOrganization?.id) {
+      // silently update URL without any page reload or history changes
+      window.history.replaceState({}, '', `/dashboard/organizations/${selectedOrganization?.id}/settings/profile`);
+    }
+  }, [selectedOrganization]);
+
+  // Members state
+  const [members, setMembers] = useState<OrganizationMember[]>([]);
+  const [loadingMembers, setLoadingMembers] = useState(false);
+
+  // Fetch members when component mounts
+  useEffect(() => {
+    if (params.id) {
+      fetchMembers();
+    }
+  }, [params.id]);
+
+  const fetchMembers = async () => {
+    setLoadingMembers(true);
+    try {
+      const response = await fetch(`/api/organization-members?organizationId=${params.id}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch members');
+      }
+
+      setMembers(data);
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : 'Failed to fetch members');
     } finally {
-      setIsLoading(false);
+      setLoadingMembers(false);
     }
   };
+
+  // useMemo prevent flickering when logout and session is not available
+  const isOwner = useMemo(() => Boolean(selectedOrganization?.ownerId === session?.user?.id), [selectedOrganization]);
+  const isAdmin = useMemo(() => Boolean(
+    isOwner || 
+    selectedOrganization?.members?.some(member => hasAdminPermission(member, { userId: session?.user?.id }))
+  ), [selectedOrganization, isOwner]);
 
   return (
     <div className="flex-1 p-8">
@@ -58,57 +91,18 @@ export default function OrganizationSettingsPage() {
           </p>
         </div>
 
-        <div className="bg-white rounded-lg shadow">
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                {t('organizationName')}
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="mt-1 block w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                required
-                placeholder={t('enterOrganizationName')}
-              />
-            </div>
+        <OrganizationDetails isAdmin={isAdmin} />
 
-            <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                {t('organizationDescription')}
-              </label>
-              <textarea
-                name="description"
-                id="description"
-                rows={4}
-                value={form.description || ''}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
-                className="mt-1 block w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                placeholder={t('enterOrganizationDescription')}
-              />
-            </div>
+        <OrganizationMembers
+          members={members}
+          loadingMembers={loadingMembers}
+          afterRemoveMember={fetchMembers}
+          isAdmin={isAdmin}
+        />
 
-            <div className="flex items-center justify-end space-x-4 pt-4 border-t">
-              <button
-                type="button"
-                onClick={() => router.push(ROUTE_DASHBOARD_ORGANIZATIONS)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
-              >
-                {isLoading ? 'Saving...' : 'Save Changes'}
-              </button>
-            </div>
-          </form>
-        </div>
+        {isAdmin && <AddOrganizationMember fetchMembers={fetchMembers} />}
+
+        {!isOwner && <MemberActions members={members} />}
       </div>
     </div>
   );

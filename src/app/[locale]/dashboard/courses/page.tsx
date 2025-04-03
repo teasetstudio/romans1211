@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { useRouter } from "@/i18n/routing";
-import { EventCourse } from "@prisma/client";
+import { Course } from "@prisma/client";
 import { CreateCourseDialog } from "./components/create-course-dialog";
 import Button from "@/components/buttons/Button";
 import { IconPlus } from "@tabler/icons-react";
@@ -20,7 +20,7 @@ export default function CoursesPage() {
   const router = useRouter();
   const { selectedOrganization } = useOrganization();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [courses, setCourses] = useState<EventCourse[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -44,7 +44,7 @@ export default function CoursesPage() {
     fetchCourses();
   }, [selectedOrganization]);
 
-  const handleCreateCourse = async (course: EventCourse) => {
+  const handleCreateCourse = async (course: Course) => {
     setCourses((prev) => [...prev, course]);
     setIsCreateDialogOpen(false);
   };

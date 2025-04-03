@@ -19,7 +19,12 @@ export async function PATCH(
     const { id } = await params;
 
     // Find the material to make original
-    const material = await materialApiService.findByIdAndOwnerId(id, session.user.id, {
+    const material = await materialApiService.findByIdAndUserId({
+      id,
+      userId: session.user.id,
+      orgPermissions: 'manage',
+    },
+    {
       original: {
         include: { translations: true },
       },

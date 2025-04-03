@@ -1,7 +1,8 @@
 'use client';
 
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { IUser } from '@/types/User';
 
 export interface Organization {
   id: string;
@@ -9,6 +10,19 @@ export interface Organization {
   description?: string | null;
   isDefault: boolean;
   ownerId: string;
+  members?: OrganizationMember[];
+}
+
+export interface OrganizationMember {
+  id: string;
+  userId: string;
+  organizationId: string;
+  permissions: string[];
+  isAccepted: boolean;
+  invitedAt: Date;
+  acceptedAt?: Date | null;
+
+  user: IUser;
 }
 
 export interface OrganizationCreateAttr {
@@ -21,7 +35,10 @@ interface OrganizationContextType {
   setOrganizations: (orgs: Organization[]) => void;
   selectedOrganization: Organization | null;
   setSelectedOrganization: (org: Organization, options?: { refresh?: boolean }) => void;
-  updateOrganization: (id: string, data: OrganizationCreateAttr) => Promise<void>;
+  updateOrganization: (id: string, data: OrganizationCreateAttr) => Promise<Organization>;
+  refreshOrganizations: () => Promise<void>;
+  getPendingInvitationsCount: () => number;
+  removeOrganization: (id: string) => void;
   // isLoading: boolean;
   // error: string | null;
 }
@@ -75,7 +92,7 @@ export function OrganizationProvider({ children, organizations: orgs, cookieSele
     if (refresh) router.refresh();
   };
 
-  const updateOrganization = async (id: string, data: { name: string }) => {
+  const updateOrganization = async (id: string, data: { name: string }): Promise<Organization> => {
     try {
       const response = await fetch(`/api/organizations/${id}`, {
         method: 'PUT',
@@ -97,10 +114,51 @@ export function OrganizationProvider({ children, organizations: orgs, cookieSele
       if (selectedOrganization?.id === id) {
         setSelectedOrganization(updatedOrg);
       }
+      return updatedOrg;
     } catch (error) {
       console.error('Error updating organization:', error);
       throw error;
     }
+  };
+
+  const refreshOrganizations = async () => {
+    try {
+      const response = await fetch('/api/organizations');
+      if (!response.ok) throw new Error('Failed to fetch organizations');
+      const updatedOrgs = await response.json();
+      // if updatedOrgs doesn't include selectedOrganization, set selectedOrganization to defaultOrg
+      if (!updatedOrgs.find((org: Organization) => org.id === selectedOrganization?.id)) {
+        const defaultOrg = getDefaultOrg();
+        if (defaultOrg) {
+          setSelectedOrganization(defaultOrg);
+        }
+      }
+
+      setOrganizations(updatedOrgs);
+      router.refresh();
+    } catch (error) {
+      console.error('Error refreshing organizations:', error);
+    }
+  };
+
+  const removeOrganization = (id: string) => {
+    const updatedOrgs = organizations.filter(org => org.id !== id);
+    if (id === selectedOrganization?.id) {
+      const defaultOrg = getDefaultOrg();
+      if (defaultOrg) {
+        handleSetSelectedOrganization(defaultOrg);
+      } else {
+        setSelectedOrganization(null);
+      }
+    }
+    setOrganizations(updatedOrgs);
+  };
+
+  const getPendingInvitationsCount = () => {
+    return organizations.reduce((count, org) => {
+      const pendingInvitation = org.members?.find(m => !m.isAccepted);
+      return count + (pendingInvitation ? 1 : 0);
+    }, 0);
   };
 
   return (
@@ -111,6 +169,9 @@ export function OrganizationProvider({ children, organizations: orgs, cookieSele
         selectedOrganization,
         setSelectedOrganization: handleSetSelectedOrganization,
         updateOrganization,
+        refreshOrganizations,
+        getPendingInvitationsCount,
+        removeOrganization,
         // isLoading,
         // error,
       }}

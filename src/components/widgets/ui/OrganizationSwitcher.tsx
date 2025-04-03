@@ -6,12 +6,14 @@ import { IconCheck, IconClose } from '@/res/icons';
 import { Link } from '@/i18n/routing';
 import { ROUTE_DASHBOARD_ORGANIZATIONS, ROUTE_DASHBOARD_ORGANIZATIONS_NEW } from '@/res/routes';
 import OrganizationIcon from './OrganizationIcon';
+import { useSession } from 'next-auth/react';
 
 const OrganizationSwitcher = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showIcon, setShowIcon] = useState(false);
-  const { organizations, selectedOrganization, setSelectedOrganization } = useOrganization();
+  const { organizations, selectedOrganization, setSelectedOrganization, refreshOrganizations } = useOrganization();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { data: session } = useSession();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -37,14 +39,25 @@ const OrganizationSwitcher = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleOrganizationSelect = (org: Organization) => {
-    setSelectedOrganization(org);
-    closeDropdown();
+  const handleOrganizationSelect = async (org: Organization) => {
+    if (selectedOrganization?.id === org.id) return;
+    try {
+      await setSelectedOrganization(org);
+      await refreshOrganizations();
+    } catch (error) {
+      console.error('Error switching organization:', error);
+    }
   };
 
   const closeDropdown = () => {
     setIsOpen(false);
   };
+
+  // Filter organizations to only show those where the user has accepted their invitation
+  const acceptedOrganizations = organizations.filter(org => {
+    const userMember = org.members?.find(member => member.userId === session?.user?.id);
+    return !(userMember?.isAccepted === false);
+  });
 
   return (
     <div className="relative w-full" ref={dropdownRef}>
@@ -76,7 +89,7 @@ const OrganizationSwitcher = () => {
           </div>
 
           <div className="py-2 max-h-64 overflow-y-auto">
-            {organizations.map((org) => (
+            {acceptedOrganizations.map((org) => (
               <button
                 key={org.id}
                 onClick={() => handleOrganizationSelect(org)}

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import prisma from '@/lib/prisma';
 import { authOptions } from '@/lib/auth';
+import { Prisma } from '@prisma/client';
 
 // GET /api/tags/search?query=example
 export async function GET(req: NextRequest) {
@@ -17,7 +18,7 @@ export async function GET(req: NextRequest) {
     const organizationId = url.searchParams.get('organizationId');
 
     // Base filter
-    const filter: any = {
+    const filter: Prisma.WtagWhereInput = {
       name: {
         contains: query,
         mode: 'insensitive',

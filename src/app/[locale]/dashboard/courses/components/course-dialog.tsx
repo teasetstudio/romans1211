@@ -4,10 +4,9 @@ import { useTranslations } from "next-intl";
 import { useForm, FormProvider } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { EventCourse } from "@prisma/client";
+import { Course } from "@prisma/client";
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import Input from "@/components/inputs/Input";
-import NumberInput from "@/components/inputs/NumberInput";
 import Button from "@/components/buttons/Button";
 import { DatePicker } from "@/components/inputs/DatePicker";
 import { NAMESPACE_DASHBOARD_COURSES } from "@/res/namespaces";
@@ -18,7 +17,6 @@ const courseSchema = z.object({
   location: z.string().optional(),
   startDate: z.date(),
   endDate: z.date().optional().nullable(),
-  defaultDuration: z.number().min(1).max(1440), // Max 24 hours in minutes
 });
 
 type CourseFormData = z.infer<typeof courseSchema>;
@@ -26,9 +24,9 @@ type CourseFormData = z.infer<typeof courseSchema>;
 interface CourseDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (course: EventCourse) => void;
+  onSubmit: (course: Course) => void;
   organizationId?: string;
-  course?: EventCourse;
+  course?: Course;
   mode: 'create' | 'edit';
 }
 
@@ -49,14 +47,12 @@ export function CourseDialog({
       location: course.location || "",
       startDate: new Date(course.startDate),
       endDate: course.endDate ? new Date(course.endDate) : null,
-      defaultDuration: course.defaultDuration,
     } : {
       title: "",
       description: "",
       location: "",
       startDate: new Date(),
       endDate: null,
-      defaultDuration: 60,
     },
   });
 
@@ -133,13 +129,6 @@ export function CourseDialog({
                 selected={endDate || null}
                 onChange={(date) => methods.setValue("endDate", date)}
                 isClearable
-              />
-
-              <NumberInput
-                name="defaultDuration"
-                placeholder={t("fields.defaultDuration")}
-                min={1}
-                max={1440}
               />
 
               <div className="flex justify-end gap-3 pt-2">

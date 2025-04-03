@@ -28,6 +28,7 @@ const TextEditor = ({ content, onChange }: TextEditorProps) => {
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML())
     },
+    immediatelyRender: false,
     extensions: [
       StarterKit,
       TextAlign.configure({
@@ -80,8 +81,8 @@ const TextEditor = ({ content, onChange }: TextEditorProps) => {
       </div>
 
       <div className="flex-grow min-h-[300px]">
-        <EditorContent 
-          editor={editor} 
+        <EditorContent
+          editor={editor}
           className="prose max-w-none min-h-[200px] focus:outline-none [&_.ProseMirror]:focus:outline-none [&_ul]:list-disc [&_ul]:pl-[40px] [&_ol]:list-decimal [&_ol]:pl-[40px]"
         />
       </div>
