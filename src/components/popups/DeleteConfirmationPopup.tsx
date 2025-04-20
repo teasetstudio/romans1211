@@ -35,9 +35,7 @@ export default function DeleteConfirmationPopup({
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <DialogPanel className="w-full max-w-sm bg-white rounded-xl p-6 shadow-xl">
           <div className="flex flex-col gap-6">
-            <div className="text-sm text-gray-600">
-              {confirmText}
-            </div>
+            <div className="text-sm text-gray-600" dangerouslySetInnerHTML={{ __html: confirmText }} />
             
             <div className="flex items-center justify-end gap-3">
               <button

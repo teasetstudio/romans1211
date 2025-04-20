@@ -21,8 +21,7 @@ export default async function MaterialTranslatePage({ params }: IdAndTypeParams)
   if (!isValidMaterialType(type)) notFound();
 
   // Dynamic model selection based on type
-  const material = await materialService.findByTypeAndIdAndOwnerId<Included>(type, id, session.user.id, {
-    organization: true, 
+  const material = await materialService.findByTypeAndIdAndUserId<Included>(type, id, session.user.id, {
     tags: true, 
   });
 

@@ -3,11 +3,12 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { hash, compare } from 'bcryptjs';
 import prisma from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 
 export async function PUT(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.email) {
       return NextResponse.json(
         { message: 'You must be logged in.' },
@@ -39,7 +40,7 @@ export async function PUT(req: Request) {
     }
 
     // Prepare update data
-    const updateData: any = { name };
+    const updateData: Prisma.UserUpdateInput = { name };
     
     // If new password is provided, hash it
     if (newPassword) {

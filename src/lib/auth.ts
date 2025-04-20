@@ -3,6 +3,7 @@ import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import prisma from '@/lib/prisma';
 import bcrypt from "bcryptjs";
+import { organizationService } from "./OrganizationServiceForSSR";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -40,13 +41,7 @@ export const authOptions: NextAuthOptions = {
           },
         });
 
-        await prisma.organization.create({
-          data: {
-            name: profile.name,
-            isDefault: true,
-            ownerId: user.id,
-          },
-        });
+        await organizationService.createOrganization({ name: profile.name, ownerId: user.id, isDefault: true });
 
         return {
           id: user.id,

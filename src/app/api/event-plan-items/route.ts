@@ -3,66 +3,7 @@ import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { EventPlanItemType } from "@prisma/client";
-import { AsyncIdParam } from "@/types/Params";
-
-// GET /api/event-plan-items - Get all plan items for an event
-export async function GET(
-  request: NextRequest,
-) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Check if the event exists and user has access
-    // const event = await prisma.event.findUnique({
-    //   where: { id: eventId },
-    //   include: {
-    //     members: {
-    //       where: { userId: session.user.id },
-    //     },
-    //   },
-    // });
-
-    // if (!event) {
-    //   return NextResponse.json({ error: "Event not found" }, { status: 404 });
-    // }
-
-    // if (event.members.length === 0) {
-    //   // Check if user is a member of the organization
-    //   const orgMember = await prisma.organizationMember.findFirst({
-    //     where: {
-    //       userId: session.user.id,
-    //       organizationId: event.organizationId,
-    //     },
-    //   });
-
-    //   if (!orgMember) {
-    //     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    //   }
-    // }
-
-    // Get all plan items for the event
-    const planItems = await prisma.eventPlanItem.findMany({
-      where: { eventId: "asd" },
-      include: {
-        song: true,
-        text: true,
-        game: true,
-      },
-      orderBy: { order: "asc" },
-    });
-
-    return NextResponse.json(planItems);
-  } catch (error) {
-    console.error("Error fetching event plan items:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch event plan items" },
-      { status: 500 }
-    );
-  }
-}
+import { ORG_EDIT_PERMISSIONS } from "@/lib/permissions";
 
 // POST /api/event-plan-items - Create a new plan item for an event
 export async function POST(request: NextRequest) {
@@ -101,11 +42,28 @@ export async function POST(request: NextRequest) {
 
     // Check if the event exists and user has access
     const event = await prisma.event.findUnique({
-      where: { id: eventId },
+      where: {
+        id: eventId,
+        organization: {
+          members: {
+            some: {
+              userId: session.user.id,
+              permissions: { hasSome: ORG_EDIT_PERMISSIONS }
+            }
+          }
+        },
+      },
+      include: {
+        organization: {
+          include: {
+            members: true
+          }
+        },
+      },
     });
 
     if (!event) {
-      return NextResponse.json({ error: "Event not found" }, { status: 404 });
+      return NextResponse.json({ error: "Event not found or don't have permission" }, { status: 404 });
     }
 
     // Delete existing items for the event
@@ -122,6 +80,7 @@ export async function POST(request: NextRequest) {
       eventId,
       type: data.type.toUpperCase() as EventPlanItemType,
       title: data.title,
+      description: data.description || null,
       duration: data.duration || 0,
       order: data.order,
       songId: data.songId || null,

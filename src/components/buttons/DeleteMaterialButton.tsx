@@ -1,9 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Dialog } from '@headlessui/react';
 import { IconTrash } from '@/res/icons';
 import { useRouter } from 'next/navigation';
+import { userInOrganizationData } from '@/utils/permissions';
+import { useSession } from "next-auth/react";
+import { useOrganization } from '../contexts/OrganizationContext';
 
 interface DeleteMaterialButtonProps {
   materialId: string;
@@ -17,6 +20,8 @@ export default function DeleteMaterialButton({
   translationsCount = 0,
 }: DeleteMaterialButtonProps) {
   const router = useRouter();
+  const { selectedOrganization } = useOrganization();
+  const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -51,6 +56,17 @@ export default function DeleteMaterialButton({
       setIsSubmitting(false);
     }
   };
+
+  const { hasDeletePermission } = useMemo(() => 
+    userInOrganizationData(session?.user?.id ?? '', selectedOrganization), 
+    [session?.user?.id, selectedOrganization]
+  );
+
+  if (!selectedOrganization) {
+    return null;
+  }
+
+  if (!hasDeletePermission) return null;
 
   return (
     <>

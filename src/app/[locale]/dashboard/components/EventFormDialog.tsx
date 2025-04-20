@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { useForm, FormProvider } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Event, EventCourse } from "@prisma/client";
+import { Event, Course } from "@prisma/client";
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
@@ -31,7 +31,7 @@ interface EventFormDialogProps {
   onClose: () => void;
   onSubmit?: (response: Event) => void;
   // For create mode
-  course?: EventCourse;
+  course?: Course;
   // For edit mode
   event?: Event;
 }
@@ -61,10 +61,8 @@ export default function EventFormDialog({
     }
 
     // Create mode
-    const defaultStartTime = new Date();
-    const defaultEndTime = course 
-      ? addMinutes(defaultStartTime, course.defaultDuration)
-      : addMinutes(defaultStartTime, 60); // 1 hour default if no course
+    const defaultStartTime = course ? new Date(course.startDate) : new Date();
+    const defaultEndTime = addMinutes(defaultStartTime, 60); // 1 hour default if no course
 
     return {
       title: course?.title || "",

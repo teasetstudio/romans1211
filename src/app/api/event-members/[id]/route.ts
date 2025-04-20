@@ -77,7 +77,7 @@ export async function PUT(
       );
     }
 
-    if (member.organizationMember.user.id === organization.ownerId) {
+    if (member.organizationMember.userId === organization.ownerId) {
       return NextResponse.json(
         { error: "Cannot change role of organization owner" },
         { status: 400 }
@@ -97,7 +97,6 @@ export async function PUT(
                 email: true,
               },
             },
-            role: true,
           },
         },
       },
@@ -180,7 +179,7 @@ export async function DELETE(
       );
     }
 
-    if (member.organizationMember.user.id === organization.ownerId) {
+    if (member.organizationMember.userId === organization.ownerId) {
       return NextResponse.json(
         { error: "Cannot remove organization owner" },
         { status: 400 }

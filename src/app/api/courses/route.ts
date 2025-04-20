@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { z } from "zod";
+import { ORG_CREATE_PERMISSIONS, ORG_READ_PERMISSIONS } from "@/lib/permissions";
 
 // Schema for creating an event blueprint
 const createEventBlueprintSchema = z.object({
@@ -11,11 +12,10 @@ const createEventBlueprintSchema = z.object({
   organizationId: z.string(),
   startDate: z.string().transform((str) => new Date(str)),
   endDate: z.string().nullable().optional().transform((str) => str ? new Date(str) : null),
-  defaultDuration: z.number().int().min(1),
   location: z.string().optional(),
 });
 
-// GET /api/event-blueprints
+// GET /api/courses
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -26,40 +26,40 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const organizationId = searchParams.get("organizationId");
     const courseId = searchParams.get("id");
-    console.log("organizationId", organizationId)
 
     if (courseId) {
-      // Get single event blueprint
-      const blueprint = await prisma.eventCourse.findUnique({
-        where: { id: courseId },
+      // Get single course
+      const course = await prisma.course.findUnique({
+        where: {
+          id: courseId,
+          organization: {
+            members: {
+              some: {
+                userId: session.user.id,
+                permissions: { hasSome: ORG_READ_PERMISSIONS }
+              }
+            }
+          },
+        },
         include: {
           events: true,
-          // members: {
-          //   include: {
-          //     organizationMember: {
-          //       include: {
-          //         user: {
-          //           select: {
-          //             id: true,
-          //             name: true,
-          //             email: true,
-          //           },
-          //         },
-          //       },
-          //     },
-          //   },
-          // },
+          organization: {
+            include: {
+              members: true,
+            },
+          },
         },
       });
 
-      if (!blueprint) {
+      if (!course) {
         return NextResponse.json(
-          { error: "Blueprint not found" },
+          { error: "Course not found or unauthorized" },
           { status: 404 }
         );
       }
 
-      return NextResponse.json(blueprint);
+
+      return NextResponse.json(course);
     }
 
     // Get all blueprints for organization
@@ -70,35 +70,23 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const courses = await prisma.eventCourse.findMany({
+    const hasReadPermission = await prisma.organizationMember.findFirst({
       where: {
-        organizationId,
-        // members: {
-        //   some: {
-        //     organizationMember: {
-        //       user: { id: session.user.id },
-        //     },
-        //   },
-        // },
+        organizationId: organizationId,
+        userId: session.user.id,
+        permissions: { hasSome: ORG_READ_PERMISSIONS }
       },
-      // include: {
-      //   events: true,
-      //   members: {
-      //     include: {
-      //       organizationMember: {
-      //         include: {
-      //           user: {
-      //             select: {
-      //               id: true,
-      //               name: true,
-      //               email: true,
-      //             },
-      //           },
-      //         },
-      //       },
-      //     },
-      //   },
-      // },
+    });
+
+    if (!hasReadPermission) {
+      return NextResponse.json(
+        { error: "No access to this organization" },
+        { status: 403 }
+      );
+    }
+
+    const courses = await prisma.course.findMany({
+      where: { organizationId },
     });
 
     return NextResponse.json(courses);
@@ -111,7 +99,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/event-blueprints
+// POST /api/courses
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -123,7 +111,6 @@ export async function POST(request: NextRequest) {
     let json;
     try {
       json = await request.json();
-      console.log('Received request payload:', json);
     } catch (error) {
       console.error('Error parsing request body:', error);
       return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 });
@@ -137,10 +124,11 @@ export async function POST(request: NextRequest) {
     const validatedData = createEventBlueprintSchema.parse(json);
 
     // Check if user has access to the organization
-    const userMembership = await prisma.organizationMember.findFirst({
+    const hasCreatePermission = await prisma.organizationMember.findFirst({
       where: {
         organizationId: validatedData.organizationId,
-        user: { id: userId },
+        userId: userId,
+        permissions: { hasSome: ORG_CREATE_PERMISSIONS }
       },
     });
 
@@ -149,7 +137,7 @@ export async function POST(request: NextRequest) {
       where: { id: validatedData.organizationId, ownerId: userId },
     });
 
-    if (!userMembership && !organization) {
+    if (!hasCreatePermission && !organization) {
       return NextResponse.json(
         { error: "No access to this organization" },
         { status: 403 }
@@ -157,40 +145,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Create blueprint
-    const blueprint = await prisma.eventCourse.create({
-      data: {
-        ...validatedData,
-      //   members: {
-      //     create: {
-      //       role: "ADMIN",
-      //       organizationMember: {
-      //         connect: {
-      //           userId_organizationId: {
-      //             userId,
-      //             organizationId: validatedData.organizationId,
-      //           },
-      //         },
-      //       },
-      //     },
-      //   },
-      // },
-      // include: {
-      //   members: {
-      //     include: {
-      //       organizationMember: {
-      //         include: {
-      //           user: {
-      //             select: {
-      //               id: true,
-      //               name: true,
-      //               email: true,
-      //             },
-      //           },
-      //         },
-      //       },
-      //     },
-      //   },
-      },
+    const blueprint = await prisma.course.create({
+      data: validatedData,
     });
 
     return NextResponse.json(blueprint, { status: 201 });

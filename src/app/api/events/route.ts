@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { z } from "zod";
+import { Prisma } from '@prisma/client';
 
 // Schema for creating an event
 const createEventSchema = z.object({
@@ -100,7 +101,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const where: any = { organizationId };
+    const where: Prisma.EventWhereInput = { organizationId };
     
     if (courseId) {
       where.courseId = courseId;

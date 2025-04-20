@@ -19,12 +19,17 @@ export async function PATCH(
     const { isPublic } = await req.json();
 
     // Verify material exists and belongs to user's organization
-    const material = await materialApiService.findByIdAndOwnerId(id, session.user.id, {
+    const material = await materialApiService.findByIdAndUserId({
+      id,
+      userId: session.user.id,
+      orgPermissions: 'manage',
+    },
+    {
       translations: true,
     });
 
     if (!material) {
-      return NextResponse.json({ error: 'Material not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Material not found or unauthorized' }, { status: 404 });
     }
 
     const originalId = material.originalId || material.id;

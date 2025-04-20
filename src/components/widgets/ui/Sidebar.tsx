@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Link } from '@/i18n/routing';
 import { useOrganization } from '@/components/contexts/OrganizationContext';
 
@@ -16,11 +16,8 @@ interface IProps {
 
 const Sidebar = ({ children }: IProps) => {
   const [isExpanded, setIsExpanded] = useState(false)
-  const { selectedOrganization } = useOrganization();
-
-  // useEffect(() => {
-    
-  // }, [isExpanded])
+  const { selectedOrganization, getPendingInvitationsCount } = useOrganization();
+  const pendingInvitationsCount = getPendingInvitationsCount();
 
   return (
     <div className="flex h-screen w-screen bg-gray-100">
@@ -49,7 +46,7 @@ const Sidebar = ({ children }: IProps) => {
         <div className="flex flex-col flex-1 overflow-hidden bg-gray-50">
           <div className="flex flex-col flex-1 overflow-y-auto bg-gradient-to-b from-dark to-primary p-2 gap-2 rounded-2xl">
             <div className='flex-auto'>
-              <div className="pb-2 border-b mb-2">
+              <div className="pb-2 border-b mb-2 relative">
                 {isExpanded
                   ? <OrganizationSwitcher />
                   : <LinkItem 
@@ -60,6 +57,11 @@ const Sidebar = ({ children }: IProps) => {
                       setIsExpanded={setIsExpanded} 
                     />
                 }
+                {pendingInvitationsCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {pendingInvitationsCount}
+                  </span>
+                )}
               </div>
               <LinkItem href='/' text='Home' icon={IconHome} isExpanded={isExpanded} />
               {/* <div className={`text-gray-300 my-5 ${!isExpanded && 'md:hidden'}`}>Organization</div> */}
@@ -106,38 +108,11 @@ interface ILinkProps {
   setIsExpanded?: (arg: boolean) => void
 }
 
-const LinkItem = ({ href, text, icon: Icon, isExpanded = true, setIsExpanded }: ILinkProps) => {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 840);
-    };
-
-    // Initial check
-    checkMobile();
-
-    // Add resize listener
-    window.addEventListener('resize', checkMobile);
-
-    // Cleanup
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  const onClick = () => {
-    // Only close sidebar on mobile screens
-    if (isMobile && isExpanded && setIsExpanded) {
-      setIsExpanded(false);
-    }
-  };
-
+const LinkItem = ({ href, text, icon: Icon, isExpanded = true }: ILinkProps) => {
   return (
     <Link
       href={href}
       className="flex items-center gap-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded-lg p-2 transition-colors"
-      // onClick={onClick}
     >
       <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
         <Icon className="w-full h-full" />

@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { z } from "zod";
 import { AsyncIdParam } from "@/types/Params";
+import { ORG_DELETE_PERMISSIONS, ORG_EDIT_PERMISSIONS } from "@/lib/permissions";
 
 // Schema for updating an event
 const updateEventSchema = z.object({
@@ -52,17 +53,29 @@ export async function PUT(
 
     // Check if event exists and user has access
     const event = await prisma.event.findUnique({
-      where: { id },
+      where: {
+        id,
+        organization: {
+          members: {
+            some: {
+              userId: session.user.id,
+              permissions: {
+                hasSome: ORG_EDIT_PERMISSIONS,
+              },
+            },
+          },
+        },
+      },
       include: {
-        // members: {
-        //   include: {
-        //     organizationMember: {
-        //       include: {
-        //         user: true,
-        //       },
-        //     },
-        //   },
-        // },
+        organization: {
+          include: {
+            members: {
+              where: {
+                userId: session.user.id,
+              },
+            },
+          },
+        },
         eventPlanItems: true,
       },
     });
@@ -74,20 +87,8 @@ export async function PUT(
       );
     }
 
-    // Check if user is a member of the event
-    // const isMember = event.members.some(
-    //   (member) => member.organizationMember.user.email === session.user.email
-    // );
-
-    // if (!isMember) {
-    //   return NextResponse.json(
-    //     { error: "No access to this event" },
-    //     { status: 403 }
-    //   );
-    // }
-
     // Update event and handle plan items if provided
-    const updateData: any = {
+    const updateData = {
       ...validatedData,
       eventPlanItems: undefined, // Handle plan items separately
     };
@@ -135,21 +136,6 @@ export async function PUT(
       data: updateData,
       include: {
         course: true,
-        // members: {
-        //   include: {
-        //     organizationMember: {
-        //       include: {
-        //         user: {
-        //           select: {
-        //             id: true,
-        //             name: true,
-        //             email: true,
-        //           },
-        //         },
-        //       },
-        //     },
-        //   },
-        // },
         eventPlanItems: {
           include: {
             song: true,
@@ -191,19 +177,32 @@ export async function DELETE(
 
     // Check if event exists and user has access
     const event = await prisma.event.findUnique({
-      where: { id },
+      where: {
+        id,
+        organization: {
+          members: {
+            some: {
+              userId: session.user.id,
+              permissions: {
+                hasSome: ORG_DELETE_PERMISSIONS,
+              },
+            },
+          },
+        },
+      },
       include: {
-        // members: {
-        //   include: {
-        //     organizationMember: {
-        //       include: {
-        //         user: true,
-        //       },
-        //     },
-        //   },
-        // },
+        organization: {
+          include: {
+            members: {
+              where: {
+                userId: session.user.id,
+              },
+            },
+          },
+        },
       },
     });
+
 
     if (!event) {
       return NextResponse.json(
@@ -212,23 +211,7 @@ export async function DELETE(
       );
     }
 
-    // Check if user is an admin member of the event
-    // const userMembership = event.members.find(
-    //   (member) =>
-    //     member.organizationMember.user.email === session.user.email &&
-    //     member.role === "ADMIN"
-    // );
-
-    // if (!userMembership) {
-    //   return NextResponse.json(
-    //     { error: "No permission to delete this event" },
-    //     { status: 403 }
-    //   );
-    // }
-
-    await prisma.event.delete({
-      where: { id },
-    });
+    // await prisma.event.delete({ where: { id } });
 
     return NextResponse.json({ success: true });
   } catch (error) {

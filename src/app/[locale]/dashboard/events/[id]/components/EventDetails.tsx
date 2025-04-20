@@ -1,63 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Event } from "@prisma/client";
-import { useForm, FormProvider } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import Input from "@/components/inputs/Input";
 import Button from "@/components/buttons/Button";
-import { DateTimePicker } from "@/components/inputs/DateTimePicker";
 import { toast } from "react-hot-toast";
 import Link from "next/link";
+import { Text } from "@/components/typo/Text";
 import { IconEdit, IconTrash } from "@/res/icons";
 import EventFormDialog from "@/app/[locale]/dashboard/components/EventFormDialog";
-
-const eventSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  description: z.string().optional().nullable(),
-  location: z.string().optional().nullable(),
-  startTime: z.date(),
-  endTime: z.date(),
-});
-
-type EventFormData = z.infer<typeof eventSchema>;
+import { useOrganization } from "@/components/contexts/OrganizationContext";
+import { userInOrganizationData } from "@/utils/permissions";
+import { Session } from "next-auth";
 
 interface EventDetailsProps {
   event: Event;
+  session: Session
 }
 
-export default function EventDetails({ event: initialEvent }: EventDetailsProps) {
+export default function EventDetails({ event: initialEvent, session }: EventDetailsProps) {
   const t = useTranslations("dashboard_events");
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [event, setEvent] = useState(initialEvent);
+  
+  const { selectedOrganization } = useOrganization();
 
-  const methods = useForm<EventFormData>({
-    resolver: zodResolver(eventSchema),
-    defaultValues: {
-      title: event.title,
-      description: event.description || "",
-      location: event.location || "",
-      startTime: new Date(event.startTime),
-      endTime: new Date(event.endTime),
-    },
-  });
-
-  const startTime = methods.watch("startTime");
-
-  // Helper function to update end time when start time changes
-  const updateEndTime = (newStartTime: Date) => {
-    const currentEndTime = methods.getValues("endTime");
-    const currentDuration = currentEndTime.getTime() - methods.getValues("startTime").getTime();
-
-    // Preserve the duration when changing the start time
-    const newEndTime = new Date(newStartTime.getTime() + currentDuration);
-    methods.setValue("endTime", newEndTime);
-  };
+  const { hasEditPermission, hasDeletePermission } = useMemo(() => 
+    userInOrganizationData(session?.user?.id ?? '', selectedOrganization), 
+    [session?.user?.id, selectedOrganization]
+  );
 
   const handleSubmit = (updatedEvent: Event) => {
     setEvent(updatedEvent);
@@ -88,9 +62,17 @@ export default function EventDetails({ event: initialEvent }: EventDetailsProps)
     }
   };
 
+  if (!selectedOrganization) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <Text className="text-muted-foreground">Select Organization</Text>
+      </div>
+    );
+  }
+
   return (
     <>
-      <div className="bg-white shadow-sm border-b border-gray-200 mb-6">
+      <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -111,6 +93,9 @@ export default function EventDetails({ event: initialEvent }: EventDetailsProps)
                     </span>
                   )}
                 </div>
+                {event.description && (
+                  <p className="mt-1 text-sm text-gray-600 line-clamp-1">{event.description}</p>
+                )}
                 <div className="mt-1 flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-gray-500">
                   <div className="flex items-center gap-1">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -134,26 +119,29 @@ export default function EventDetails({ event: initialEvent }: EventDetailsProps)
                     </div>
                   )}
                 </div>
-                {event.description && (
-                  <p className="mt-1 text-sm text-gray-600 line-clamp-1">{event.description}</p>
-                )}
               </div>
               <div className="flex shrink-0 gap-2 self-start sm:self-center">
-                <Button
-                  onClick={() => setIsEditing(true)}
-                  className="inline-flex items-center text-gray-700 hover:text-primary px-3 py-1 rounded-md transition-colors gap-1.5 text-sm border border-transparent hover:border-primary"
-                >
-                  <IconEdit className="w-4 h-4" />
-                  <span>{t("edit")}</span>
-                </Button>
-                <Button
-                  onClick={handleDelete}
-                  className="inline-flex items-center text-gray-700 hover:text-red-600 px-3 py-1 rounded-md transition-colors gap-1.5 text-sm border border-transparent hover:border-red-600"
-                  disabled={isDeleting}
-                >
-                  <IconTrash className="w-4 h-4" />
-                  <span>{isDeleting ? t("deleting") : t("delete")}</span>
-                </Button>
+                {hasEditPermission &&
+                  <Button
+                    onClick={() => setIsEditing(true)}
+                    paddingClass="py-3 px-4"
+                    className="inline-flex items-center text-gray-700 hover:text-primary rounded-md transition-colors gap-1.5 text-sm border border-transparent hover:border-primary"
+                  >
+                    <IconEdit className="w-4 h-4" />
+                    <span>{t("edit")}</span>
+                  </Button>
+                }
+                {hasDeletePermission &&
+                  <Button
+                    onClick={handleDelete}
+                    paddingClass="py-3 px-4"
+                    className="inline-flex items-center text-gray-700 hover:text-red-600 rounded-md transition-colors gap-1.5 text-sm border border-transparent hover:border-red-600"
+                    disabled={isDeleting}
+                  >
+                    <IconTrash className="w-4 h-4" />
+                    <span>{isDeleting ? t("deleting") : t("delete")}</span>
+                  </Button>
+                }
               </div>
             </div>
           </div>

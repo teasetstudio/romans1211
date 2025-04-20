@@ -4,6 +4,44 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { z } from "zod";
 import { AsyncIdParam } from "@/types/Params";
+import { ORG_DELETE_PERMISSIONS } from "@/lib/permissions";
+
+// GET /api/courses/[id]
+export async function GET(
+  request: NextRequest,
+  { params }: { params: AsyncIdParam }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { id } = await params;
+
+    const course = await prisma.course.findUnique({
+      where: { id },
+      include: {
+        events: true,
+      },
+    });
+
+    if (!course) {
+      return NextResponse.json(
+        { error: "Course not found or unauthorized" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(course);
+  } catch (error) {
+    console.error("Error in GET /api/courses/[id]:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
 
 // Schema for updating an event blueprint
 const updateCoursesSchema = z.object({
@@ -11,7 +49,6 @@ const updateCoursesSchema = z.object({
   description: z.string().optional(),
   startDate: z.string().transform((str) => new Date(str)),
   endDate: z.string().nullable().transform((str) => str ? new Date(str) : null),
-  defaultDuration: z.number().int().min(1),
   location: z.string().optional(),
 });
 
@@ -31,7 +68,7 @@ export async function PUT(
     const validatedData = updateCoursesSchema.parse(json);
 
     // Check if course exists and user has access
-    const course = await prisma.eventCourse.findUnique({
+    const course = await prisma.course.findUnique({
       where: { id },
     });
 
@@ -42,7 +79,7 @@ export async function PUT(
       );
     }
 
-    const updatedCourse = await prisma.eventCourse.update({
+    const updatedCourse = await prisma.course.update({
       where: { id },
       data: validatedData,
     });
@@ -72,21 +109,28 @@ export async function DELETE(
     }
 
     const { id } = await params;
+    const { searchParams } = new URL(request.url);
+    const force = searchParams.get("force") === "true";
 
     // Check if course exists and user has access
-    const course = await prisma.eventCourse.findUnique({
-      where: { id },
-      // include: {
-      //   members: {
-      //     include: {
-      //       organizationMember: {
-      //         include: {
-      //           user: true,
-      //         },
-      //       },
-      //     },
-      //   },
-      // },
+    const course = await prisma.course.findUnique({
+      where: {
+        id,
+        organization: {
+          members: {
+            some: {
+              userId: session.user.id,
+              permissions: { hasSome: ORG_DELETE_PERMISSIONS }
+            }
+          },
+        },
+      },
+      include: {
+        events: true,
+        organization: {
+          include: { members: true },
+        },
+      },
     });
 
     if (!course) {
@@ -96,23 +140,15 @@ export async function DELETE(
       );
     }
 
-    // Check if user is an admin member of the blueprint
-    // const userMembership = blueprint.members.find(
-    //   (member) =>
-    //     member.organizationMember.user.email === session.user.email &&
-    //     member.role === "ADMIN"
-    // );
+    // Check if course has any events
+    if (course.events.length > 0 && !force) {
+      return NextResponse.json(
+        { error: "Cannot delete course with associated events", code: "COURSE_HAS_EVENTS" },
+        { status: 400 }
+      );
+    }
 
-    // if (!userMembership) {
-    //   return NextResponse.json(
-    //     { error: "No permission to delete this event blueprint" },
-    //     { status: 403 }
-    //   );
-    // }
-
-    await prisma.eventCourse.delete({
-      where: { id },
-    });
+    await prisma.course.delete({ where: { id } });
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -20,12 +20,17 @@ export async function PUT(
     const { id } = await params;
 
     // Verify material belongs to user's organization
-    const material = await materialApiService.findByIdAndOwnerId(id, session.user.id, {
+    const material = await materialApiService.findByIdAndUserId({
+      id,
+      userId: session.user.id,
+      orgPermissions: 'edit',
+    },
+    {
       tags: true,
     });
 
     if (!material) {
-      return NextResponse.json({ error: 'Material not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Material not found or unauthorized' }, { status: 404 });
     }
 
     // If trying to make a translation public, validate that the original is public
@@ -85,7 +90,12 @@ export async function DELETE(
     const deleteAll = searchParams.get('deleteAll') === 'true';
 
     // Find the material and check if it has translations
-    const material = await materialApiService.findByIdAndOwnerId(id, session.user.id, {
+    const material = await materialApiService.findByIdAndUserId({
+      id,
+      userId: session.user.id,
+      orgPermissions: 'delete',
+    },
+    {
       translations: true,
     });
 

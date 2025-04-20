@@ -5,10 +5,10 @@
 
 */
 -- CreateEnum
-CREATE TYPE "EventPlanItemType" AS ENUM ('SONG', 'TEXT', 'GAME', 'COMMENT');
+CREATE TYPE "EventPlanItemType" AS ENUM ('SONG', 'TEXT', 'GAME', 'COMMENT', 'CUSTOM');
 
 -- AlterTable
-ALTER TABLE "EventBlueprint" DROP COLUMN "recurrenceRule";
+-- ALTER TABLE "Course" DROP COLUMN "recurrenceRule";
 
 -- CreateTable
 CREATE TABLE "EventPlanItem" (

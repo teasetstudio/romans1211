@@ -6,6 +6,7 @@ import { ROUTE_DASHBOARD_LIBRARY } from '@/res/routes';
 import { TMaterialType } from '@/types/Materials';
 import { getDashboardEditMaterialUrl } from '@/utils/urls';
 import DeleteMaterialButton from '@/components/buttons/DeleteMaterialButton';
+import LibraryClientButton from './ClientButton';
 
 interface MaterialDashboardHeaderProps {
   materialId: string;
@@ -34,13 +35,15 @@ export default function MaterialDashboardHeader({
         </Link>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Link
+          <LibraryClientButton
             href={editMaterialUrl}
+            permission='hasEditPermission'
             className="inline-flex items-center justify-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-primary hover:bg-secondary rounded-[12px] transition-colors"
           >
             <IconPencil size={16} />
             {t('edit')}
-          </Link>
+          </LibraryClientButton>
+
           <DeleteMaterialButton 
             materialId={materialId}
             isOriginal={isOriginal}

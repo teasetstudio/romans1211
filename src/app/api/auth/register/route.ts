@@ -6,6 +6,7 @@ import crypto from 'crypto';
 import { VerificationEmailTemplate } from "../../send/templates/verification-email";
 import { defaultResendEmail } from "@/res/consts";
 import { sendEmail } from "@/lib/email";
+import { organizationService } from "@/lib/OrganizationServiceForSSR";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -85,14 +86,8 @@ export async function POST(req: Request) {
       },
     });
 
-    // Create default organization
-    await prisma.organization.create({
-      data: {
-        name,
-        isDefault: true,
-        ownerId: user.id,
-      },
-    });
+
+    await organizationService.createOrganization({ name, ownerId: user.id, isDefault: true });
 
     // Send verification email
     const verificationUrl = `${process.env.NEXTAUTH_URL}/verify-email?token=${verificationToken}`;
