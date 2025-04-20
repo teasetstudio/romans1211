@@ -7,16 +7,17 @@ import { IconTrash } from "@tabler/icons-react";
 import Button from "@/components/buttons/Button";
 import { Text } from "@/components/typo/Text";
 import { NAMESPACE_DASHBOARD_COURSES } from "@/res/namespaces";
-import DeleteConfirmationPopup from "@/components/popups/DeleteConfirmationPopup";
 import { useState } from "react";
+import DeleteConfirmationPopup from "@/components/popups/DeleteConfirmationPopup";
 
 interface CourseListProps {
   courses: Course[];
   onDelete: (id: string, force?: boolean) => void;
   onEdit: (id: string) => void;
+  hasDeletePermission: boolean;
 }
 
-export function CourseList({ courses, onDelete, onEdit }: CourseListProps) {
+export function CourseList({ courses, onDelete, onEdit, hasDeletePermission }: CourseListProps) {
   const t = useTranslations(NAMESPACE_DASHBOARD_COURSES);
   const [courseToDelete, setCourseToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -113,15 +114,17 @@ export function CourseList({ courses, onDelete, onEdit }: CourseListProps) {
                   <Text>{course.location || "-"}</Text>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <div className="flex justify-center">
-                    <Button
-                      bgColor="bg-transparent"
-                      size="sm"
-                      className="text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-full w-10 h-10 flex items-center justify-center transition-all !min-w-0"
-                      onClick={(e) => handleDeleteClick(e, course.id)}
-                    >
-                      <IconTrash size={20} />
-                    </Button>
+                  <div className="flex justify-center min-h-9">
+                    {hasDeletePermission && (
+                      <Button
+                        bgColor="bg-transparent"
+                        size="sm"
+                        className="text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-full w-10 h-10 flex items-center justify-center transition-all !min-w-0"
+                        onClick={(e) => handleDeleteClick(e, course.id)}
+                      >
+                        <IconTrash size={20} />
+                      </Button>
+                    )}
                   </div>
                 </td>
               </tr>

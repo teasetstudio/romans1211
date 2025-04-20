@@ -1,19 +1,21 @@
 'use client';
 
+import { toast } from 'react-hot-toast';
+import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
-import { NAMESPACE_DASHBOARD } from '@/res/namespaces';
 import { useEffect, useState, useMemo } from 'react';
+import { Text } from "@/components/typo/Text";
 import { useParams } from 'next/navigation';
+import { useRouter } from '@/i18n/routing';
+import { NAMESPACE_DASHBOARD } from '@/res/namespaces';
+import { ROUTE_DASHBOARD_ORGANIZATIONS } from '@/res/routes';
+import { userInOrganizationData } from '@/utils/permissions';
 import { OrganizationMember, useOrganization } from '@/components/contexts/OrganizationContext';
+
+import MemberActions from './components/MemberActions';
 import OrganizationDetails from './components/OrganizationDetails';
 import OrganizationMembers from './components/OrganizationMembers';
 import AddOrganizationMember from './components/AddOrganizationMember';
-import MemberActions from './components/MemberActions';
-import { toast } from 'react-hot-toast';
-import { useSession } from 'next-auth/react';
-import { useRouter } from '@/i18n/routing';
-import { ROUTE_DASHBOARD_ORGANIZATIONS } from '@/res/routes';
-import { hasAdminPermission } from '@/utils/permissions';
 
 export default function OrganizationSettingsPage() {
   const t = useTranslations(NAMESPACE_DASHBOARD);
@@ -74,12 +76,18 @@ export default function OrganizationSettingsPage() {
     }
   };
 
-  // useMemo prevent flickering when logout and session is not available
-  const isOwner = useMemo(() => Boolean(selectedOrganization?.ownerId === session?.user?.id), [selectedOrganization]);
-  const isAdmin = useMemo(() => Boolean(
-    isOwner || 
-    selectedOrganization?.members?.some(member => hasAdminPermission(member, { userId: session?.user?.id }))
-  ), [selectedOrganization, isOwner]);
+  if (!selectedOrganization) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <Text className="text-muted-foreground">{t("selectOrganization")}</Text>
+      </div>
+    );
+  }
+
+  const { isOwner, hasAdminPermission } = useMemo(() => 
+    userInOrganizationData(session?.user?.id ?? '', selectedOrganization), 
+    [session?.user?.id, selectedOrganization]
+  );
 
   return (
     <div className="flex-1 p-8">
@@ -91,16 +99,16 @@ export default function OrganizationSettingsPage() {
           </p>
         </div>
 
-        <OrganizationDetails isAdmin={isAdmin} />
+        <OrganizationDetails isAdmin={hasAdminPermission} />
 
         <OrganizationMembers
           members={members}
           loadingMembers={loadingMembers}
           afterRemoveMember={fetchMembers}
-          isAdmin={isAdmin}
+          isAdmin={hasAdminPermission}
         />
 
-        {isAdmin && <AddOrganizationMember fetchMembers={fetchMembers} />}
+        {hasAdminPermission && <AddOrganizationMember fetchMembers={fetchMembers} />}
 
         {!isOwner && <MemberActions members={members} />}
       </div>

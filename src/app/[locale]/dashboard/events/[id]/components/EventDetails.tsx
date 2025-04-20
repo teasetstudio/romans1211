@@ -1,25 +1,45 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Event } from "@prisma/client";
 import Button from "@/components/buttons/Button";
 import { toast } from "react-hot-toast";
 import Link from "next/link";
+import { Text } from "@/components/typo/Text";
 import { IconEdit, IconTrash } from "@/res/icons";
 import EventFormDialog from "@/app/[locale]/dashboard/components/EventFormDialog";
+import { useOrganization } from "@/components/contexts/OrganizationContext";
+import { userInOrganizationData } from "@/utils/permissions";
+import { Session } from "next-auth";
 
 interface EventDetailsProps {
   event: Event;
+  session: Session
 }
 
-export default function EventDetails({ event: initialEvent }: EventDetailsProps) {
+export default function EventDetails({ event: initialEvent, session }: EventDetailsProps) {
   const t = useTranslations("dashboard_events");
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [event, setEvent] = useState(initialEvent);
+  
+  const { selectedOrganization } = useOrganization();
+
+  if (!selectedOrganization) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <Text className="text-muted-foreground">Select Organization</Text>
+      </div>
+    );
+  }
+
+  const { hasEditPermission, hasDeletePermission } = useMemo(() => 
+    userInOrganizationData(session?.user?.id ?? '', selectedOrganization), 
+    [session?.user?.id, selectedOrganization]
+  );
 
   const handleSubmit = (updatedEvent: Event) => {
     setEvent(updatedEvent);
@@ -101,23 +121,27 @@ export default function EventDetails({ event: initialEvent }: EventDetailsProps)
                 </div>
               </div>
               <div className="flex shrink-0 gap-2 self-start sm:self-center">
-                <Button
-                  onClick={() => setIsEditing(true)}
-                  paddingClass="py-3 px-4"
-                  className="inline-flex items-center text-gray-700 hover:text-primary rounded-md transition-colors gap-1.5 text-sm border border-transparent hover:border-primary"
-                >
-                  <IconEdit className="w-4 h-4" />
-                  <span>{t("edit")}</span>
-                </Button>
-                <Button
-                  onClick={handleDelete}
-                  paddingClass="py-3 px-4"
-                  className="inline-flex items-center text-gray-700 hover:text-red-600 rounded-md transition-colors gap-1.5 text-sm border border-transparent hover:border-red-600"
-                  disabled={isDeleting}
-                >
-                  <IconTrash className="w-4 h-4" />
-                  <span>{isDeleting ? t("deleting") : t("delete")}</span>
-                </Button>
+                {hasEditPermission &&
+                  <Button
+                    onClick={() => setIsEditing(true)}
+                    paddingClass="py-3 px-4"
+                    className="inline-flex items-center text-gray-700 hover:text-primary rounded-md transition-colors gap-1.5 text-sm border border-transparent hover:border-primary"
+                  >
+                    <IconEdit className="w-4 h-4" />
+                    <span>{t("edit")}</span>
+                  </Button>
+                }
+                {hasDeletePermission &&
+                  <Button
+                    onClick={handleDelete}
+                    paddingClass="py-3 px-4"
+                    className="inline-flex items-center text-gray-700 hover:text-red-600 rounded-md transition-colors gap-1.5 text-sm border border-transparent hover:border-red-600"
+                    disabled={isDeleting}
+                  >
+                    <IconTrash className="w-4 h-4" />
+                    <span>{isDeleting ? t("deleting") : t("delete")}</span>
+                  </Button>
+                }
               </div>
             </div>
           </div>

@@ -1,13 +1,17 @@
 "use client"
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { DragDropContext, Droppable, Draggable, DropResult, DragStart, DragUpdate } from "@hello-pangea/dnd";
 import { TMaterial, TMaterialType } from "@/types/Materials";
 import { Event, EventPlanItem } from "@prisma/client";
+import { Text } from "@/components/typo/Text";
 import { toast } from "react-hot-toast";
 import EventPlanItemsFilter from "./EventPlanItemsFilter";
 import { IconChevronDown, IconChevronUp } from "@tabler/icons-react";
 import CustomItemModal from "./CustomItemModal";
+import { Session } from "next-auth";
+import { useOrganization } from "@/components/contexts/OrganizationContext";
+import { userInOrganizationData } from "@/utils/permissions";
 
 // Extend the Event type to include eventPlanItems
 interface EventWithPlanItems extends Event {
@@ -39,6 +43,7 @@ type TColumn = (IPlanItem | IMaterialItem)[]
 
 interface IProps {
   event: EventWithPlanItems;
+  session: Session;
 }
 
 interface SaveResponse {
@@ -49,7 +54,7 @@ interface SaveResponse {
 // Create constant for the custom plan item type to avoid mismatches
 const CUSTOM_PLAN_ITEM_TYPE = "CUSTOM";
 
-const EventPlanItems = ({ event }: IProps) => {
+const EventPlanItems = ({ event, session }: IProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<TMaterialType | "all">("all");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -58,6 +63,21 @@ const EventPlanItems = ({ event }: IProps) => {
   const [showCustomItemModal, setShowCustomItemModal] = useState(false);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [expandedDescriptions, setExpandedDescriptions] = useState<Set<string>>(new Set());
+
+  const { selectedOrganization } = useOrganization();
+
+  if (!selectedOrganization) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <Text className="text-muted-foreground">Select Organization</Text>
+      </div>
+    );
+  }
+
+  const { hasEditPermission } = useMemo(() => 
+    userInOrganizationData(session?.user?.id ?? '', selectedOrganization), 
+    [session?.user?.id, selectedOrganization]
+  );
 
   // Fetch materials when filters change
   useEffect(() => {
@@ -445,6 +465,97 @@ const EventPlanItems = ({ event }: IProps) => {
         return 'textId';
     }
   };
+
+  if (!hasEditPermission) {
+    if (columns.planItems.length === 0) {
+      return (
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 mt-2">
+          <div className="bg-white rounded-lg shadow-sm p-3">
+            <h3 className="text-lg font-medium mb-3">Event Plan</h3>
+            <div className="space-y-2">
+              <p>No plan items</p>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 mt-2">
+        <div className="bg-white rounded-lg shadow-sm p-3">
+          <h3 className="text-lg font-medium mb-3">Event Plan</h3>
+          <div className="space-y-2">
+            {columns.planItems.map((item, index) => (
+              <div
+                key={`${item.id}-${index}`}
+                className={`p-2 rounded-lg border ${
+                  item.type === "CUSTOM" 
+                    ? 'bg-amber-50 border-amber-100'
+                    : item.type === 'song'
+                    ? 'bg-purple-50 border-purple-100'
+                    : item.type === 'text'
+                    ? 'bg-blue-50 border-blue-100'
+                    : 'bg-green-50 border-green-100'
+                }`}
+              >
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <div className={`text-sm font-medium ${
+                      item.type === "CUSTOM"
+                        ? 'text-amber-900'
+                        : item.type === 'song'
+                        ? 'text-purple-900'
+                        : item.type === 'text'
+                        ? 'text-blue-900'
+                        : 'text-green-900'
+                    }`}>{item.title}</div>
+                    {item.type === "CUSTOM" && item.description && (
+                      <div className="mt-1">
+                        <div 
+                          className="flex items-center text-xs text-amber-600 cursor-pointer hover:text-amber-800"
+                          onClick={(e) => toggleDescriptionExpansion(item.id, e)}
+                        >
+                          {expandedDescriptions.has(item.id) ? (
+                            <>
+                              <IconChevronUp size={14} className="mr-1" />
+                              <span>Show description</span>
+                            </>
+                          ) : (
+                            <>
+                              <IconChevronDown size={14} className="mr-1" />
+                              <span>Show description</span>
+                            </>
+                          )}
+                        </div>
+                        
+                        {expandedDescriptions.has(item.id) && (
+                          <div 
+                            className="mt-1.5 text-sm text-amber-800 max-h-40 overflow-y-auto p-2 bg-amber-100/50 rounded"
+                            dangerouslySetInnerHTML={{ __html: item.description || "" }}
+                          />
+                        )}
+                      </div>
+                    )}
+                    {item.type !== "CUSTOM" && (
+                      <div className={`text-xs mt-0.5 ${
+                        item.type === 'song'
+                          ? 'text-purple-600'
+                          : item.type === 'text'
+                          ? 'text-blue-600'
+                          : 'text-green-600'
+                      }`}>
+                        {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 mt-2">

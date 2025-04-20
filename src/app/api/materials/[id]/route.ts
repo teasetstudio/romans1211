@@ -23,14 +23,14 @@ export async function PUT(
     const material = await materialApiService.findByIdAndUserId({
       id,
       userId: session.user.id,
-      orgPermissions: 'read',
+      orgPermissions: 'edit',
     },
     {
       tags: true,
     });
 
     if (!material) {
-      return NextResponse.json({ error: 'Material not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Material not found or unauthorized' }, { status: 404 });
     }
 
     // If trying to make a translation public, validate that the original is public

@@ -22,7 +22,6 @@ export default async function Library({ searchParams }: ILibrarySearchParams) {
   const tagsArray = tags ? tags.split(',') : [];
 
   const organization = await organizationService.getSelectedOrganization(session.user.id);
-
   // Can't be, anyway redirect to create org or show a corresponding message
   if (!organization) return null
 

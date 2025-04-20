@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { z } from "zod";
 import { AsyncIdParam } from "@/types/Params";
+import { ORG_DELETE_PERMISSIONS } from "@/lib/permissions";
 
 // GET /api/courses/[id]
 export async function GET(
@@ -27,7 +28,7 @@ export async function GET(
 
     if (!course) {
       return NextResponse.json(
-        { error: "Course not found" },
+        { error: "Course not found or unauthorized" },
         { status: 404 }
       );
     }
@@ -113,20 +114,22 @@ export async function DELETE(
 
     // Check if course exists and user has access
     const course = await prisma.course.findUnique({
-      where: { id },
-      // include: {
-      //   members: {
-      //     include: {
-      //       organizationMember: {
-      //         include: {
-      //           user: true,
-      //         },
-      //       },
-      //     },
-      //   },
-      // },
+      where: {
+        id,
+        organization: {
+          members: {
+            some: {
+              userId: session.user.id,
+              permissions: { hasSome: ORG_DELETE_PERMISSIONS }
+            }
+          },
+        },
+      },
       include: {
         events: true,
+        organization: {
+          include: { members: true },
+        },
       },
     });
 
@@ -137,19 +140,6 @@ export async function DELETE(
       );
     }
 
-    // Check if user is an admin member of the blueprint
-    // const userMembership = blueprint.members.find(
-    //   (member) =>
-    //     member.organizationMember.user.email === session.user.email &&
-    //     member.role === "ADMIN"
-    // );
-
-    // if (!userMembership) {
-    //   return NextResponse.json(
-    //     { error: "No permission to delete this event blueprint" },
-    //     { status: 403 }
-    //   );
-    // }
     // Check if course has any events
     if (course.events.length > 0 && !force) {
       return NextResponse.json(
@@ -158,9 +148,7 @@ export async function DELETE(
       );
     }
 
-    await prisma.course.delete({
-      where: { id },
-    });
+    await prisma.course.delete({ where: { id } });
 
     return NextResponse.json({ success: true });
   } catch (error) {

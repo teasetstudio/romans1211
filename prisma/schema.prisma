@@ -109,6 +109,7 @@ model Organization {
   songs       Song[]
   games       Game[]
   courses     Course[]
+  events      Event[]
   owner       User                @relation(fields: [ownerId], references: [id])
   members     OrganizationMember[]
 
@@ -148,6 +149,7 @@ model Event {
   location          String?          // Can override course location
 
   organizationId    String
+  organization      Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   courseId          String?          // Optional reference to event course
   course            Course?          @relation(fields: [courseId], references: [id])
   isCancelled       Boolean          @default(false) // For cancelling individual occurrences

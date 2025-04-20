@@ -12,7 +12,7 @@ export default function AddOrganizationMember({ fetchMembers }: AddOrganizationM
   const params = useParams();
   const [memberForm, setMemberForm] = useState({
     email: '',
-    permissions: [] as string[]
+    permissions: ["READ"] as string[]
   });
   const [addingMember, setAddingMember] = useState(false);
   
@@ -161,9 +161,9 @@ export default function AddOrganizationMember({ fetchMembers }: AddOrganizationM
                   <label className="flex items-center">
                     <input
                       type="checkbox"
-                      checked={memberForm.permissions.includes("READ")}
-                      onChange={() => togglePermission("READ")}
-                      className="rounded text-blue-600 focus:ring-blue-500 h-4 w-4"
+                      checked={true}
+                      disabled
+                      className="rounded h-4 w-4"
                     />
                     <span className="ml-2 text-sm text-gray-700">Read</span>
                   </label>
@@ -171,7 +171,7 @@ export default function AddOrganizationMember({ fetchMembers }: AddOrganizationM
               </div>
               
               {/* Library permissions */}
-              <div className="bg-gray-50 p-3 rounded-md">
+              {/* <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-medium mb-2 text-gray-800">Library</h3>
                 <div className="space-y-2">
                   <label className="flex items-center">
@@ -229,10 +229,10 @@ export default function AddOrganizationMember({ fetchMembers }: AddOrganizationM
                     <span className="ml-2 text-sm text-gray-700">Read</span>
                   </label>
                 </div>
-              </div>
+              </div> */}
               
               {/* Courses permissions */}
-              <div className="bg-gray-50 p-3 rounded-md">
+              {/* <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-medium mb-2 text-gray-800">Courses</h3>
                 <div className="space-y-2">
                   <label className="flex items-center">
@@ -290,7 +290,7 @@ export default function AddOrganizationMember({ fetchMembers }: AddOrganizationM
                     <span className="ml-2 text-sm text-gray-700">Read</span>
                   </label>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
           

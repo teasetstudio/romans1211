@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { EventPlanItemType } from "@prisma/client";
+import { ORG_EDIT_PERMISSIONS } from "@/lib/permissions";
 
 // POST /api/event-plan-items - Create a new plan item for an event
 export async function POST(request: NextRequest) {
@@ -41,11 +42,28 @@ export async function POST(request: NextRequest) {
 
     // Check if the event exists and user has access
     const event = await prisma.event.findUnique({
-      where: { id: eventId },
+      where: {
+        id: eventId,
+        organization: {
+          members: {
+            some: {
+              userId: session.user.id,
+              permissions: { hasSome: ORG_EDIT_PERMISSIONS }
+            }
+          }
+        },
+      },
+      include: {
+        organization: {
+          include: {
+            members: true
+          }
+        },
+      },
     });
 
     if (!event) {
-      return NextResponse.json({ error: "Event not found" }, { status: 404 });
+      return NextResponse.json({ error: "Event not found or don't have permission" }, { status: 404 });
     }
 
     // Delete existing items for the event

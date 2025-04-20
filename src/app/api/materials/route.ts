@@ -87,7 +87,14 @@ export async function POST(req: NextRequest) {
       where: {
         OR: [
           { id: organizationId, ownerId: userId },
-          { members: { some: { userId, permissions: { hasSome: ORG_CREATE_PERMISSIONS } } } }
+          { id: organizationId,
+            members: {
+              some: {
+                userId,
+                permissions: { hasSome: ORG_CREATE_PERMISSIONS },
+              }
+            }
+          }
         ]
       },
       include: {
@@ -100,7 +107,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!organization) {
-      return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Organization not found or unauthorized' }, { status: 404 });
     }
 
     // If this is a translation, verify the original exists and belongs to the same organization

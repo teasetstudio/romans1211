@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Event, Course } from "@prisma/client";
 import Button from "@/components/buttons/Button";
 import { IconPlus, IconCalendar, IconEdit, IconMapPin } from "@tabler/icons-react";
@@ -13,6 +13,9 @@ import { CourseDialog } from "./course-dialog";
 import { useRouter } from "@/i18n/routing";
 import { NAMESPACE_DASHBOARD_COURSES } from "@/res/namespaces";
 import EventFormDialog from "../../components/EventFormDialog";
+import { useOrganization } from "@/components/contexts/OrganizationContext";
+import { useSession } from "next-auth/react";
+import { userInOrganizationData } from "@/utils/permissions";
 
 interface CourseDetailsProps {
   course: Course & {
@@ -23,6 +26,8 @@ interface CourseDetailsProps {
 export function CourseDetails({ course }: CourseDetailsProps) {
   const t = useTranslations(NAMESPACE_DASHBOARD_COURSES);
   const router = useRouter();
+  const { selectedOrganization } = useOrganization();
+  const { data: session } = useSession();
   const [events, setEvents] = useState<Event[]>(course.events);
   const [isEditCourseOpen, setIsEditCourseOpen] = useState(false);
   const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
@@ -48,6 +53,19 @@ export function CourseDetails({ course }: CourseDetailsProps) {
       console.error("Error deleting event:", error);
     }
   };
+
+  if (!selectedOrganization) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <Text className="text-muted-foreground">{t("selectOrganization")}</Text>
+      </div>
+    );
+  }
+
+  const { hasCreatePermission, hasDeletePermission, hasEditPermission } = useMemo(() => 
+    userInOrganizationData(session?.user?.id ?? '', selectedOrganization), 
+    [session?.user?.id, selectedOrganization]
+  );
 
   return (
     <div>
@@ -92,22 +110,26 @@ export function CourseDetails({ course }: CourseDetailsProps) {
                 </div>
               </div>
               <div className="flex shrink-0 gap-2 self-start sm:self-center">
-                <Button
-                  onClick={() => setIsCreateEventOpen(true)}
-                  paddingClass="px-3 py-2"
+                {hasCreatePermission && (
+                  <Button
+                    onClick={() => setIsCreateEventOpen(true)}
+                    paddingClass="px-3 py-2"
                   className="inline-flex items-center text-gray-700 hover:text-primary rounded-md transition-colors gap-1.5 text-sm border border-transparent hover:border-primary"
                 >
                   <IconPlus className="w-4 h-4" />
-                  {t("createEvent")}
-                </Button>
-                <Button
-                  onClick={() => setIsEditCourseOpen(true)}
-                  paddingClass="px-3 py-2"
-                  className="inline-flex items-center text-gray-700 hover:text-primary  rounded-md transition-colors gap-1.5 text-sm border border-transparent hover:border-primary"
+                    {t("createEvent")}
+                  </Button>
+                )}
+                {hasEditPermission && (
+                  <Button
+                    onClick={() => setIsEditCourseOpen(true)}
+                    paddingClass="px-3 py-2"
+                    className="inline-flex items-center text-gray-700 hover:text-primary  rounded-md transition-colors gap-1.5 text-sm border border-transparent hover:border-primary"
                 >
                   <IconEdit className="w-4 h-4" />
-                  <span>{t("edit")}</span>
-                </Button>
+                    <span>{t("edit")}</span>
+                  </Button>
+                )}
               </div>
             </div>
           </div>
@@ -122,30 +144,35 @@ export function CourseDetails({ course }: CourseDetailsProps) {
         {events.length === 0 ? (
           <div className="flex h-64 flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed">
             <Text className="text-muted-foreground">{t("noEvents")}</Text>
-            <Button 
-              onClick={() => setIsCreateEventOpen(true)} 
+            {hasCreatePermission && (
+              <Button 
+                onClick={() => setIsCreateEventOpen(true)}
               className="px-8 py-3 text-base font-semibold flex items-center gap-2 bg-primary text-white shadow-md hover:shadow-lg transition-all duration-200"
             >
               <IconPlus size={20} strokeWidth={2.5} />
-              {t("createFirstEvent")}
-            </Button>
+                {t("createFirstEvent")}
+              </Button>
+            )}
           </div>
         ) : (
           <>
             <EventList
+              hasDeletePermission={hasDeletePermission}
               events={events} 
               onDelete={handleDeleteEvent}
               onEdit={(id) => router.push(ROUTE_DASHBOARD_EVENT(id))}
             />
             <div className="mt-4 flex justify-end">
-              <Button
-                onClick={() => setIsCreateEventOpen(true)}
-                paddingClass="py-3 px-4"
-                className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white font-medium rounded-lg shadow-sm"
+              {hasCreatePermission && (
+                <Button
+                  onClick={() => setIsCreateEventOpen(true)}
+                  paddingClass="py-3 px-4"
+                  className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white font-medium rounded-lg shadow-sm"
               >
                 <IconPlus size={20} />
-                {t("createEvent")}
-              </Button>
+                  {t("createEvent")}
+                </Button>
+              )}
             </div>
           </>
         )}

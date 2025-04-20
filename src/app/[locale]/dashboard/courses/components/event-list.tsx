@@ -12,9 +12,10 @@ interface EventListProps {
   events: Event[];
   onDelete: (id: string) => void;
   onEdit: (id: string) => void;
+  hasDeletePermission: boolean;
 }
 
-export function EventList({ events, onDelete, onEdit }: EventListProps) {
+export function EventList({ events, onDelete, onEdit, hasDeletePermission }: EventListProps) {
   const t = useTranslations(NAMESPACE_DASHBOARD_COURSES);
 
   return (
@@ -71,6 +72,7 @@ export function EventList({ events, onDelete, onEdit }: EventListProps) {
                 </span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                {hasDeletePermission && (
                   <div className="flex justify-center">
                     <Button
                       bgColor="bg-transparent"
@@ -85,7 +87,8 @@ export function EventList({ events, onDelete, onEdit }: EventListProps) {
                       <IconTrash size={20} />
                     </Button>
                   </div>
-                </td>
+                )}
+              </td>
             </tr>
           ))}
         </tbody>

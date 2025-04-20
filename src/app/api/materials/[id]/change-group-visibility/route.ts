@@ -29,7 +29,7 @@ export async function PATCH(
     });
 
     if (!material) {
-      return NextResponse.json({ error: 'Material not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Material not found or unauthorized' }, { status: 404 });
     }
 
     const originalId = material.originalId || material.id;

@@ -80,23 +80,10 @@ class OrganizationServiceForSSR {
   async getSelectedOrganization(userId: string): Promise<Organization | null> {
     const cookieStore = await cookies();
     const selectedOrgId = cookieStore.get('selectedOrganizationId')?.value;
-
+    console.log('selectedOrgId', selectedOrgId)
     let organization: Organization | null = null;
     if (selectedOrgId) {
       organization = await this.getOrganizationByIdAndUserId(selectedOrgId, userId);
-    }
-
-    if (!organization && selectedOrgId) {
-      organization = await prisma.organization.findFirst({
-        where: { ownerId: userId, isDefault: true },
-        include: {
-          members: {
-            where: {
-              userId
-            }
-          }
-        },
-      });
     }
 
     return organization;
@@ -105,20 +92,15 @@ class OrganizationServiceForSSR {
   async getOrganizationByIdAndUserId(organizationId: string, userId: string): Promise<Organization | null> {
     const organization = await prisma.organization.findFirst({
       where: {
-        OR: [
-          { id: organizationId, ownerId: userId },
-          {
-            id: organizationId,
-            members: {
-              some: {
-                userId,
-                permissions: {
-                  hasSome: ORG_READ_PERMISSIONS
-                }
-              }
+        id: organizationId,
+        members: {
+          some: {
+            userId,
+            permissions: {
+              hasSome: ORG_READ_PERMISSIONS
             }
           }
-        ]
+        }
       },
       include: {
         members: {

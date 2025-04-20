@@ -4,80 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { EventPlanItemType } from "@prisma/client";
 import { AsyncIdParam } from "@/types/Params";
-
-// export async function GET(
-//   request: NextRequest,
-//   { params }: { params: AsyncIdParam }
-// ) {
-//   try {
-//     const session = await getServerSession(authOptions);
-//     if (!session?.user) {
-//       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-//     }
-
-//     const eventId = params.id;
-//     const itemId = params.itemId;
-
-//     // Check if the event exists
-//     const event = await prisma.event.findUnique({
-//       where: { id: eventId },
-//     });
-
-//     if (!event) {
-//       return NextResponse.json({ error: "Event not found" }, { status: 404 });
-//     }
-
-//     // Check if user is a member of the organization
-//     const orgMember = await prisma.organizationMember.findFirst({
-//       where: {
-//         userId: session.user.id,
-//         organizationId: event.organizationId,
-//       },
-//     });
-
-//     if (!orgMember) {
-//       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-//     }
-
-//     // Check if user has access to this event
-//     const eventMember = await prisma.eventMember.findFirst({
-//       where: {
-//         eventId,
-//         organizationMemberId: orgMember.id,
-//       },
-//     });
-
-//     // If not an event member, check organization permissions
-//     if (!eventMember && !orgMember) {
-//       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-//     }
-
-//     // Get the specific plan item
-//     const planItem = await prisma.eventPlanItem.findFirst({
-//       where: { 
-//         id: itemId,
-//         eventId: eventId 
-//       },
-//       include: {
-//         song: true,
-//         text: true,
-//         game: true,
-//       },
-//     });
-
-//     if (!planItem) {
-//       return NextResponse.json({ error: "Plan item not found" }, { status: 404 });
-//     }
-
-//     return NextResponse.json(planItem);
-//   } catch (error) {
-//     console.error("Error fetching event plan item:", error);
-//     return NextResponse.json(
-//       { error: "Failed to fetch event plan item" },
-//       { status: 500 }
-//     );
-//   }
-// }
+import { ORG_EDIT_PERMISSIONS } from "@/lib/permissions";
 
 // PATCH /api/event-plan-items/[id] - Update a plan item
 export async function PATCH(
@@ -98,37 +25,29 @@ export async function PATCH(
 
     // Check if the event exists
     const event = await prisma.event.findUnique({
-      where: { id: eventId },
+      where: {
+        id: eventId,
+        organization: {
+          members: {
+            some: {
+              userId: session.user.id,
+              permissions: { hasSome: ORG_EDIT_PERMISSIONS }
+            }
+          }
+        },
+      },
+      include: {
+        organization: {
+          include: {
+            members: true
+          }
+        },
+      },
     });
 
     if (!event) {
       return NextResponse.json({ error: "Event not found" }, { status: 404 });
     }
-
-    // Check if user is a member of the organization
-    // const orgMember = await prisma.organizationMember.findFirst({
-    //   where: {
-    //     userId: session.user.id,
-    //     organizationId: event.organizationId,
-    //   },
-    // });
-
-    // if (!orgMember) {
-    //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    // }
-
-    // Check if user has access to this event
-    // const eventMember = await prisma.eventMember.findFirst({
-    //   where: {
-    //     eventId,
-    //     organizationMemberId: orgMember.id,
-    //   },
-    // });
-
-    // // If not an event member, check organization permissions
-    // if (!eventMember && !orgMember) {
-    //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    // }
 
     // Check if the plan item exists
     const existingItem = await prisma.eventPlanItem.findFirst({
@@ -195,37 +114,29 @@ export async function DELETE(
 
     // Check if the event exists
     const event = await prisma.event.findUnique({
-      where: { id: eventId },
+      where: {
+        id: eventId,
+        organization: {
+          members: {
+            some: {
+              userId: session.user.id,
+              permissions: { hasSome: ORG_EDIT_PERMISSIONS }
+            }
+          }
+        },
+       },
+      include: {
+        organization: {
+          include: {
+            members: true
+          }
+        },
+      },
     });
 
     if (!event) {
-      return NextResponse.json({ error: "Event not found" }, { status: 404 });
+      return NextResponse.json({ error: "Event not found or don't have permission" }, { status: 404 });
     }
-
-    // Check if user is a member of the organization
-    // const orgMember = await prisma.organizationMember.findFirst({
-    //   where: {
-    //     userId: session.user.id,
-    //     organizationId: event.organizationId,
-    //   },
-    // });
-
-    // if (!orgMember) {
-    //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    // }
-
-    // Check if user has access to this event
-    // const eventMember = await prisma.eventMember.findFirst({
-    //   where: {
-    //     eventId,
-    //     organizationMemberId: orgMember.id,
-    //   },
-    // });
-
-    // // If not an event member, check organization permissions
-    // if (!eventMember && !orgMember) {
-    //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    // }
 
     // Check if the plan item exists
     const existingItem = await prisma.eventPlanItem.findFirst({

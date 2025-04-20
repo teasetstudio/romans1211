@@ -87,7 +87,8 @@ export function OrganizationProvider({ children, organizations: orgs, cookieSele
     // Set cookie with 30 days expiry
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + 30);
-    document.cookie = `selectedOrganizationId=${org.id}; expires=${expiryDate.toUTCString()}; path=/`;
+    // without SameSite=Lax it doesn't set the cookie in incognito mode in browsers
+    document.cookie = `selectedOrganizationId=${org.id}; expires=${expiryDate.toUTCString()}; path=/; SameSite=Lax`;
     
     if (refresh) router.refresh();
   };
