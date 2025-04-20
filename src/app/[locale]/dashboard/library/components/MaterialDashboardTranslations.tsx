@@ -78,7 +78,7 @@ const MaterialDashboardTranslations = ({ material, type }: IProps) => {
       <div className='mt-2'>
         {material.originalId ? (
           <div className="flex flex-col items-end gap-1 text-gray-500">
-            <MakeOriginalButton materialId={material.id} />
+            {hasManagePermission && <MakeOriginalButton materialId={material.id} />}
             <Link
               href={getDashboardMaterialUrl({ type, id: material.originalId })}
               className="py-1 text-xs font-medium hover:text-secondary text-slate-400 underline transition-colors"
