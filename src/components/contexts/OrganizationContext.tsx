@@ -162,6 +162,12 @@ export function OrganizationProvider({ children, organizations: orgs, cookieSele
     }, 0);
   };
 
+  useEffect(() => {
+    if (!getCookieOrg() && selectedOrganization) {
+      handleSetSelectedOrganization(selectedOrganization, { refresh: true })
+    }
+  }, [selectedOrganization])
+
   return (
     <OrganizationContext.Provider
       value={{
