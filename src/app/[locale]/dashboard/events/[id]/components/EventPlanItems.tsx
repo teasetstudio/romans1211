@@ -55,6 +55,7 @@ interface SaveResponse {
 const CUSTOM_PLAN_ITEM_TYPE = "CUSTOM";
 
 const EventPlanItems = ({ event, session }: IProps) => {
+  console.log('session', session)
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<TMaterialType | "all">("all");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
