@@ -80,7 +80,7 @@ class OrganizationServiceForSSR {
   async getSelectedOrganization(userId: string): Promise<Organization | null> {
     const cookieStore = await cookies();
     const selectedOrgId = cookieStore.get('selectedOrganizationId')?.value;
-    console.log('selectedOrgId', selectedOrgId)
+
     let organization: Organization | null = null;
     if (selectedOrgId) {
       organization = await this.getOrganizationByIdAndUserId(selectedOrgId, userId);

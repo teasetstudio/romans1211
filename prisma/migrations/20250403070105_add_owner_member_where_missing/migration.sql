@@ -1,13 +1,13 @@
 -- Insert a new OrganizationMember with OWNER permissions
 INSERT INTO "OrganizationMember" (
-    id, 
-    "userId", 
-    "organizationId", 
-    permissions, 
-    "isAccepted", 
-    "invitedAt", 
-    "acceptedAt", 
-    "createdAt", 
+    id,
+    "userId",
+    "organizationId",
+    permissions,
+    "isAccepted",
+    "invitedAt",
+    "acceptedAt",
+    "createdAt",
     "updatedAt"
 )
 SELECT
