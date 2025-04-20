@@ -72,6 +72,11 @@ export default function CoursesPage() {
     }
   };
 
+  const { hasCreatePermission, hasDeletePermission } = useMemo(() => 
+    userInOrganizationData(session?.user?.id ?? '', selectedOrganization), 
+    [session?.user?.id, selectedOrganization]
+  );
+
   if (!selectedOrganization) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -79,11 +84,6 @@ export default function CoursesPage() {
       </div>
     );
   }
-
-  const { hasCreatePermission, hasDeletePermission } = useMemo(() => 
-    userInOrganizationData(session?.user?.id ?? '', selectedOrganization), 
-    [session?.user?.id, selectedOrganization]
-  );
 
   return (
     <div className="container mx-auto py-6">

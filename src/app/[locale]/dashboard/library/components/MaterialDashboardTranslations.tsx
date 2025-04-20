@@ -22,10 +22,8 @@ interface IProps {
 const MaterialDashboardTranslations = ({ material, type }: IProps) => {
   const { selectedOrganization } = useOrganization();
   const { data: session } = useSession();
-
-  if (!selectedOrganization) {
-    return null;
-  }
+  const t = useTranslations(NAMESPACE_DASHBOARD);
+  const { updateMaterialVisibility, isLoading } = useMaterial();
 
   const { hasManagePermission, hasCreatePermission } = useMemo(() => 
     userInOrganizationData(session?.user?.id ?? '', selectedOrganization), 
@@ -35,9 +33,6 @@ const MaterialDashboardTranslations = ({ material, type }: IProps) => {
   const original = material.original ? material.original : material;
   const childTranslations = material.original ? material.original.translations : material.translations;
   const translations = [original, ...(childTranslations ? childTranslations : [])];
-
-  const t = useTranslations(NAMESPACE_DASHBOARD);
-  const { updateMaterialVisibility, isLoading } = useMaterial();
 
   return (
     <div className="mb-4 flex flex-wrap justify-between">

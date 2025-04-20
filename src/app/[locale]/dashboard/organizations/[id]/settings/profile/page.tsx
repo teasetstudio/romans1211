@@ -75,6 +75,11 @@ export default function OrganizationSettingsPage() {
       setLoadingMembers(false);
     }
   };
+  
+  const { isOwner, hasAdminPermission } = useMemo(() => 
+    userInOrganizationData(session?.user?.id ?? '', selectedOrganization), 
+    [session?.user?.id, selectedOrganization]
+  );
 
   if (!selectedOrganization) {
     return (
@@ -83,11 +88,6 @@ export default function OrganizationSettingsPage() {
       </div>
     );
   }
-
-  const { isOwner, hasAdminPermission } = useMemo(() => 
-    userInOrganizationData(session?.user?.id ?? '', selectedOrganization), 
-    [session?.user?.id, selectedOrganization]
-  );
 
   return (
     <div className="flex-1 p-8">

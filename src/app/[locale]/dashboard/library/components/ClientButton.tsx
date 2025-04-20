@@ -18,14 +18,14 @@ const LibraryClientButton = ({ href, label, children, permission, className }: I
   const { selectedOrganization } = useOrganization();
   const { data: session } = useSession();
 
-  if (!selectedOrganization) {
-    return null;
-  }
-
   const permissions = useMemo(() => 
     userInOrganizationData(session?.user?.id ?? '', selectedOrganization), 
     [session?.user?.id, selectedOrganization]
   );
+
+  if (!selectedOrganization) {
+    return null;
+  }
 
   if (!permissions[permission]) {
     return null;

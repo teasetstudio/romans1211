@@ -28,14 +28,6 @@ export default function EventDetails({ event: initialEvent, session }: EventDeta
   
   const { selectedOrganization } = useOrganization();
 
-  if (!selectedOrganization) {
-    return (
-      <div className="flex h-full items-center justify-center">
-        <Text className="text-muted-foreground">Select Organization</Text>
-      </div>
-    );
-  }
-
   const { hasEditPermission, hasDeletePermission } = useMemo(() => 
     userInOrganizationData(session?.user?.id ?? '', selectedOrganization), 
     [session?.user?.id, selectedOrganization]
@@ -69,6 +61,14 @@ export default function EventDetails({ event: initialEvent, session }: EventDeta
       setIsDeleting(false);
     }
   };
+
+  if (!selectedOrganization) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <Text className="text-muted-foreground">Select Organization</Text>
+      </div>
+    );
+  }
 
   return (
     <>

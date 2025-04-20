@@ -66,14 +66,6 @@ const EventPlanItems = ({ event, session }: IProps) => {
 
   const { selectedOrganization } = useOrganization();
 
-  if (!selectedOrganization) {
-    return (
-      <div className="flex h-full items-center justify-center">
-        <Text className="text-muted-foreground">Select Organization</Text>
-      </div>
-    );
-  }
-
   const { hasEditPermission } = useMemo(() => 
     userInOrganizationData(session?.user?.id ?? '', selectedOrganization), 
     [session?.user?.id, selectedOrganization]
@@ -465,6 +457,14 @@ const EventPlanItems = ({ event, session }: IProps) => {
         return 'textId';
     }
   };
+
+  if (!selectedOrganization) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <Text className="text-muted-foreground">Select Organization</Text>
+      </div>
+    );
+  }
 
   if (!hasEditPermission) {
     if (columns.planItems.length === 0) {

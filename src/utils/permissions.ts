@@ -43,7 +43,20 @@ export const hasCreatePermission = (member: OrganizationMember | undefined, crit
     member.permissions.some(permission => ORG_CREATE_PERMISSIONS.includes(permission as OrganizationPermission));
 };
 
-export const userInOrganizationData = (userId: string, org: Organization) => {
+export const userInOrganizationData = (userId: string, org?: Organization | null) => {
+  if (!org) {
+    return {
+      member: null,
+      isPendingInvitation: false,
+      isOwner: false,
+      hasAdminPermission: false,
+      hasManageAccess: false,
+      hasReadPermission: false,
+      hasCreatePermission: false,
+      hasDeletePermission: false,
+      hasEditPermission: false,
+    };
+  }
   const member = org.members?.find(m => m.userId === userId);
   if (!member) {
     return {

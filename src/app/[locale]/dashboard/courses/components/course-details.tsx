@@ -54,6 +54,11 @@ export function CourseDetails({ course }: CourseDetailsProps) {
     }
   };
 
+  const { hasCreatePermission, hasDeletePermission, hasEditPermission } = useMemo(() => 
+    userInOrganizationData(session?.user?.id ?? '', selectedOrganization), 
+    [session?.user?.id, selectedOrganization]
+  );
+
   if (!selectedOrganization) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -61,11 +66,6 @@ export function CourseDetails({ course }: CourseDetailsProps) {
       </div>
     );
   }
-
-  const { hasCreatePermission, hasDeletePermission, hasEditPermission } = useMemo(() => 
-    userInOrganizationData(session?.user?.id ?? '', selectedOrganization), 
-    [session?.user?.id, selectedOrganization]
-  );
 
   return (
     <div>

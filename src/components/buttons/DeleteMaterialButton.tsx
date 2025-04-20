@@ -57,14 +57,14 @@ export default function DeleteMaterialButton({
     }
   };
 
-  if (!selectedOrganization) {
-    return null;
-  }
-
   const { hasDeletePermission } = useMemo(() => 
     userInOrganizationData(session?.user?.id ?? '', selectedOrganization), 
     [session?.user?.id, selectedOrganization]
   );
+
+  if (!selectedOrganization) {
+    return null;
+  }
 
   if (!hasDeletePermission) return null;
 
