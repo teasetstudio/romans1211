@@ -44,7 +44,6 @@ export const hasCreatePermission = (member: OrganizationMember | undefined, crit
 };
 
 export const userInOrganizationData = (userId: string, org?: Organization | null) => {
-  console.log(userId)
   if (!org) {
     return {
       member: null,
@@ -59,7 +58,6 @@ export const userInOrganizationData = (userId: string, org?: Organization | null
     };
   }
   const member = org.members?.find(m => m.userId === userId);
-  console.log('member', member)
   if (!member) {
     return {
       member: null,
@@ -73,7 +71,6 @@ export const userInOrganizationData = (userId: string, org?: Organization | null
       hasEditPermission: false,
     };
   }
-  console.log('member', member)
   const isPendingInvitation = !member.isAccepted;
   const isOwner = org.ownerId === userId;
   
