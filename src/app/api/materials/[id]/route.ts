@@ -5,6 +5,46 @@ import { materialApiService } from '@/lib/MaterialServiceForAPI';
 import { apiTagService } from '@/lib/TagServiceForAPI';
 import { AsyncIdParam } from '@/types/Params';
 
+// GET /api/materials/[id]
+export async function GET(
+  req: NextRequest,
+  { params }: { params: AsyncIdParam }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { id } = await params;
+
+    // Find the material and check permissions
+    const material = await materialApiService.findByIdAndUserId({
+      id,
+      userId: session.user.id,
+      orgPermissions: 'read',
+    },
+    {
+      tags: true,
+      translations: true,
+      original: {
+        include: {
+          translations: true,
+        },
+      },
+    });
+
+    if (!material) {
+      return NextResponse.json({ error: 'Material not found or unauthorized' }, { status: 404 });
+    }
+
+    return NextResponse.json(material);
+  } catch (error) {
+    console.error('Error fetching material:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
 // PUT /api/materials/[id]
 export async function PUT(
   req: NextRequest,

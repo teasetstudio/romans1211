@@ -3,16 +3,8 @@
 import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react';
 import TextEditor from "@/components/inputs/TextEditor";
 import { useState, useEffect } from "react";
-import { TMaterialType } from "@/types/Materials";
 import { IconTrash } from "@tabler/icons-react";
-
-interface IPlanItem {
-  id: string;
-  title: string;
-  type: TMaterialType | "CUSTOM";
-  materialId: string | null;
-  description?: string | null;
-}
+import { IPlanItem } from "@/types/PlanItem";
 
 interface CustomItemModalProps {
   isOpen: boolean;
