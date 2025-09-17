@@ -22,7 +22,7 @@ async function handleApiRoutes(request: NextRequest) {
   const path = request.nextUrl.pathname;
   
   // Skip authentication for NextAuth.js routes
-  if (path.startsWith('/api/auth/')) {
+  if (path.startsWith('/api/auth/') || path.startsWith('/api/public/')) {
     return NextResponse.next();
   }
 

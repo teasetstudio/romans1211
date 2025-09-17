@@ -153,6 +153,10 @@ model Event {
   courseId          String?          // Optional reference to event course
   course            Course?          @relation(fields: [courseId], references: [id])
   isCancelled       Boolean          @default(false) // For cancelling individual occurrences
+  
+  // Link access fields
+  isAvailableByLink Boolean          @default(false) // If true, event can be accessed by link (not fully public)
+  linkSlug          String?          @unique // Unique slug for shareable link
   members           EventMember[]
   eventPlanItems    EventPlanItem[]
 
@@ -163,6 +167,8 @@ model Event {
   @@index([courseId])
   @@index([startTime])
   @@index([endTime])
+  @@index([isAvailableByLink])
+  @@index([linkSlug])
 }
 
 model EventPlanItem {

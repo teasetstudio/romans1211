@@ -8,8 +8,9 @@ import Button from "@/components/buttons/Button";
 import { toast } from "react-hot-toast";
 import Link from "next/link";
 import { Text } from "@/components/typo/Text";
-import { IconEdit, IconTrash } from "@/res/icons";
+import { IconEdit, IconTrash, IconSettings } from "@/res/icons";
 import EventFormDialog from "@/app/[locale]/dashboard/components/EventFormDialog";
+import EventSettingsDialog from "./EventSettingsDialog";
 import { useOrganization } from "@/components/contexts/OrganizationContext";
 import { userInOrganizationData } from "@/utils/permissions";
 import { Session } from "next-auth";
@@ -24,6 +25,7 @@ export default function EventDetails({ event: initialEvent, session }: EventDeta
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [openLinkSettings, setOpenLinkSettings] = useState(false);
   const [event, setEvent] = useState(initialEvent);
   
   const { selectedOrganization } = useOrganization();
@@ -131,6 +133,16 @@ export default function EventDetails({ event: initialEvent, session }: EventDeta
                     <span>{t("edit")}</span>
                   </Button>
                 }
+                {hasEditPermission &&
+                  <Button
+                    onClick={() => setOpenLinkSettings(true)}
+                    paddingClass="py-3 px-4"
+                    className="inline-flex items-center text-gray-700 hover:text-primary rounded-md transition-colors gap-1.5 text-sm border border-transparent hover:border-primary"
+                  >
+                    <IconSettings className="w-4 h-4" />
+                    <span>{t("settings")}</span>
+                  </Button>
+                }
                 {hasDeletePermission &&
                   <Button
                     onClick={handleDelete}
@@ -154,6 +166,15 @@ export default function EventDetails({ event: initialEvent, session }: EventDeta
         onClose={() => setIsEditing(false)}
         onSubmit={handleSubmit}
         event={event}
+      />
+
+      <EventSettingsDialog
+        open={openLinkSettings}
+        onClose={() => setOpenLinkSettings(false)}
+        event={{ id: event.id, isAvailableByLink: event.isAvailableByLink, linkSlug: event.linkSlug }}
+        onUpdated={(updated) => {
+          setEvent((prev) => ({ ...prev, ...updated }));
+        }}
       />
     </>
   );
