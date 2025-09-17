@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { IconX, IconTag, IconLanguage, IconLoader } from '@tabler/icons-react';
 import { TMaterialType } from '@/types/Materials';
 import { getMaterial } from '@/api/requests/materials';
@@ -27,26 +27,38 @@ interface MaterialModalProps {
   onClose: () => void;
   materialId: string | null;
   materialType: TMaterialType;
+  // Optional: when provided, modal will fetch via public endpoint using this event slug
+  eventSlug?: string | null;
 }
 
-const MaterialModal = ({ isOpen, onClose, materialId, materialType }: MaterialModalProps) => {
+const MaterialModal = ({ isOpen, onClose, materialId, materialType, eventSlug }: MaterialModalProps) => {
   const [material, setMaterial] = useState<MaterialWithTags | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Fetch material data
-  const fetchMaterial = async (id: string) => {
+  const fetchMaterial = useCallback(async (id: string) => {
     setLoading(true);
     setError(null);
     try {
-      const data = await getMaterial(id);
+      let data: MaterialWithTags;
+      if (eventSlug) {
+        const res = await fetch(`/api/public/events/${eventSlug}/materials/${id}`);
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || 'Failed to fetch material');
+        }
+        data = (await res.json()) as MaterialWithTags;
+      } else {
+        data = (await getMaterial(id)) as MaterialWithTags;
+      }
       setMaterial(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch material');
     } finally {
       setLoading(false);
     }
-  };
+  }, [eventSlug]);
 
   // Fetch material when modal opens or materialId changes
   useEffect(() => {
@@ -56,7 +68,7 @@ const MaterialModal = ({ isOpen, onClose, materialId, materialType }: MaterialMo
       setMaterial(null);
       setError(null);
     }
-  }, [isOpen, materialId]);
+  }, [isOpen, materialId, fetchMaterial]);
 
   // Handle translation selection
   const handleTranslationSelect = async (translationId: string) => {
