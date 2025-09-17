@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { IconX, IconTag, IconLanguage, IconLoader } from '@tabler/icons-react';
+import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react';
 import { TMaterialType } from '@/types/Materials';
 import { getMaterial } from '@/api/requests/materials';
 
@@ -108,25 +109,7 @@ const MaterialModal = ({ isOpen, onClose, materialId, materialType, eventSlug }:
   };
 
   const allTranslations = getAllTranslations();
-  // Close modal on escape key
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      // Prevent body scroll when modal is open
-      document.body.style.overflow = 'hidden';
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen, onClose]);
+  // Headless UI Dialog handles escape key and focus management
 
   if (!isOpen) return null;
 
@@ -166,137 +149,134 @@ const MaterialModal = ({ isOpen, onClose, materialId, materialType, eventSlug }:
   const styles = getTypeStyles(material?.type || materialType);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black bg-opacity-50 transition-opacity"
-        onClick={onClose}
-      />
-      
-      {/* Modal */}
-      <div className="relative bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
-        {/* Loading State */}
-        {loading && (
-          <div className="flex items-center justify-center p-8">
-            <IconLoader className="animate-spin mr-2" size={20} />
-            <span>Loading material...</span>
-          </div>
-        )}
-        
-        {/* Error State */}
-        {error && (
-          <div className="p-6">
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <p className="text-red-800">{error}</p>
-              <button
-                onClick={() => materialId && fetchMaterial(materialId)}
-                className="mt-2 px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
-              >
-                Retry
-              </button>
+    <Dialog open={isOpen} onClose={onClose} className="relative z-[10001]">
+      <div className="fixed inset-0 flex items-center justify-center p-4">
+        <DialogBackdrop className="fixed inset-0 bg-black/50" />
+
+        <DialogPanel className="relative bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
+          {/* Loading State */}
+          {loading && (
+            <div className="flex items-center justify-center p-8">
+              <IconLoader className="animate-spin mr-2" size={20} />
+              <span>Loading material...</span>
             </div>
-            <div className="mt-4 flex justify-end">
-              <button
-                onClick={onClose}
-                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-              >
-                Close
-              </button>
+          )}
+
+          {/* Error State */}
+          {error && (
+            <div className="p-6">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p className="text-red-800">{error}</p>
+                <button
+                  onClick={() => materialId && fetchMaterial(materialId)}
+                  className="mt-2 px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
+                >
+                  Retry
+                </button>
+              </div>
+              <div className="mt-4 flex justify-end">
+                <button
+                  onClick={onClose}
+                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                >
+                  Close
+                </button>
+              </div>
             </div>
-          </div>
-        )}
-        
-        {/* Content */}
-        {material && !loading && !error && (
-          <>
-          {/* Header */}
-          <div className={`px-6 py-4 border-b ${styles.header}`}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <h2 className={`text-xl font-semibold ${styles.title}`}>
-                  {material.title}
-                </h2>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles.type}`}>
-                  {material.type.charAt(0).toUpperCase() + material.type.slice(1)}
-                </span>
-                <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
-                  {material.language.toUpperCase()}
-                </span>
-              </div>
-              <button
-                onClick={onClose}
-                className="p-1 hover:bg-black hover:bg-opacity-10 rounded-full transition-colors"
-              >
-                <IconX size={20} className="text-gray-500" />
-              </button>
-            </div>
-            
-            {/* Translation Selector */}
-            {allTranslations.length > 1 && (
-              <div className="mt-4">
-                <div className="flex items-center text-sm text-gray-600 mb-2">
-                  <IconLanguage size={16} className="mr-1" />
-                  Available Languages:
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {allTranslations.map((translation) => (
-                    <button
-                      key={translation.id}
-                      onClick={() => handleTranslationSelect(translation.id)}
-                      className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
-                        translation.id === material.id
-                          ? `${styles.type} border-current`
-                          : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'
-                      }`}
-                    >
-                      {translation.language.toUpperCase()}
-                      {translation.originalId ? '' : ' (Original)'}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {/* Tags */}
-            {material.tags && material.tags.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-2">
-                <div className="flex items-center text-sm text-gray-600 mr-2">
-                  <IconTag size={16} className="mr-1" />
-                  Tags:
-                </div>
-                {material.tags.map((tag) => (
-                  <span
-                    key={tag.id}
-                    className={`px-2 py-1 rounded-full text-xs font-medium border ${styles.tag}`}
-                  >
-                    {tag.name}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
+          )}
 
           {/* Content */}
-          <div className="px-6 py-4 overflow-y-auto max-h-[calc(90vh-300px)]">
-            <div 
-              className="prose prose-sm max-w-none text-gray-800 leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: material.content }}
-            />
-          </div>
+          {material && !loading && !error && (
+            <>
+              {/* Header */}
+              <div className={`px-6 py-4 border-b ${styles.header}`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <h2 className={`text-xl font-semibold ${styles.title}`}>
+                      {material.title}
+                    </h2>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles.type}`}>
+                      {material.type.charAt(0).toUpperCase() + material.type.slice(1)}
+                    </span>
+                    <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
+                      {material.language.toUpperCase()}
+                    </span>
+                  </div>
+                  <button
+                    onClick={onClose}
+                    className="p-1 hover:bg-black hover:bg-opacity-10 rounded-full transition-colors"
+                  >
+                    <IconX size={20} className="text-gray-500" />
+                  </button>
+                </div>
 
-          {/* Footer */}
-          <div className="px-6 py-4 border-t bg-gray-50 flex justify-end">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-            >
-              Close
-            </button>
-          </div>
-          </>
-        )}
+                {/* Translation Selector */}
+                {allTranslations.length > 1 && (
+                  <div className="mt-4">
+                    <div className="flex items-center text-sm text-gray-600 mb-2">
+                      <IconLanguage size={16} className="mr-1" />
+                      Available Languages:
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {allTranslations.map((translation) => (
+                        <button
+                          key={translation.id}
+                          onClick={() => handleTranslationSelect(translation.id)}
+                          className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                            translation.id === material.id
+                              ? `${styles.type} border-current`
+                              : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'
+                          }`}
+                        >
+                          {translation.language.toUpperCase()}
+                          {translation.originalId ? '' : ' (Original)'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Tags */}
+                {material.tags && material.tags.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <div className="flex items-center text-sm text-gray-600 mr-2">
+                      <IconTag size={16} className="mr-1" />
+                      Tags:
+                    </div>
+                    {material.tags.map((tag) => (
+                      <span
+                        key={tag.id}
+                        className={`px-2 py-1 rounded-full text-xs font-medium border ${styles.tag}`}
+                      >
+                        {tag.name}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Content */}
+              <div className="px-6 py-4 overflow-y-auto max-h-[calc(90vh-300px)]">
+                <div
+                  className="prose prose-sm max-w-none text-gray-800 leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: material.content }}
+                />
+              </div>
+
+              {/* Footer */}
+              <div className="px-6 py-4 border-t bg-gray-50 flex justify-end">
+                <button
+                  onClick={onClose}
+                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </>
+          )}
+        </DialogPanel>
       </div>
-    </div>
+    </Dialog>
   );
 };
 
