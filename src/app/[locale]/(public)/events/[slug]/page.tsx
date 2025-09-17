@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
 import PublicEventView from "./components/PublicEventView";
+import type { AsyncParams } from "@/types/Params";
 
-export default async function PublicEventPage({ params }: { params: { slug: string; locale: string } }) {
+export default async function PublicEventPage({ params }: AsyncParams<{ slug: string; locale: string }>) {
   const { slug } = await params;
 
   // Fetch event by linkSlug with public flag
