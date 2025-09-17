@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 // GET /api/public/events/[slug]/materials/[id]
 export async function GET(
   req: NextRequest,
-  { params }: { params: { slug: string; id: string } }
+  { params }: { params: Promise<{ slug: string; id: string }> }
 ) {
   try {
     const { slug, id } = await params;
