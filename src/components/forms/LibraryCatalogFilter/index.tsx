@@ -190,7 +190,7 @@ const LibraryCatalogFilter = ({ searchParams, className }: IProps) => {
                       <span className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 border-2 border-gray-300 border-t-primary rounded-full animate-spin" />
                     )}
                     {tagSuggestions.length > 0 && (
-                      <ul className="absolute left-0 right-0 mt-2 bg-gray5 border border-gray3 rounded-xl shadow-lg z-50 max-h-60 overflow-auto">
+                      <ul className="absolute z-50 left-0 right-0 mt-2 bg-gray5 border border-gray3 rounded-xl shadow-lg max-h-60 overflow-auto">
                         {tagSuggestions.map((s) => (
                           <li
                             key={s}
