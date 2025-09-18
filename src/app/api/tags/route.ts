@@ -4,14 +4,32 @@ import prisma from '@/lib/prisma';
 import { authOptions } from '@/lib/auth';
 
 // GET /api/tags
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // const session = await getServerSession(authOptions);
+    // if (!session?.user) {
+    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // }
+
+    const searchText = req.nextUrl.searchParams.get('searchText')?.trim();
 
     const tags = await prisma.wtag.findMany({
+      where:
+        searchText && searchText.length > 0
+          ? searchText.length < 3
+            ? {
+                name: {
+                  startsWith: searchText,
+                  mode: 'insensitive',
+                },
+              }
+            : {
+                name: {
+                  contains: searchText,
+                  mode: 'insensitive',
+                },
+              }
+          : undefined,
       orderBy: {
         name: 'asc',
       },

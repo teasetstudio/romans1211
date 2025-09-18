@@ -1,3 +1,4 @@
+"use client"
 import H2 from '@/components/typo/H2'
 import H8 from '@/components/typo/H8'
 import H9 from '@/components/typo/H9'
@@ -6,6 +7,8 @@ import { NAMESPACE_WIDGETS } from '@/res/namespaces'
 import { SubmitFormListener } from './SubmitFormListener'
 import { ILibraryCatalogSearchParams } from '@/types/Params'
 import { IconSearch } from '@/res/icons'
+import { useEffect, useState } from 'react'
+import { IconX } from '@tabler/icons-react'
 
 interface IProps {
   searchParams: ILibraryCatalogSearchParams
@@ -15,6 +18,85 @@ interface IProps {
 const LibraryCatalogFilter = ({ searchParams, className }: IProps) => {
   const t = useTranslations(NAMESPACE_WIDGETS)
   const { type, 'search-term': searchTerm, tags } = searchParams
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [tagTerm, setTagTerm] = useState('')
+  const [tagSuggestions, setTagSuggestions] = useState<string[]>([])
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false)
+
+  // initialize from searchParams
+  useEffect(() => {
+    const initial = (tags || '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+    setSelectedTags(initial)
+    setTagTerm('')
+  }, [tags])
+
+  // Tag helpers
+  const addTag = (tag: string) => {
+    const t = tag.trim()
+    if (!t) return
+    const exists = new Set(selectedTags.map((x) => x.toLowerCase()))
+    if (exists.has(t.toLowerCase())) return
+    const next = [...selectedTags, t]
+    setSelectedTags(next)
+  }
+
+  const removeTag = (tag: string) => {
+    const next = selectedTags.filter((x) => x.toLowerCase() !== tag.toLowerCase())
+    setSelectedTags(next)
+  }
+
+  // Debounced suggestions for tags based on tagTerm
+  useEffect(() => {
+    const controller = new AbortController()
+    const q = tagTerm.trim()
+
+    if (!q) {
+      setTagSuggestions([])
+      return
+    }
+
+    const handle = setTimeout(async () => {
+      try {
+        setIsLoadingSuggestions(true)
+        const res = await fetch(`/api/tags?searchText=${encodeURIComponent(q)}`, { signal: controller.signal })
+        if (!res.ok) throw new Error('Failed to load suggestions')
+        const data: unknown = await res.json()
+        const names: string[] = Array.isArray(data)
+          ? (data as unknown[])
+              .map((item) => {
+                if (typeof item === 'string') return item
+                if (item && typeof item === 'object' && 'name' in item) {
+                  const n = (item as { name?: unknown }).name
+                  return typeof n === 'string' ? n : undefined
+                }
+                return undefined
+              })
+              .filter((v): v is string => typeof v === 'string')
+          : []
+        const lowerQ = q.toLowerCase()
+        const already = new Set(selectedTags.map((t) => t.toLowerCase()))
+        const filtered = names
+          .filter((n) => typeof n === 'string')
+          .filter((n) => n.toLowerCase().startsWith(lowerQ))
+          .filter((n) => !already.has(n.toLowerCase()))
+          .filter((n, idx, arr) => arr.indexOf(n) === idx)
+          .slice(0, 8)
+        setTagSuggestions(filtered)
+      } catch {
+        setTagSuggestions([])
+      } finally {
+        setIsLoadingSuggestions(false)
+      }
+    }, 250)
+
+    return () => {
+      controller.abort()
+      clearTimeout(handle)
+    }
+  }, [tagTerm, selectedTags])
   return (
     <div className={className}>
       <div className="container">
@@ -69,13 +151,63 @@ const LibraryCatalogFilter = ({ searchParams, className }: IProps) => {
                   <label className="block mb-2">
                     <H9 color="text-gray2" className="font-medium">{t('catalog_filter.tags')}</H9>
                   </label>
-                  <input
-                    type="text"
-                    name="tags"
-                    defaultValue={tags}
-                    placeholder={t('catalog_filter.tags_placeholder')}
-                    className="w-full px-4 py-3 bg-white/10 border border-gray3 rounded-xl text-gray1 placeholder-gray2 focus:outline-none focus:border-primary transition-colors"
-                  />
+                  <div className="relative">
+                    {/* Hidden input to submit selected tags */}
+                    <input type="hidden" name="tags" value={selectedTags.join(',')} />
+                    <div className="w-full px-2 py-2 bg-white/10 border border-gray3 rounded-xl text-gray1 focus-within:border-primary">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {selectedTags.map((t) => (
+                          <span key={t} className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-primary/20 text-primary text-xs">
+                            {t}
+                            <button
+                              type="button"
+                              className="hover:bg-primary/30 rounded-full p-0.5"
+                              onClick={() => removeTag(t)}
+                              aria-label={`Remove ${t}`}
+                            >
+                              <IconX className="h-3 w-3" />
+                            </button>
+                          </span>
+                        ))}
+                        <input
+                          type="text"
+                          value={tagTerm}
+                          onChange={(e) => setTagTerm(e.target.value)}
+                          onKeyDown={(e) => {
+                            if ((e.key === 'Enter' || e.key === ',') && tagTerm.trim()) {
+                              e.preventDefault()
+                              addTag(tagTerm)
+                              setTagTerm('')
+                              setTagSuggestions([])
+                            }
+                          }}
+                          placeholder={t('catalog_filter.tags_placeholder')}
+                          className="flex-1 min-w-[120px] bg-transparent outline-none text-gray1 placeholder-gray2 py-1 px-1"
+                        />
+                      </div>
+                    </div>
+                    {isLoadingSuggestions && (
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 border-2 border-gray-300 border-t-primary rounded-full animate-spin" />
+                    )}
+                    {tagSuggestions.length > 0 && (
+                      <ul className="absolute left-0 right-0 mt-2 bg-gray5 border border-gray3 rounded-xl shadow-lg z-50 max-h-60 overflow-auto">
+                        {tagSuggestions.map((s) => (
+                          <li
+                            key={s}
+                            className="px-4 py-2 cursor-pointer hover:bg-white/10 text-gray1"
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => {
+                              addTag(s)
+                              setTagTerm('')
+                              setTagSuggestions([])
+                            }}
+                          >
+                            {s}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
                 </div>
               </div>
 
