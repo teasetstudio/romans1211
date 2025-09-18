@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Listbox, ListboxOptions, ListboxOption, ListboxButton, Switch, Label, Field } from '@headlessui/react';
 import clsx from 'clsx';
 import { Link } from '@/i18n/routing';
@@ -82,9 +82,68 @@ export default function MaterialForm({
   const [isPublic, setIsPublic] = useState(initialData.isPublic);
   const [tags, setTags] = useState<string[]>(initialData.tags || []);
   const [tagInput, setTagInput] = useState('');
+  const [tagSuggestions, setTagSuggestions] = useState<string[]>([]);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<'text' | 'song' | 'game'>(initialData.type || 'text');
+
+  // Debounced fetch for tag suggestions
+  useEffect(() => {
+    const controller = new AbortController();
+    const q = tagInput.trim();
+
+    if (!q) {
+      setTagSuggestions([]);
+      return;
+    }
+
+    const handle = setTimeout(async () => {
+      try {
+        setIsLoadingSuggestions(true);
+        const res = await fetch(`/api/tags?searchText=${encodeURIComponent(q)}`, {
+          signal: controller.signal,
+        });
+        if (!res.ok) throw new Error('Failed to load suggestions');
+        const data: unknown = await res.json();
+        // Normalize to string[] of tag names using type guards
+        const names: string[] = Array.isArray(data)
+          ? (data as unknown[])
+              .map((item) => {
+                if (typeof item === 'string') return item;
+                if (item && typeof item === 'object' && 'name' in item) {
+                  const n = (item as { name?: unknown }).name;
+                  return typeof n === 'string' ? n : undefined;
+                }
+                return undefined;
+              })
+              .filter((v): v is string => typeof v === 'string')
+          : [];
+        // Ensure startsWith (case-insensitive), exclude already selected tags, unique, limit 8
+        const lowerQ = q.toLowerCase();
+        const filtered = names
+          .filter((n) => n && typeof n === 'string')
+          .filter((n) => n.toLowerCase().startsWith(lowerQ))
+          .filter((n) => !tags.includes(n))
+          .filter((n, idx, arr) => arr.indexOf(n) === idx)
+          .slice(0, 8);
+        setTagSuggestions(filtered);
+      } catch (e: unknown) {
+        const isAbort = typeof e === 'object' && e !== null && 'name' in e && (e as { name?: unknown }).name === 'AbortError';
+        if (!isAbort) {
+          // swallow errors silently for suggestions
+          setTagSuggestions([]);
+        }
+      } finally {
+        setIsLoadingSuggestions(false);
+      }
+    }, 250);
+
+    return () => {
+      controller.abort();
+      clearTimeout(handle);
+    };
+  }, [tagInput, tags]);
 
   const handleAddTag = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && tagInput.trim()) {
@@ -322,6 +381,29 @@ export default function MaterialForm({
                 placeholder={t('form.tags_placeholder')}
                 className="w-full pl-12 pr-4 py-2 bg-white border border-gray-200 rounded-lg placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
               />
+              {isLoadingSuggestions && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 border-2 border-gray-300 border-t-primary rounded-full animate-spin" />
+              )}
+              {tagSuggestions.length > 0 && (
+                <ul className="absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-auto">
+                  {tagSuggestions.map((s) => (
+                    <li
+                      key={s}
+                      className="px-3 py-2 cursor-pointer hover:bg-primary/5"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => {
+                        if (!tags.includes(s)) {
+                          setTags([...tags, s]);
+                        }
+                        setTagInput('');
+                        setTagSuggestions([]);
+                      }}
+                    >
+                      {s}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
         </div>
