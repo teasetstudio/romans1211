@@ -6,10 +6,10 @@ import { authOptions } from '@/lib/auth';
 // GET /api/tags
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // const session = await getServerSession(authOptions);
+    // if (!session?.user) {
+    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // }
 
     const searchText = req.nextUrl.searchParams.get('searchText')?.trim();
 
