@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { DragDropContext, DropResult, DragStart, DragUpdate } from "@hello-pangea/dnd";
 import { TMaterial, TMaterialType, TMaterialWithType } from "@/types/Materials";
 import { Text } from "@/components/typo/Text";
@@ -366,7 +366,21 @@ const EventPlanItems = ({ event, session }: IProps) => {
     });
   };
 
-  const handleSave = async () => {
+  // Helper function to get the correct ID field name
+  const getItemIdField = useCallback((materialType: TMaterialType): string => {
+    switch (materialType.toLowerCase()) {
+      case 'text':
+        return 'textId';
+      case 'song':
+        return 'songId';
+      case 'game':
+        return 'gameId';
+      default:
+        return 'textId';
+    }
+  }, []);
+
+  const handleSave = useCallback(async () => {
     setIsSaving(true);
     setSaveStatus(null);
 
@@ -427,21 +441,41 @@ const EventPlanItems = ({ event, session }: IProps) => {
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [columns.planItems, event.id, getItemIdField]);
 
-  // Helper function to get the correct ID field name
-  const getItemIdField = (materialType: TMaterialType): string => {
-    switch (materialType.toLowerCase()) {
-      case 'text':
-        return 'textId';
-      case 'song':
-        return 'songId';
-      case 'game':
-        return 'gameId';
-      default:
-        return 'textId';
+  // Auto-save when planItems change (debounced)
+  const autoSaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isFirstRenderRef = useRef(true);
+
+  useEffect(() => {
+    // Only auto-save for users with edit permissions
+    if (!hasEditPermission) return;
+
+    // Skip auto-saving on the initial render
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false;
+      return;
     }
-  };
+
+    // Clear any pending save
+    if (autoSaveTimeoutRef.current) {
+      clearTimeout(autoSaveTimeoutRef.current);
+    }
+
+    // Debounce save to reduce requests during rapid changes
+    autoSaveTimeoutRef.current = setTimeout(() => {
+      void handleSave();
+    }, 800);
+
+    // Cleanup on dependency change/unmount
+    return () => {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+    };
+  }, [columns.planItems, hasEditPermission, handleSave]);
+
+  
 
   if (!selectedOrganization) {
     return (
@@ -497,6 +531,7 @@ const EventPlanItems = ({ event, session }: IProps) => {
             expandedDescriptions={expandedDescriptions}
             onToggleDescription={toggleDescriptionExpansion}
             onEditCustomItem={startEditingCustomItem}
+            onDeleteCustomItem={deleteCustomItem}
           />
         </div>
       </DragDropContext>

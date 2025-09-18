@@ -9,6 +9,7 @@ interface PlanItemProps {
   expandedDescriptions: Set<string>;
   onToggleDescription: (itemId: string, e: React.MouseEvent) => void;
   onEditCustomItem?: (item: IPlanItem) => void;
+  onDeleteCustomItem?: (itemId: string) => void;
   onItemClick?: (item: IPlanItem) => void;
   isReadOnly?: boolean;
 }
@@ -19,6 +20,7 @@ const PlanItem = ({
   expandedDescriptions, 
   onToggleDescription, 
   onEditCustomItem,
+  onDeleteCustomItem,
   onItemClick,
   isReadOnly = false
 }: PlanItemProps) => {
@@ -121,16 +123,31 @@ const PlanItem = ({
             </div>
           )}
         </div>
-        {item.type === "CUSTOM" && !isReadOnly && onEditCustomItem && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onEditCustomItem(item);
-            }}
-            className="text-xs font-medium text-amber-600 hover:text-amber-800 bg-amber-100 px-2 py-0.5 rounded"
-          >
-            Edit
-          </button>
+        {item.type === "CUSTOM" && !isReadOnly && (onEditCustomItem || onDeleteCustomItem) && (
+          <div className="flex flex-col items-end space-y-1">
+            {onEditCustomItem && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEditCustomItem(item);
+                }}
+                className="text-xs font-medium text-amber-600 hover:text-amber-800 bg-amber-100 px-2 py-0.5 rounded"
+              >
+                Edit
+              </button>
+            )}
+            {onDeleteCustomItem && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeleteCustomItem(item.id);
+                }}
+                className="text-xs font-medium text-red-600 hover:text-red-800 bg-red-100 px-2 py-0.5 rounded"
+              >
+                Delete
+              </button>
+            )}
+          </div>
         )}
       </div>
     </div>
