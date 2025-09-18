@@ -41,7 +41,7 @@ export default async function LibraryCatalogPage({ searchParams }: IProps) {
   return (
     <div className="mx-auto">
       {/* Filters */}
-      <div className="mb-6">
+      <div className="mb-6 relative z-50">
         <LibraryCatalogFilter searchParams={searchParamsRes} className="my-6" />
 
         <ActiveLibraryFilters
