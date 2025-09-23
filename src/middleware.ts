@@ -3,6 +3,20 @@ import { getToken } from 'next-auth/jwt';
 import createMiddleware from 'next-intl/middleware';
 import { routing } from './i18n/routing';
 
+// Helper function to verify admin password from string
+function verifyAdminPassword(password: string): boolean {
+  return password === process.env.ADMIN_PASSWORD;
+}
+
+// Handle admin authentication
+function handleAdminAuth(request: NextRequest): NextResponse | null {
+  const adminPassword = request.headers.get('x-admin-password');
+  if (!adminPassword || !verifyAdminPassword(adminPassword)) {
+    return NextResponse.json({ error: 'Unauthorized - Invalid admin password' }, { status: 401 });
+  }
+  return null; // null means authorized
+}
+
 // Middleware configuration for all routes
 export const config = {
   matcher: [
@@ -21,8 +35,17 @@ export const config = {
 async function handleApiRoutes(request: NextRequest) {
   const path = request.nextUrl.pathname;
   
-  // Skip authentication for NextAuth.js routes
-  if (path.startsWith('/api/auth/') || path.startsWith('/api/public/') || path.startsWith('/api/admin/')) {
+  // Handle admin routes with admin authentication
+  if (path.startsWith('/api/admin/')) {
+    const authError = handleAdminAuth(request);
+    if (authError) {
+      return authError;
+    }
+    return NextResponse.next();
+  }
+  
+  // Skip authentication for NextAuth.js routes and public routes
+  if (path.startsWith('/api/auth/') || path.startsWith('/api/public/')) {
     return NextResponse.next();
   }
 

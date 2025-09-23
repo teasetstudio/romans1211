@@ -1,23 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
-// Hardcoded admin password for security
-const ADMIN_PASSWORD = 'admin123!@#';
-
-// Helper function to verify admin password
-function verifyAdminPassword(password: string): boolean {
-  return password === ADMIN_PASSWORD;
-}
-
-// GET /api/admin/unused-tags - Find unused tags
-export async function GET(req: NextRequest) {
+// GET /api/admin/tags/unused - Find unused tags
+export async function GET() {
   try {
-    // Check admin password
-    const adminPassword = req.headers.get('x-admin-password');
-    if (!adminPassword || !verifyAdminPassword(adminPassword)) {
-      return NextResponse.json({ error: 'Unauthorized - Invalid admin password' }, { status: 401 });
-    }
-
     // Find all tags that are not used by any Text, Song, or Game
     const unusedTags = await prisma.wtag.findMany({
       where: {
@@ -48,72 +34,108 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// DELETE /api/admin/unused-tags - Delete unused tags by ID array
+// DELETE /api/admin/unused-tags - Delete unused tags by ID array or delete all unused tags
 export async function DELETE(req: NextRequest) {
   try {
-    // Check admin password
-    const adminPassword = req.headers.get('x-admin-password');
-    if (!adminPassword || !verifyAdminPassword(adminPassword)) {
-      return NextResponse.json({ error: 'Unauthorized - Invalid admin password' }, { status: 401 });
-    }
-
     const body = await req.json();
-    const { tagIds } = body;
+    const { tagIds, deleteAll, exceptIds } = body;
 
-    if (!tagIds || !Array.isArray(tagIds) || tagIds.length === 0) {
-      return NextResponse.json({ error: 'tagIds array is required and must not be empty' }, { status: 400 });
+    // Validate exceptIds if provided
+    if (exceptIds && (!Array.isArray(exceptIds) || !exceptIds.every(id => typeof id === 'string'))) {
+      return NextResponse.json({ error: 'exceptIds must be an array of strings' }, { status: 400 });
     }
 
-    // Validate that all provided IDs are strings
-    if (!tagIds.every(id => typeof id === 'string')) {
-      return NextResponse.json({ error: 'All tag IDs must be strings' }, { status: 400 });
-    }
+    let tagsToDelete;
 
-    // First, verify that all tags exist and are actually unused
-    const tagsToDelete = await prisma.wtag.findMany({
-      where: {
-        id: { in: tagIds },
+    if (deleteAll === true) {
+      // Find all unused tags, excluding the ones in exceptIds
+      const whereCondition: {
+        AND: Array<Record<string, unknown>>;
+        id?: { notIn: string[] };
+      } = {
         AND: [
           { texts: { none: {} } },
           { songs: { none: {} } },
           { games: { none: {} } }
         ]
-      },
-      select: {
-        id: true,
-        name: true
+      };
+
+      // Exclude specified IDs if provided
+      if (exceptIds && exceptIds.length > 0) {
+        whereCondition.id = { notIn: exceptIds };
       }
-    });
 
-    if (tagsToDelete.length === 0) {
-      return NextResponse.json({ 
-        error: 'No unused tags found with the provided IDs', 
-        providedIds: tagIds 
-      }, { status: 400 });
-    }
+      tagsToDelete = await prisma.wtag.findMany({
+        where: whereCondition,
+        select: {
+          id: true,
+          name: true
+        }
+      });
 
-    // Check if some tags are being used (safety check)
-    const usedTags = await prisma.wtag.findMany({
-      where: {
-        id: { in: tagIds },
-        OR: [
-          { texts: { some: {} } },
-          { songs: { some: {} } },
-          { games: { some: {} } }
-        ]
-      },
-      select: {
-        id: true,
-        name: true
+      if (tagsToDelete.length === 0) {
+        return NextResponse.json({ 
+          message: 'No unused tags found to delete',
+          exceptIds: exceptIds || []
+        });
       }
-    });
+    } else {
+      // Original behavior - delete specific tag IDs
+      if (!tagIds || !Array.isArray(tagIds) || tagIds.length === 0) {
+        return NextResponse.json({ error: 'tagIds array is required and must not be empty when deleteAll is not true' }, { status: 400 });
+      }
 
-    if (usedTags.length > 0) {
-      return NextResponse.json({ 
-        error: 'Some tags are currently in use and cannot be deleted', 
-        usedTags: usedTags,
-        unusedTags: tagsToDelete
-      }, { status: 400 });
+      // Validate that all provided IDs are strings
+      if (!tagIds.every(id => typeof id === 'string')) {
+        return NextResponse.json({ error: 'All tag IDs must be strings' }, { status: 400 });
+      }
+
+      // First, verify that all tags exist and are actually unused
+      tagsToDelete = await prisma.wtag.findMany({
+        where: {
+          id: { in: tagIds },
+          AND: [
+            { texts: { none: {} } },
+            { songs: { none: {} } },
+            { games: { none: {} } }
+          ]
+        },
+        select: {
+          id: true,
+          name: true
+        }
+      });
+
+      if (tagsToDelete.length === 0) {
+        return NextResponse.json({ 
+          error: 'No unused tags found with the provided IDs', 
+          providedIds: tagIds 
+        }, { status: 400 });
+      }
+
+      // Check if some tags are being used (safety check)
+      const usedTags = await prisma.wtag.findMany({
+        where: {
+          id: { in: tagIds },
+          OR: [
+            { texts: { some: {} } },
+            { songs: { some: {} } },
+            { games: { some: {} } }
+          ]
+        },
+        select: {
+          id: true,
+          name: true
+        }
+      });
+
+      if (usedTags.length > 0) {
+        return NextResponse.json({ 
+          error: 'Some tags are currently in use and cannot be deleted', 
+          usedTags: usedTags,
+          unusedTags: tagsToDelete
+        }, { status: 400 });
+      }
     }
 
     // Delete the unused tags
@@ -125,10 +147,15 @@ export async function DELETE(req: NextRequest) {
       }
     });
 
+    const responseMessage = deleteAll === true 
+      ? `Successfully deleted ${deleteResult.count} unused tags (deleteAll mode)`
+      : `Successfully deleted ${deleteResult.count} unused tags`;
+
     return NextResponse.json({
-      message: `Successfully deleted ${deleteResult.count} unused tags`,
+      message: responseMessage,
       deletedTags: tagsToDelete,
-      deletedCount: deleteResult.count
+      deletedCount: deleteResult.count,
+      ...(deleteAll === true && { exceptIds: exceptIds || [] })
     });
   } catch (error) {
     console.error('Error deleting unused tags:', error);

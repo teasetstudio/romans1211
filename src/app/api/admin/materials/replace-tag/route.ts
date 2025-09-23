@@ -1,14 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
-// Hardcoded admin password for security (same as other admin endpoints)
-const ADMIN_PASSWORD = 'admin123!@#';
-
-// Helper function to verify admin password
-function verifyAdminPassword(password: string): boolean {
-  return password === ADMIN_PASSWORD;
-}
-
 // Interface for the request body
 interface ReplaceTagRequest {
   materialId: string;
@@ -24,32 +16,17 @@ interface ReplaceTagResponse {
     id: string;
     title: string;
     type: string;
-    tags: {
-      id: string;
-      name: string;
-    }[];
+    tags: { id: string; name: string }[];
   };
   changes: {
-    removedTag: {
-      id: string;
-      name: string;
-    };
-    addedTag: {
-      id: string;
-      name: string;
-    };
+    removedTag: { id: string; name: string };
+    addedTag: { id: string; name: string };
   };
 }
 
 // POST /api/admin/materials/replace-tag - Replace one tag with another on a material
 export async function POST(req: NextRequest) {
   try {
-    // Check admin password
-    const adminPassword = req.headers.get('x-admin-password');
-    if (!adminPassword || !verifyAdminPassword(adminPassword)) {
-      return NextResponse.json({ error: 'Unauthorized - Invalid admin password' }, { status: 401 });
-    }
-
     const body: ReplaceTagRequest = await req.json();
     const { materialId, oldTagId, newTagId } = body;
 
@@ -91,12 +68,8 @@ export async function POST(req: NextRequest) {
       const found = await (prisma[type] as any).findUnique({
         where: { id: materialId },
         include: {
-          tags: {
-            select: {
-              id: true,
-              name: true
-            }
-          }
+          tags: { select: { id: true, name: true } },
+          organization: { select: { id: true, name: true } }
         }
       });
 
@@ -191,12 +164,6 @@ export async function POST(req: NextRequest) {
 // GET /api/admin/materials/replace-tag - Get information about a material's tags (for preview)
 export async function GET(req: NextRequest) {
   try {
-    // Check admin password
-    const adminPassword = req.headers.get('x-admin-password');
-    if (!adminPassword || !verifyAdminPassword(adminPassword)) {
-      return NextResponse.json({ error: 'Unauthorized - Invalid admin password' }, { status: 401 });
-    }
-
     const url = new URL(req.url);
     const materialId = url.searchParams.get('materialId');
 
@@ -216,18 +183,8 @@ export async function GET(req: NextRequest) {
       const found = await (prisma[type] as any).findUnique({
         where: { id: materialId },
         include: {
-          tags: {
-            select: {
-              id: true,
-              name: true
-            }
-          },
-          organization: {
-            select: {
-              id: true,
-              name: true
-            }
-          }
+          tags: { select: { id: true, name: true } },
+          organization: { select: { id: true, name: true } }
         }
       });
 
