@@ -1,14 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
-// Hardcoded admin password for security (same as other admin endpoints)
-const ADMIN_PASSWORD = 'admin123!@#';
-
-// Helper function to verify admin password
-function verifyAdminPassword(password: string): boolean {
-  return password === ADMIN_PASSWORD;
-}
-
 // Interface for tag with usage stats
 interface TagWithStats {
   id: string;
@@ -26,12 +18,6 @@ interface TagWithStats {
 // GET /api/admin/tags/search - Find tag by name with usage statistics
 export async function GET(req: NextRequest) {
   try {
-    // Check admin password
-    const adminPassword = req.headers.get('x-admin-password');
-    if (!adminPassword || !verifyAdminPassword(adminPassword)) {
-      return NextResponse.json({ error: 'Unauthorized - Invalid admin password' }, { status: 401 });
-    }
-
     // Get query parameters
     const url = new URL(req.url);
     const tagName = url.searchParams.get('tagName');
