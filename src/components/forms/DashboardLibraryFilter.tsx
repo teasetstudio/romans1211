@@ -220,6 +220,7 @@ const DashboardLibraryFilter = ({ searchParams, className }: IProps) => {
                     setTagSuggestions([])
                   }
                 }}
+                autoComplete="off"
                 placeholder={t('tags_placeholder')}
                 className="flex-1 min-w-[60px] px-1 py-1 outline-none bg-transparent text-gray-800 placeholder-gray-400"
               />
