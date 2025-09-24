@@ -97,6 +97,7 @@ const LibraryCatalogFilter = ({ searchParams, className }: IProps) => {
       clearTimeout(handle)
     }
   }, [tagTerm, selectedTags])
+
   return (
     <div className={className}>
       <div className="container">

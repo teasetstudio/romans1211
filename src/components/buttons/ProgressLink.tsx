@@ -11,18 +11,18 @@ export const ProgressLink = ({ onClick, href, ...props }: any) => {
   const handleClick = (event: any) => {
     // Start NProgress on link click
     NProgress.start();
-    
+
     // Check if we're navigating to the same page
     const targetPath = href?.toString() || '';
     const currentPath = pathname;
-    
+
     // If navigating to the same page, complete progress immediately
     if (targetPath === currentPath || (targetPath === '/' && currentPath === '/')) {
       setTimeout(() => {
         NProgress.done();
       }, 100); // Small delay to show the progress bar briefly
     }
-    
+
     // Call the original onClick if provided
     if (onClick) {
       onClick(event);

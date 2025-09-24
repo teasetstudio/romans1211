@@ -3,6 +3,7 @@
 import { useSearchParams } from 'next/navigation';
 import { useRouter, usePathname } from '@/i18n/routing'
 import { useEffect } from 'react';
+import NProgress from 'nprogress';
 
 export function SubmitFormListener() {
   const router = useRouter();
@@ -45,6 +46,7 @@ export function SubmitFormListener() {
         }
       });
 
+      NProgress.start();
       router.push(`${pathname}${params.toString() ? `?${params.toString()}` : ''}`);
     };
 
