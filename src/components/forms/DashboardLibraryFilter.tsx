@@ -7,6 +7,7 @@ import { FormEvent, useState, useEffect } from 'react'
 import { NAMESPACE_DASHBOARD } from '@/res/namespaces'
 import { useTranslations } from 'next-intl'
 import { IconX } from '@tabler/icons-react'
+import NProgress from "nprogress";
 
 interface IProps {
   searchParams: ILibraryCatalogSearchParams
@@ -112,12 +113,12 @@ const DashboardLibraryFilter = ({ searchParams, className }: IProps) => {
         if (!isAbort) setTagSuggestions([])
       } finally {
         setIsLoadingSuggestions(false)
-      }
-    }, 250)
+      } 
+    }, 250) 
 
-    return () => {
-      controller.abort()
-      clearTimeout(handle)
+    return () => {  
+      controller.abort()  
+      clearTimeout(handle)  
     }
   }, [tagTerm, selectedTags])
 
@@ -134,6 +135,7 @@ const DashboardLibraryFilter = ({ searchParams, className }: IProps) => {
     // Reset to page 1 when filter changes
     params.set('page', '1')
 
+    NProgress.start();
     // Navigate with new params
     router.push(`${pathname}${params.toString() ? `?${params.toString()}` : ''}`)
   }

@@ -2,9 +2,8 @@
 
 import React from 'react'
 import { signOut } from 'next-auth/react'
-import { useRouter } from 'next-nprogress-bar'
+import { useRouter } from '@/i18n/routing'
 import { IconLogout } from '@/res/icons'
-
 
 interface IProps {
   showOnlyIcon?: boolean
@@ -17,7 +16,7 @@ const LogoutBtn = ({ showOnlyIcon }: IProps) => {
     await signOut({ redirect: false })
     router.push('/')
   }
-  
+
   return (
     <button
       onClick={onSignOut}

@@ -2,7 +2,7 @@ import { Lang } from '@/types/Lang';
 import { TMaterialType } from '@/types/Materials';
 import { ITag } from '@/types/Tag';
 import { dateToDDMMYYY } from '@/utils/dates';
-import { Link } from '@/i18n/routing';;
+import { ProgressLink as Link } from '@/components/buttons/ProgressLink';;
 import parse, { HTMLReactParserOptions, Element } from 'html-react-parser';
 import LangBadge from '../badges/LangBadge';
 import ImageCardPart from './shared/ImageCardPart';

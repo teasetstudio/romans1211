@@ -1,7 +1,8 @@
 "use client"
 
 import React, { useState } from 'react'
-import { Link } from '@/i18n/routing';
+import { ProgressLink as Link } from '@/components/buttons/ProgressLink';
+import NProgress from "nprogress";
 import { useOrganization } from '@/components/contexts/OrganizationContext';
 
 import { IconClose, IconDashboard, IconHome, IconLibrary, IconProfile, IconBurger, IconCompass } from '@/res/icons'
@@ -112,6 +113,7 @@ const LinkItem = ({ href, text, icon: Icon, isExpanded = true }: ILinkProps) => 
   return (
     <Link
       href={href}
+      onClick={() => NProgress.start()}
       className="flex items-center gap-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded-lg p-2 transition-colors"
     >
       <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">

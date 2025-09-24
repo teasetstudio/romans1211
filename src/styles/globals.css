@@ -22,6 +22,43 @@ body {
   /* font-family: Arial, Helvetica, sans-serif; */
 }
 
+/* NProgress Custom Styles */
+#nprogress {
+  pointer-events: none;
+  z-index: 119999; /* High z-index to appear above everything */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100vw;
+  height: 4px;
+}
+
+#nprogress .bar {
+  background: #00bfff !important; /* Match your theme color */
+  position: fixed;
+  z-index: 9999;
+  top: 0;
+  left: 0;
+  width: 100vw !important; /* Force full viewport width */
+  height: 4px; /* Adjust thickness */
+}
+
+#nprogress .peg {
+  display: block;
+  position: absolute;
+  right: 0px;
+  width: 100px;
+  height: 100%;
+  box-shadow: 0 0 10px #00bfff, 0 0 5px #00bfff;
+  opacity: 1.0;
+  transform: rotate(3deg) translate(0px, -4px);
+}
+
+#nprogress .spinner {
+  display: none; /* Hide spinner since you have showSpinner: false */
+}
+
 /* AddButton.tsx */
 .gray4 path {
   stroke: #eff4ff;

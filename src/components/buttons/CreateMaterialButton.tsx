@@ -1,6 +1,6 @@
 'use client'
 
-import { Link } from '@/i18n/routing';
+import { ProgressLink as Link } from '@/components/buttons/ProgressLink';
 
 import { IconPlus } from '@/res/icons'
 import H9 from '../typo/H9'

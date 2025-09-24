@@ -1,4 +1,4 @@
-import { Link } from '@/i18n/routing';
+import { ProgressLink as Link } from '@/components/buttons/ProgressLink';
 import { NAMESPACE_COMMON } from '@/res/namespaces';
 import { useTranslations } from 'next-intl';
 

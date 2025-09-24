@@ -1,4 +1,4 @@
-import { Link } from "@/i18n/routing";
+import { ProgressLink as Link } from '@/components/buttons/ProgressLink';
 import { IconText, IconMusic, IconGame } from "@/res/icons";
 import { NAMESPACE_DASHBOARD } from "@/res/namespaces";
 import { ROUTE_DASHBOARD_LIBRARY, ROUTE_DASHBOARD_MATERIAL_CREATE } from "@/res/routes";

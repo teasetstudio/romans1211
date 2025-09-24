@@ -1,7 +1,7 @@
 'use client';
 
 import { TMaterialType, TMaterialWithIncluded } from '@/types/Materials'
-import { Link } from '@/i18n/routing';
+import { ProgressLink as Link } from '@/components/buttons/ProgressLink';
 import MakeOriginalButton from '@/components/buttons/MakeOriginalButton';
 import { getDashboardMaterialUrl, getDashboardTranslateMaterialUrl } from '@/utils/urls';
 

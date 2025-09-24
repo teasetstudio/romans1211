@@ -6,7 +6,7 @@ import { isValidMaterialType } from '@/utils';
 import { TMaterialsIncludedOrganization, TMaterialsIncludedTags } from '@/types/Materials';
 import { materialService } from '@/lib/MaterialServiceForSSR';
 import CreateTranslationForm from '../../../../components/CreateTranslationForm';
-import { Link } from '@/i18n/routing';
+import { ProgressLink as Link } from '@/components/buttons/ProgressLink';
 import { getDashboardMaterialUrl } from '@/utils/urls';
 import Expandable from '@/components/widgets/ui/Expandable';
 

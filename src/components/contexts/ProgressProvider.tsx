@@ -1,18 +1,31 @@
 'use client';
 
-import { AppProgressBar as ProgressBar } from 'next-nprogress-bar';
-type Props = { children?: React.ReactNode; };
+import { usePathname, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
+import NProgress from "nprogress";
+// import "nprogress/nprogress.css";
 
-export const ProgressProvider = ({ children }: Props) => {
+// Configure NProgress
+NProgress.configure({ 
+  showSpinner: false,
+  minimum: 0.3,
+  easing: 'ease',
+  speed: 500,
+
+});
+
+export const ProgressProvider = ({ children }: { children: React.ReactNode }) => {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    // Complete any existing progress bar
+    NProgress.done();
+  }, [pathname, searchParams]);
+
   return (
     <>
       {children}
-      <ProgressBar
-        height="4px"
-        color="#00bfff"
-        options={{ showSpinner: false }}
-        shallowRouting
-      />
     </>
   );
 };

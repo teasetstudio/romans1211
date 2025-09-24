@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from '@/i18n/routing';
-import { Link } from '@/i18n/routing';
+import { ProgressLink as Link } from '@/components/buttons/ProgressLink';
 import { useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import * as yup from 'yup';

@@ -1,5 +1,5 @@
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
+import { ProgressLink as Link } from '@/components/buttons/ProgressLink';
 import { NAMESPACE_NOT_FOUND } from '@/res/namespaces';
 
 export default function NotFound() {
