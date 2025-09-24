@@ -11,7 +11,6 @@ NProgress.configure({
   minimum: 0.3,
   easing: 'ease',
   speed: 500,
-
 });
 
 export const ProgressProvider = ({ children }: { children: React.ReactNode }) => {
