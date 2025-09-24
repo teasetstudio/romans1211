@@ -1,6 +1,6 @@
 import { IconText, IconMusic, IconGame, IconLibrary, IconClock, IconArrowLeft } from "@/res/icons";
 import { ROUTE_DASHBOARD_LIBRARY, ROUTE_DASHBOARD_MATERIAL_CREATE } from "@/res/routes";
-import { Link } from '@/i18n/routing';
+import { ProgressLink as Link } from '@/components/buttons/ProgressLink';
 import { NAMESPACE_DASHBOARD } from '@/res/namespaces';
 import { useTranslations } from 'next-intl';
 

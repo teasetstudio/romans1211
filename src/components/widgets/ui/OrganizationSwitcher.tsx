@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Organization, useOrganization } from '@/components/contexts/OrganizationContext';
 import { IconCheck, IconClose } from '@/res/icons';
-import { Link } from '@/i18n/routing';
+import { ProgressLink as Link } from '@/components/buttons/ProgressLink';
 import { ROUTE_DASHBOARD_ORGANIZATIONS, ROUTE_DASHBOARD_ORGANIZATIONS_NEW } from '@/res/routes';
 import OrganizationIcon from './OrganizationIcon';
 import { useSession } from 'next-auth/react';

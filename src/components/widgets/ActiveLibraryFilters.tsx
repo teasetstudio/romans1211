@@ -2,7 +2,7 @@
 
 import { usePathname } from '@/i18n/routing';
 import { appendParamsToUrl } from '@/utils/urls'
-import { Link } from '@/i18n/routing';
+import { ProgressLink as Link } from '@/components/buttons/ProgressLink';
 import React from 'react'
 
 interface IProps {

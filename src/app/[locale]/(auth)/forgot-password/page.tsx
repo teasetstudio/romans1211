@@ -1,7 +1,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/routing';
+import { ProgressLink as Link } from '@/components/buttons/ProgressLink';
 import { useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import * as yup from 'yup';

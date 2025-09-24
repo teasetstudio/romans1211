@@ -1,6 +1,7 @@
 'use client';
 
-import { useRouter } from 'next-nprogress-bar'
+import { useRouter } from "@/i18n/routing";
+import NProgress from "nprogress";
 import MaterialTypeBadge from '@/components/badges/MaterialTypeBadge'
 import VisibilityBadge from '@/components/badges/VisibilityBadge';
 import { TMaterialType } from '@/types/Materials';
@@ -17,6 +18,7 @@ const ContentTitle = ({ type }: IProps) => {
 
   const router = useRouter();
   const onTypeChange = (newMaterialId: string, newType: TMaterialType) => {
+    NProgress.start();
     router.push(`/dashboard/library/material/${newType}/${newMaterialId}`);
   };
 

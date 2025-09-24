@@ -1,5 +1,5 @@
 import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/routing';
+import { ProgressLink as Link } from '@/components/buttons/ProgressLink';
 
 import LoginForm from '@/components/popups/AuthPopup/LoginForm'
 import H2 from '@/components/typo/H2';

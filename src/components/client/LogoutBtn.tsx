@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { signOut } from 'next-auth/react'
-import { useRouter } from 'next-nprogress-bar'
+import { useRouter } from '@/i18n/routing'
 import { IconLogout } from '@/res/icons'
 
 interface IProps {

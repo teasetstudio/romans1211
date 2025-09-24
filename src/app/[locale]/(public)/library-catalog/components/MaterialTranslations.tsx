@@ -1,5 +1,5 @@
 import { TMaterialType, TMaterialWithIncluded } from '@/types/Materials'
-import { Link } from '@/i18n/routing';
+import { ProgressLink as Link } from '@/components/buttons/ProgressLink';
 import { getMaterialUrl } from '@/utils/urls';
 
 interface IProps {

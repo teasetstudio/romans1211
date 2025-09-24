@@ -1,7 +1,7 @@
 import { IconText, IconMusic, IconGame, IconArrowLeft } from "@/res/icons";
 import { getDashboardMaterialUrl } from "@/utils/urls";
 import { TMaterialWithType } from "@/types/Materials";
-import { Link } from '@/i18n/routing';
+import { ProgressLink as Link } from '@/components/buttons/ProgressLink';
 import { useTranslations } from "next-intl";
 import { NAMESPACE_DASHBOARD } from "@/res/namespaces";
 
