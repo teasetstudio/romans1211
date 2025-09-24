@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { Event } from "@prisma/client";
 import Button from "@/components/buttons/Button";
 import { toast } from "react-hot-toast";
-import Link from "next/link";
+import { ProgressLink as Link } from '@/components/buttons/ProgressLink';
 import { Text } from "@/components/typo/Text";
 import { IconEdit, IconTrash, IconSettings } from "@/res/icons";
 import EventFormDialog from "@/app/[locale]/dashboard/components/EventFormDialog";

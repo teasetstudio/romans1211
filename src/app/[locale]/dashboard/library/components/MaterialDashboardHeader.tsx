@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { ProgressLink as Link } from '@/components/buttons/ProgressLink';
 import { IconArrowLeft, IconPencil} from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { NAMESPACE_DASHBOARD } from '@/res/namespaces';
