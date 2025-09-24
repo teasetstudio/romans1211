@@ -212,6 +212,103 @@ class MaterialServiceForAPI {
       }),
     ]);
   }
+
+  async changeType(
+    currentType: TMaterialType, 
+    newType: TMaterialType, 
+    materialId: string
+  ): Promise<{newMaterialId: string; newType: TMaterialType }> {
+    if (currentType === newType) {
+      throw new Error('Material is already of the specified type');
+    }
+
+    // Validate new type
+    const validTypes: TMaterialType[] = ['text', 'song', 'game'];
+    if (!validTypes.includes(newType)) {
+      throw new Error('Invalid material type');
+    }
+
+    return await prisma.$transaction(async (tx) => {
+      // Get the current material with all its data and translations
+      const currentMaterial = await this.getModel(currentType, tx).findUnique({
+        where: { id: materialId, originalId: null },
+        include: {
+          tags: true,
+          translations: true,
+          organization: true,
+        },
+      });
+
+      if (!currentMaterial) {
+        throw new Error('Material not found');
+      }
+
+      // Create the material in the new type table (let Prisma generate new ID)
+      const newMaterial = await this.getModel(newType, tx).create({
+        data: {
+          title: currentMaterial.title,
+          content: currentMaterial.content,
+          language: currentMaterial.language,
+          isPublic: currentMaterial.isPublic,
+          originalId: null,
+          organizationId: currentMaterial.organizationId,
+          createdAt: currentMaterial.createdAt,
+          updatedAt: new Date(),
+          tags: {
+            connect: currentMaterial.tags.map((tag: { id: string }) => ({ id: tag.id })),
+          },
+        },
+        include: {
+          tags: true,
+        },
+      });
+
+      // Migrate all translations to the new type
+      if (currentMaterial.translations && currentMaterial.translations.length > 0) {
+        for (const translation of currentMaterial.translations) {
+          // Get translation with tags
+          const translationWithTags = await this.getModel(currentType, tx).findUnique({
+            where: { id: translation.id },
+            include: { tags: true },
+          });
+
+          if (translationWithTags) {
+            // Create translation in new type table (new ID will be generated)
+            await this.getModel(newType, tx).create({
+              data: {
+                title: translationWithTags.title,
+                content: translationWithTags.content,
+                language: translationWithTags.language,
+                isPublic: translationWithTags.isPublic,
+                originalId: newMaterial.id, // Point to the new original
+                organizationId: translationWithTags.organizationId,
+                createdAt: translationWithTags.createdAt,
+                updatedAt: new Date(),
+                tags: {
+                  connect: translationWithTags.tags.map((tag: { id: string }) => ({ id: tag.id })),
+                },
+              },
+            });
+
+            // Delete from old type table
+            await this.getModel(currentType, tx).delete({
+              where: { id: translation.id },
+            });
+          }
+        }
+      }
+
+      // Delete the original material from the old type table
+      await this.getModel(currentType, tx).delete({
+        where: { id: materialId },
+      });
+
+      return {
+        newMaterialId: newMaterial.id,
+        newType,
+      };
+    });
+  }
 }
 
 export const materialApiService = new MaterialServiceForAPI();
