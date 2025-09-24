@@ -2,7 +2,7 @@
 
 import { useOrganization } from "@/components/contexts/OrganizationContext";
 import { ROUTE_DASHBOARD_ORGANIZATIONS_NEW, ROUTE_DASHBOARD_ORGANIZATIONS_SETTINGS } from "@/res/routes";
-import { Link } from "@/i18n/routing";
+import { ProgressLink as Link } from '@/components/buttons/ProgressLink';
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import toast from 'react-hot-toast';

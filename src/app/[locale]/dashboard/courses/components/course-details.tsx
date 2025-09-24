@@ -6,7 +6,7 @@ import { Event, Course } from "@prisma/client";
 import Button from "@/components/buttons/Button";
 import { IconPlus, IconCalendar, IconEdit, IconMapPin } from "@tabler/icons-react";
 import { Text } from "@/components/typo/Text";
-import Link from "next/link";
+import { ProgressLink as Link } from '@/components/buttons/ProgressLink';
 import { ROUTE_DASHBOARD_COURSES, ROUTE_DASHBOARD_EVENT } from "@/res/routes";
 import { EventList } from "./event-list";
 import { CourseDialog } from "./course-dialog";

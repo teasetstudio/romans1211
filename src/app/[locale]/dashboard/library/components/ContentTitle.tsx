@@ -1,12 +1,11 @@
 'use client';
 
-import { useRouter } from "@/i18n/routing";
-import NProgress from "nprogress";
 import MaterialTypeBadge from '@/components/badges/MaterialTypeBadge'
 import VisibilityBadge from '@/components/badges/VisibilityBadge';
 import { TMaterialType } from '@/types/Materials';
 import { getFullUrl, getMaterialUrl } from '@/utils/urls';
 import { useMaterial } from './MaterialStateProvider';
+import { useNavigateWithProgress } from '@/hooks/useNavigateWithProgress';
 
 interface IProps {
   type: TMaterialType;
@@ -15,11 +14,11 @@ interface IProps {
 const ContentTitle = ({ type }: IProps) => {
   const { material } = useMaterial();
   const publicUrl = material.isPublic ? getFullUrl(getMaterialUrl({ type, id: material.id })) : undefined;
+  const { navigateWithProgress } = useNavigateWithProgress();
 
-  const router = useRouter();
   const onTypeChange = (newMaterialId: string, newType: TMaterialType) => {
-    NProgress.start();
-    router.push(`/dashboard/library/material/${newType}/${newMaterialId}`);
+    const targetUrl = `/dashboard/library/material/${newType}/${newMaterialId}`;
+    navigateWithProgress(targetUrl);
   };
 
   return (

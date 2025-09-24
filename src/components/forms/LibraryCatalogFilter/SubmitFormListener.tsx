@@ -1,11 +1,12 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useRouter, usePathname } from '@/i18n/routing'
+import { usePathname } from '@/i18n/routing'
 import { useEffect } from 'react';
+import { useNavigateWithProgress } from '@/hooks/useNavigateWithProgress';
 
 export function SubmitFormListener() {
-  const router = useRouter();
+  const { navigateWithProgress } = useNavigateWithProgress();
   const searchParams = useSearchParams();
   const pathname = usePathname()
 
@@ -45,12 +46,13 @@ export function SubmitFormListener() {
         }
       });
 
-      router.push(`${pathname}${params.toString() ? `?${params.toString()}` : ''}`);
+      const targetUrl = `${pathname}${params.toString() ? `?${params.toString()}` : ''}`;
+      navigateWithProgress(targetUrl);
     };
 
     form.addEventListener('submit', handleSubmit);
     return () => form.removeEventListener('submit', handleSubmit);
-  }, [router, searchParams, pathname]);
+  }, [navigateWithProgress, searchParams, pathname]);
 
   return null;
 }

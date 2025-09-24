@@ -2,12 +2,12 @@
 
 import { ILibraryCatalogSearchParams } from '@/types/Params'
 import { IconSearch } from '@/res/icons'
-import { useRouter, usePathname } from '@/i18n/routing'
+import { usePathname } from '@/i18n/routing'
 import { FormEvent, useState, useEffect } from 'react'
 import { NAMESPACE_DASHBOARD } from '@/res/namespaces'
 import { useTranslations } from 'next-intl'
 import { IconX } from '@tabler/icons-react'
-import NProgress from "nprogress";
+import { useNavigateWithProgress } from '@/hooks/useNavigateWithProgress';
 
 interface IProps {
   searchParams: ILibraryCatalogSearchParams
@@ -16,10 +16,10 @@ interface IProps {
 
 const DashboardLibraryFilter = ({ searchParams, className }: IProps) => {
   const t = useTranslations(NAMESPACE_DASHBOARD);
+  const { navigateWithProgress } = useNavigateWithProgress();
+  const pathname = usePathname();
 
   const { type, 'search-term': searchTerm, tags, originalOnly = "true" } = searchParams
-  const router = useRouter()
-  const pathname = usePathname()
 
   // State for form inputs
   const [search, setSearch] = useState(searchTerm || '')
@@ -135,9 +135,9 @@ const DashboardLibraryFilter = ({ searchParams, className }: IProps) => {
     // Reset to page 1 when filter changes
     params.set('page', '1')
 
-    NProgress.start();
-    // Navigate with new params
-    router.push(`${pathname}${params.toString() ? `?${params.toString()}` : ''}`)
+    // Navigate with new params using the hook
+    const targetUrl = `${pathname}${params.toString() ? `?${params.toString()}` : ''}`
+    navigateWithProgress(targetUrl)
   }
 
   return (
