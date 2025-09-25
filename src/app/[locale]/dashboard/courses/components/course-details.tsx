@@ -10,12 +10,12 @@ import { ProgressLink as Link } from '@/components/buttons/ProgressLink';
 import { ROUTE_DASHBOARD_COURSES, ROUTE_DASHBOARD_EVENT } from "@/res/routes";
 import { EventList } from "./event-list";
 import { CourseDialog } from "./course-dialog";
-import { useRouter } from "@/i18n/routing";
 import { NAMESPACE_DASHBOARD_COURSES } from "@/res/namespaces";
 import EventFormDialog from "../../components/EventFormDialog";
 import { useOrganization } from "@/components/contexts/OrganizationContext";
 import { useSession } from "next-auth/react";
 import { userInOrganizationData } from "@/utils/permissions";
+import { useNavigateWithProgress } from '@/hooks/useNavigateWithProgress';
 
 interface CourseDetailsProps {
   course: Course & {
@@ -25,7 +25,7 @@ interface CourseDetailsProps {
 
 export function CourseDetails({ course }: CourseDetailsProps) {
   const t = useTranslations(NAMESPACE_DASHBOARD_COURSES);
-  const router = useRouter();
+  const { navigateWithProgress, refreshWithProgress } = useNavigateWithProgress();
   const { selectedOrganization } = useOrganization();
   const { data: session } = useSession();
   const [events, setEvents] = useState<Event[]>(course.events);
@@ -33,7 +33,7 @@ export function CourseDetails({ course }: CourseDetailsProps) {
   const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
 
   const handleCourseUpdate = async () => {
-    router.refresh();
+    refreshWithProgress();
     setIsEditCourseOpen(false);
   };
 
@@ -160,7 +160,7 @@ export function CourseDetails({ course }: CourseDetailsProps) {
               hasDeletePermission={hasDeletePermission}
               events={events} 
               onDelete={handleDeleteEvent}
-              onEdit={(id) => router.push(ROUTE_DASHBOARD_EVENT(id))}
+              onEdit={(id) => navigateWithProgress(ROUTE_DASHBOARD_EVENT(id))}
             />
             <div className="mt-4 flex justify-end">
               {hasCreatePermission && (

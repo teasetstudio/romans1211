@@ -3,8 +3,6 @@ import prisma from "@/lib/prisma";
 import { ROUTE_DASHBOARD_COURSES } from "@/res/routes";
 import { CourseDetails } from "../components/course-details";
 import { getSession } from "@/lib/auth";
-import { userInOrganizationData } from "@/utils/permissions";
-import { Organization } from "@/components/contexts/OrganizationContext";
 import { ORG_READ_PERMISSIONS } from "@/lib/permissions";
 
 interface EventCoursePageProps {
@@ -33,7 +31,7 @@ export default async function CoursePage({ params }: EventCoursePageProps) {
     include: {
       events: {
         orderBy: {
-          startTime: 'asc'
+          startTime: 'desc'
         }
       },
       organization: {

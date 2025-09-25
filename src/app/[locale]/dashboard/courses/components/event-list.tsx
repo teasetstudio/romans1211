@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Event } from "@prisma/client";
-import { format } from "date-fns";
+import { format, isToday, isTomorrow, isYesterday, isThisYear } from "date-fns";
 import Button from "@/components/buttons/Button";
 import { Text } from "@/components/typo/Text";
 import { IconTrash } from "@tabler/icons-react";
@@ -18,6 +18,29 @@ interface EventListProps {
 export function EventList({ events, onDelete, onEdit, hasDeletePermission }: EventListProps) {
   const t = useTranslations(NAMESPACE_DASHBOARD_COURSES);
 
+  // Helper function to format dates in a more readable way
+  const formatEventDateTime = (date: Date) => {
+    
+    // For dates today, tomorrow, or yesterday - show relative day + time
+    if (isToday(date)) {
+      return `${t("date.today")} ${format(date, "HH:mm")}`;
+    }
+    if (isTomorrow(date)) {
+      return `${t("date.tomorrow")} ${format(date, "HH:mm")}`;
+    }
+    if (isYesterday(date)) {
+      return `${t("date.yesterday")} ${format(date, "HH:mm")}`;
+    }
+    
+    // For dates in the current year - show short month, day, and time
+    if (isThisYear(date)) {
+      return format(date, "MMM d, HH:mm");
+    }
+    
+    // For dates in other years - include the year
+    return format(date, "MMM d, yyyy HH:mm");
+  };
+
   return (
     <div className="overflow-hidden rounded-lg border border-gray-200">
       <table className="min-w-full divide-y divide-gray-200">
@@ -31,12 +54,6 @@ export function EventList({ events, onDelete, onEdit, hasDeletePermission }: Eve
             </th>
             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               {t("table.endTime")}
-            </th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              {t("table.location")}
-            </th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              {t("table.status")}
             </th>
             <th scope="col" className="relative px-6 py-3">
               <span className="sr-only">{t("table.actions")}</span>
@@ -54,22 +71,10 @@ export function EventList({ events, onDelete, onEdit, hasDeletePermission }: Eve
                 <Text>{event.title}</Text>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <Text>{format(new Date(event.startTime), "PPP p")}</Text>
+                <Text>{formatEventDateTime(new Date(event.startTime))}</Text>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <Text>{format(new Date(event.endTime), "PPP p")}</Text>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <Text>{event.location || "-"}</Text>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                  event.isCancelled 
-                    ? "bg-red-100 text-red-800" 
-                    : "bg-green-100 text-green-800"
-                }`}>
-                  {event.isCancelled ? t("cancelled") : t("active")}
-                </span>
+                <Text>{formatEventDateTime(new Date(event.endTime))}</Text>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 {hasDeletePermission && (

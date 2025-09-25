@@ -6,6 +6,7 @@ import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react';
 import { TMaterialType } from '@/types/Materials';
 import { getMaterial } from '@/api/requests/materials';
 
+import '@/styles/tiptap-components.css';
 
 interface MaterialWithTags {
   id: string;
@@ -258,7 +259,7 @@ const MaterialModal = ({ isOpen, onClose, materialId, materialType, eventSlug }:
               {/* Content */}
               <div className="px-6 py-4 overflow-y-auto max-h-[calc(90vh-300px)]">
                 <div
-                  className="prose prose-sm max-w-none text-gray-800 leading-relaxed"
+                  className="tiptap-wrapper whitespace-pre-wrap"
                   dangerouslySetInnerHTML={{ __html: material.content }}
                 />
               </div>

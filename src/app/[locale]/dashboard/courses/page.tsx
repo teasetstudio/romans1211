@@ -2,7 +2,6 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useState, useMemo } from "react";
-import { useRouter } from "@/i18n/routing";
 import { Course } from "@prisma/client";
 import { useSession } from "next-auth/react";
 
@@ -18,15 +17,16 @@ import { CourseList } from "./components/course-list";
 import SecondTimothy4_7 from "./components/SecondTimothy4_7";
 import { CreateCourseDialog } from "./components/create-course-dialog";
 import { userInOrganizationData } from "@/utils/permissions";
+import { useNavigateWithProgress } from '@/hooks/useNavigateWithProgress';
 
 export default function CoursesPage() {
   const t = useTranslations(NAMESPACE_DASHBOARD_COURSES);
-  const router = useRouter();
   const { selectedOrganization } = useOrganization();
   const { data: session } = useSession();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { navigateWithProgress } = useNavigateWithProgress();
 
   useEffect(() => {
     if (!selectedOrganization) return;
@@ -112,7 +112,7 @@ export default function CoursesPage() {
           courses={courses}
           hasDeletePermission={hasDeletePermission}
           onDelete={handleDeleteCourses}
-          onEdit={(id) => router.push(getDashboardCourseUrl(id))}
+          onEdit={(id) => navigateWithProgress(getDashboardCourseUrl(id))}
         />
       )}
 
