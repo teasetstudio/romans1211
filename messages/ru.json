@@ -285,6 +285,11 @@
       "cancel": "Отмена",
       "edit": "Редактировать",
       "delete": "Удалить"
+    },
+    "date": {
+      "today": "Сегодня",
+      "tomorrow": "Завтра",
+      "yesterday": "Вчера"
     }
   },
   "dashboard_events": {

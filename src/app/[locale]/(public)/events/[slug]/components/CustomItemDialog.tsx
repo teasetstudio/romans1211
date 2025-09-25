@@ -37,7 +37,7 @@ export default function CustomItemDialog({ open, onClose, title, badge = "Custom
           <div className="px-6 py-4 overflow-y-auto max-h-[calc(90vh-150px)]">
             {contentHtml ? (
               <div
-                className="prose prose-sm max-w-none text-gray-800"
+                className="tiptap-wrapper whitespace-pre-wrap"
                 dangerouslySetInnerHTML={{ __html: contentHtml }}
               />
             ) : (

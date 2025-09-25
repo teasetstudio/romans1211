@@ -24,5 +24,14 @@ export const useNavigateWithProgress = () => {
     router.push(targetUrl);
   };
 
-  return { navigateWithProgress };
+  const refreshWithProgress = () => {
+    NProgress.start();
+
+    setTimeout(() => {
+      NProgress.done();
+    }, 1000);
+    router.refresh();
+  };
+
+  return { navigateWithProgress, refreshWithProgress };
 };

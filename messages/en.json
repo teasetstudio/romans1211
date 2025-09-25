@@ -293,6 +293,11 @@
       "cancel": "Cancel",
       "edit": "Edit",
       "delete": "Delete"
+    },
+    "date": {
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "yesterday": "Yesterday"
     }
   },
   "dashboard_events": {
