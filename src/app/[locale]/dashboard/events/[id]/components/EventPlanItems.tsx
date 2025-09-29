@@ -47,6 +47,12 @@ const EventPlanItems = ({ event, session }: IProps) => {
   const [showCustomItemModal, setShowCustomItemModal] = useState(false);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [expandedDescriptions, setExpandedDescriptions] = useState<Set<string>>(new Set());
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [pageSize] = useState(20); // Fixed page size
 
   const { selectedOrganization } = useOrganization();
 
@@ -86,8 +92,12 @@ const EventPlanItems = ({ event, session }: IProps) => {
         params.append("organizationId", event.organizationId);
 
         if (searchInPublicLibrary) {
-          params.append("searchInPublicLibrary", "true");
+          params.append("includePublicLibrary", "true");
         }
+
+        // Add pagination parameters
+        params.append("page", currentPage.toString());
+        params.append("limit", pageSize.toString());
 
         const response = await fetch(`/api/materials?${params.toString()}`);
         if (!response.ok) {
@@ -95,6 +105,10 @@ const EventPlanItems = ({ event, session }: IProps) => {
         }
 
         const data = await response.json();
+        
+        // Update pagination state
+        setTotalCount(data.totalCount || 0);
+        setTotalPages(data.totalPages || 0);
 
         // Update columns with the new materials
         setColumns(prev => ({
@@ -112,7 +126,12 @@ const EventPlanItems = ({ event, session }: IProps) => {
     // Debounce the fetch to avoid too many requests
     const timeoutId = setTimeout(fetchMaterials, 300);
     return () => clearTimeout(timeoutId);
-  }, [selectedType, searchQuery, selectedTags, originalOnly, event.organizationId, searchInPublicLibrary]);
+  }, [selectedType, searchQuery, selectedTags, originalOnly, event.organizationId, searchInPublicLibrary, currentPage, pageSize]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedType, searchQuery, selectedTags, originalOnly, searchInPublicLibrary]);
 
   // Update columns with materials from API
   const [columns, setColumns] = useState<Columns>({
@@ -531,6 +550,11 @@ const EventPlanItems = ({ event, session }: IProps) => {
             hoveredMaterialId={hoveredMaterialId}
             isDraggingRightToLeft={isDraggingRightToLeft}
             isDraggingFromRight={isDraggingFromRight}
+            currentPage={currentPage}
+            totalCount={totalCount}
+            totalPages={totalPages}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
           />
 
           <PlanItemsColumn

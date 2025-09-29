@@ -145,9 +145,9 @@ class MaterialServiceForSSR {
     searchTerm?: string;
     isPublic?: boolean | null;
     organizationId?: string;
-    isExcludeOrganizationId?: boolean;
     ownerId?: string;
-    originalOnly?: boolean
+    originalOnly?: boolean;
+    includePublicLibrary?: boolean;
   }): Promise<{ materials: TCatalogMaterial[]; totalCount: number; totalPages: number }> {
     const { 
       page = 1, 
@@ -157,9 +157,9 @@ class MaterialServiceForSSR {
       type, 
       isPublic = true,
       organizationId,
-      isExcludeOrganizationId = false,
       ownerId,
-      originalOnly = true
+      originalOnly = true,
+      includePublicLibrary = false
     } = searchParams;
 
     const validatedType = this.validateType(type);
@@ -183,14 +183,20 @@ class MaterialServiceForSSR {
     const WHERE = (type: 'Text' | 'Song' | 'Game') => {
       const conditions = [];
       
-      if (isPublic !== undefined && isPublic !== null) 
-        conditions.push(Prisma.sql`m."isPublic" = ${isPublic}`);
-      
-      if (organizationId) {
-        if (isExcludeOrganizationId) {
-          conditions.push(Prisma.sql`m."organizationId" != ${organizationId}`);
-        } else {
+      // Handle organization and public library search logic
+      if (includePublicLibrary && organizationId) {
+        // Search in both organization materials and public materials
+        conditions.push(Prisma.sql`(
+          m."organizationId" = ${organizationId} OR 
+          m."isPublic" = true
+        )`);
+      } else {
+        if (organizationId) {
+          // Search only in organization materials
           conditions.push(Prisma.sql`m."organizationId" = ${organizationId}`);
+        }
+        if (isPublic !== undefined && isPublic !== null) {
+          conditions.push(Prisma.sql`m."isPublic" = ${isPublic}`);
         }
       }
 

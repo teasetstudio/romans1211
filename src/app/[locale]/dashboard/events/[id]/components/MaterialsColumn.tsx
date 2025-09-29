@@ -3,6 +3,7 @@ import { Droppable } from "@hello-pangea/dnd";
 import { TMaterialWithType, TMaterialType } from "@/types/Materials";
 import MaterialItem from "./MaterialItem";
 import MaterialModal from "./MaterialModal";
+import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 
 interface MaterialsColumnProps {
   materials: (TMaterialWithType & {isFromPublicLibrary: boolean})[];
@@ -11,6 +12,11 @@ interface MaterialsColumnProps {
   hoveredMaterialId: string | null;
   isDraggingRightToLeft: boolean;
   isDraggingFromRight: boolean;
+  currentPage: number;
+  totalCount: number;
+  totalPages: number;
+  pageSize: number;
+  onPageChange: (page: number) => void;
 }
 
 const MaterialsColumn = ({
@@ -19,7 +25,12 @@ const MaterialsColumn = ({
   isLoading,
   hoveredMaterialId,
   isDraggingRightToLeft,
-  isDraggingFromRight
+  isDraggingFromRight,
+  currentPage,
+  totalCount,
+  totalPages,
+  pageSize,
+  onPageChange
 }: MaterialsColumnProps) => {
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
@@ -48,7 +59,57 @@ const MaterialsColumn = ({
   };
   return (
     <div className="bg-white rounded-lg shadow-sm p-3">
-      <h3 className="text-lg font-medium mb-3">Available Materials</h3>
+      <div className="flex justify-between items-center mb-3">
+        <h3 className="text-lg font-medium">Available Materials</h3>
+        <div className="text-sm text-gray-600">
+          {isLoading ? (
+            <div className="animate-pulse bg-gray-200 h-4 w-12 rounded"></div>
+          ) : (
+            `${totalCount} total`
+          )}
+        </div>
+      </div>
+      
+      {/* Materials Count and Pagination Info */}
+      <div className="flex justify-between items-center mb-3 text-sm">
+        <div className="text-gray-600">
+          {isLoading ? (
+            <div className="animate-pulse bg-gray-200 h-4 w-32 rounded"></div>
+          ) : (
+            `Showing ${((currentPage - 1) * pageSize) + 1}-${Math.min(currentPage * pageSize, totalCount)} of ${totalCount}`
+          )}
+        </div>
+        
+        {isLoading ? (
+          <div className="flex items-center gap-2">
+            <div className="animate-pulse bg-gray-200 h-4 w-8 rounded"></div>
+          </div>
+        ) : (
+          totalPages > 1 && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+                className="p-1 rounded border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              >
+                <IconChevronLeft size={14} />
+              </button>
+              
+              <span className="text-gray-600">
+                {currentPage}/{totalPages}
+              </span>
+              
+              <button
+                onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+                disabled={currentPage === totalPages}
+                className="p-1 rounded border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              >
+                <IconChevronRight size={14} />
+              </button>
+            </div>
+          )
+        )}
+      </div>
       <Droppable 
         droppableId="materials"
         isDropDisabled={false}
@@ -60,8 +121,19 @@ const MaterialsColumn = ({
             className="min-h-[400px]"
           >
             {isLoading ? (
-              <div className="flex items-center justify-center h-[400px]">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+              <div className="space-y-2">
+                {Array.from({ length: 8 }).map((_, index) => (
+                  <div key={index} className="p-1 border border-gray-200 rounded-lg animate-pulse bg-white">
+                    {/* Header with title and type badge */}
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="h-4 bg-gray-200 rounded w-4/5 mb-1"></div>
+                        <div className="h-3 bg-gray-200 rounded w-10"></div>
+                      </div>
+                      <div className="h-4 w-14 bg-gray-200 rounded-full ml-3"></div>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : (
               materials.map((item, index) => (

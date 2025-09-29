@@ -26,8 +26,7 @@ export async function GET(req: NextRequest) {
                      searchParams.get('isPublic') === 'false' ? false : null;
     const organizationId = searchParams.get('organizationId');
     const originalOnly = searchParams.get('originalOnly') === 'true';
-    console.log('asd', searchParams.get('searchInPublicLibrary'))
-    const searchInPublicLibrary = searchParams.get('searchInPublicLibrary') === 'true';
+    const includePublicLibrary = searchParams.get('includePublicLibrary') === 'true';
 
     // Check if user has access to the organization
     if (organizationId) {
@@ -37,7 +36,7 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // Organization materials
+    // Organization materials (and public materials if searchInPublicLibrary is true)
     const result = await materialService.findInCatalog({
       type: type || undefined,
       page,
@@ -48,55 +47,27 @@ export async function GET(req: NextRequest) {
       organizationId: organizationId || undefined,
       // ownerId: session.user.id,
       originalOnly,
+      includePublicLibrary,
     });
 
-    // Public materials excluding organizationId's (they were added above)
-    let result2 = null;
-    if (searchInPublicLibrary) {
-      result2 = await materialService.findInCatalog({
-        type: type || undefined,
-        page,
-        limit,
-        searchTerm: searchTerm || undefined,
-        tags: tags.length > 0 ? tags : undefined,
-        isPublic: true,
-        organizationId: organizationId || undefined,
-        isExcludeOrganizationId: true,
-        // ownerId: session.user.id,
-        originalOnly,
-      });
-    }
 
-    // Combine and sort results
-    const organizationMaterials = result.materials.map(material => ({
+    // Mark materials as from public library if they don't belong to the organization
+    const materialsWithLibraryFlag = result.materials.map(material => ({
       ...material,
-      isFromPublicLibrary: false
+      isFromPublicLibrary: material.organizationId !== organizationId
     }));
 
-    const publicMaterials = result2 ? result2.materials.map(material => ({
-      ...material,
-      isFromPublicLibrary: true
-    })) : [];
-
-    const combinedMaterials = [...organizationMaterials, ...publicMaterials]
+    const combinedMaterials = materialsWithLibraryFlag
       .sort((a, b) => a.title.localeCompare(b.title));
 
-    const combinedTotalCount = result.totalCount + (result2?.totalCount || 0);
-    const combinedTotalPages = Math.ceil(combinedTotalCount / limit);
+    const combinedTotalCount = result.totalCount;
+    const combinedTotalPages = result.totalPages;
 
     const generatedResults = {
       materials: combinedMaterials,
       totalCount: combinedTotalCount,
       totalPages: combinedTotalPages,
       limit,
-      organizationResults: {
-        totalCount: result.totalCount,
-        totalPages: result.totalPages
-      },
-      publicResults: {
-        totalCount: result2?.totalCount || 0,
-        totalPages: result2?.totalPages || 0
-      }
     };
 
     return NextResponse.json(generatedResults);
