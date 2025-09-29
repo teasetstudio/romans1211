@@ -2,13 +2,13 @@ import { Draggable } from "@hello-pangea/dnd";
 import { TMaterialWithType } from "@/types/Materials";
 
 interface MaterialItemProps {
-  item: TMaterialWithType;
+  item: TMaterialWithType & {isFromPublicLibrary: boolean};
   index: number;
   isUsed: boolean;
   isHovered: boolean;
   isDraggingRightToLeft: boolean;
   isDraggingFromRight: boolean;
-  onItemClick?: (item: TMaterialWithType) => void;
+  onItemClick?: (item: TMaterialWithType & {isFromPublicLibrary: boolean}) => void;
 }
 
 const MaterialItem = ({ 
@@ -57,14 +57,21 @@ const MaterialItem = ({
             }}
           >
             <div className="flex items-center justify-between">
-              <div>
-                <span className={`text-sm font-medium ${
-                  item.type === 'song' 
-                    ? 'text-purple-900' 
-                    : item.type === 'text'
-                    ? 'text-blue-900'
-                    : 'text-green-900'
-                }`}>{item.title}</span>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <span className={`text-sm font-medium ${
+                    item.type === 'song' 
+                      ? 'text-purple-900' 
+                      : item.type === 'text'
+                      ? 'text-blue-900'
+                      : 'text-green-900'
+                  }`}>{item.title}</span>
+                  {item.isFromPublicLibrary && (
+                    <span className="text-xs font-medium text-orange-600 bg-orange-100 px-1.5 py-0.5 rounded">
+                      Public
+                    </span>
+                  )}
+                </div>
                 <div className={`text-xs mt-0.5 ${
                   item.type === 'song' 
                     ? 'text-purple-600' 

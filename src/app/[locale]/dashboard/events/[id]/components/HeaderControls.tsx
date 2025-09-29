@@ -12,6 +12,8 @@ interface HeaderControlsProps {
   setOriginalOnly: (originalOnly: boolean) => void;
   organizationId: string;
   onAddCustomItem: () => void;
+  searchInPublicLibrary: boolean;
+  setSearchInPublicLibrary: (searchInPublicLibrary: boolean) => void;
 }
 
 const HeaderControls = ({
@@ -24,7 +26,9 @@ const HeaderControls = ({
   originalOnly,
   setOriginalOnly,
   organizationId,
-  onAddCustomItem
+  onAddCustomItem,
+  searchInPublicLibrary,
+  setSearchInPublicLibrary
 }: HeaderControlsProps) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -40,6 +44,8 @@ const HeaderControls = ({
           originalOnly={originalOnly}
           setOriginalOnly={setOriginalOnly}
           organizationId={organizationId}
+          searchInPublicLibrary={searchInPublicLibrary}
+          setSearchInPublicLibrary={setSearchInPublicLibrary}
         />
       </div>
 

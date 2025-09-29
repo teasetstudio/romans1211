@@ -51,12 +51,17 @@ class MaterialServiceForAPI {
   }): Promise<(TMaterialWithType & Partial<TMaterialsIncluded>) | null> {
     const where = {
       id: _where.id,
-      organization: {
-        OR: [
-          { ownerId: _where.userId },
-          { members: { some: { userId: _where.userId, permissions: { hasSome: orgPermissions[_where.orgPermissions] } } } }
-        ]
-      }
+      OR: [
+        {
+          organization: {
+            OR: [
+              { ownerId: _where.userId },
+              { members: { some: { userId: _where.userId, permissions: { hasSome: orgPermissions[_where.orgPermissions] } } } }
+            ]
+          }
+        },
+        { isPublic: true }
+      ]
     }
     const include: any = {
       ..._include,

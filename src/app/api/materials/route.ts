@@ -26,6 +26,7 @@ export async function GET(req: NextRequest) {
                      searchParams.get('isPublic') === 'false' ? false : null;
     const organizationId = searchParams.get('organizationId');
     const originalOnly = searchParams.get('originalOnly') === 'true';
+    const includePublicLibrary = searchParams.get('includePublicLibrary') === 'true';
 
     // Check if user has access to the organization
     if (organizationId) {
@@ -34,7 +35,8 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
       }
     }
-    // Get materials using the service
+
+    // Organization materials (and public materials if searchInPublicLibrary is true)
     const result = await materialService.findInCatalog({
       type: type || undefined,
       page,
@@ -45,9 +47,30 @@ export async function GET(req: NextRequest) {
       organizationId: organizationId || undefined,
       // ownerId: session.user.id,
       originalOnly,
+      includePublicLibrary,
     });
 
-    return NextResponse.json(result);
+
+    // Mark materials as from public library if they don't belong to the organization
+    const materialsWithLibraryFlag = result.materials.map(material => ({
+      ...material,
+      isFromPublicLibrary: material.organizationId !== organizationId
+    }));
+
+    const combinedMaterials = materialsWithLibraryFlag
+      .sort((a, b) => a.title.localeCompare(b.title));
+
+    const combinedTotalCount = result.totalCount;
+    const combinedTotalPages = result.totalPages;
+
+    const generatedResults = {
+      materials: combinedMaterials,
+      totalCount: combinedTotalCount,
+      totalPages: combinedTotalPages,
+      limit,
+    };
+
+    return NextResponse.json(generatedResults);
   } catch (error) {
     console.error('Error fetching materials:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

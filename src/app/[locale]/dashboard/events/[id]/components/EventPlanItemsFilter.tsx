@@ -1,7 +1,7 @@
 "use client"
 
 import { TMaterialType } from "@/types/Materials";
-import { IconSearch, IconTag, IconX, IconLoader2 } from '@tabler/icons-react';
+import { IconSearch, IconTag, IconX, IconLoader2, IconLock, IconWorld } from '@tabler/icons-react';
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-hot-toast";
 import debounce from "lodash.debounce";
@@ -16,6 +16,8 @@ interface IProps {
   originalOnly: boolean;
   setOriginalOnly: (original: boolean) => void;
   organizationId: string;
+  searchInPublicLibrary: boolean;
+  setSearchInPublicLibrary: (searchInPublicLibrary: boolean) => void;
 }
 
 const EventPlanItemsFilter = ({
@@ -27,7 +29,9 @@ const EventPlanItemsFilter = ({
   setSelectedTags,
   originalOnly,
   setOriginalOnly,
-  organizationId
+  organizationId,
+  searchInPublicLibrary,
+  setSearchInPublicLibrary
 }: IProps) => {
   const [tagSearchQuery, setTagSearchQuery] = useState("");
   const [isTagMenuOpen, setIsTagMenuOpen] = useState(false);
@@ -39,7 +43,8 @@ const EventPlanItemsFilter = ({
     try {
       const params = new URLSearchParams({
         query,
-        organizationId
+        organizationId,
+        searchInPublicLibrary: searchInPublicLibrary.toString()
       });
       
       const response = await fetch(`/api/tags/search?${params.toString()}`);
@@ -56,7 +61,7 @@ const EventPlanItemsFilter = ({
     } finally {
       setIsLoadingTags(false);
     }
-  }, [organizationId]);
+  }, [organizationId, searchInPublicLibrary]);
   // Debounced tag search function
   const debouncedSearch = useCallback(
     debounce((query) => {
@@ -107,12 +112,12 @@ const EventPlanItemsFilter = ({
         </div>
 
         {/* Material Type Selection */}
-        <div className="w-40">
+        <div className="w-32">
           <select
             id="materialType"
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value as TMaterialType | "all")}
-            className="block w-full pl-3 pr-8 py-1.5 border border-gray-200 rounded-lg bg-white focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+            className="block w-full pl-2 pr-8 py-1.5 border border-gray-200 rounded-lg bg-white focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
           >
             {typeOptions.map(option => (
               <option key={option.value} value={option.value}>
@@ -124,9 +129,14 @@ const EventPlanItemsFilter = ({
 
         {/* Original Content Filter */}
         <div className="flex items-center gap-2">
-          <label htmlFor="originalOnly" className="text-sm text-gray-600 cursor-pointer whitespace-nowrap">
-            Original only
-          </label>
+          <div className="group relative">
+            <label htmlFor="originalOnly" className="text-sm text-gray-600 cursor-pointer flex items-center">
+              <IconLock size={16} className="text-gray-500" />
+            </label>
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+              Original Translations only
+            </div>
+          </div>
           <div className="relative inline-block w-8 align-middle select-none">
             <input
               type="checkbox"
@@ -134,6 +144,30 @@ const EventPlanItemsFilter = ({
               id="originalOnly"
               checked={originalOnly}
               onChange={(e) => setOriginalOnly(e.target.checked)}
+              className="opacity-0 absolute w-full h-full cursor-pointer peer"
+            />
+            <div className="w-8 h-4 bg-gray-300 rounded-full shadow-inner peer-checked:bg-indigo-500 transition-colors"></div>
+            <div className="absolute inset-y-0 left-0 w-4 h-4 bg-white rounded-full shadow transform transition-transform peer-checked:translate-x-4"></div>
+          </div>
+        </div>
+
+        {/* Public Library Search Filter */}
+        <div className="flex items-center gap-2">
+          <div className="group relative">
+            <label htmlFor="searchInPublicLibrary" className="text-sm text-gray-600 cursor-pointer flex items-center">
+              <IconWorld size={16} className="text-gray-500" />
+            </label>
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+              Include materials from public library
+            </div>
+          </div>
+          <div className="relative inline-block w-8 align-middle select-none">
+            <input
+              type="checkbox"
+              name="searchInPublicLibrary"
+              id="searchInPublicLibrary"
+              checked={searchInPublicLibrary}
+              onChange={(e) => setSearchInPublicLibrary(e.target.checked)}
               className="opacity-0 absolute w-full h-full cursor-pointer peer"
             />
             <div className="w-8 h-4 bg-gray-300 rounded-full shadow-inner peer-checked:bg-indigo-500 transition-colors"></div>
