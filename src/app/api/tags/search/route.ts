@@ -16,6 +16,7 @@ export async function GET(req: NextRequest) {
     const url = new URL(req.url);
     const query = url.searchParams.get('query') || '';
     const organizationId = url.searchParams.get('organizationId');
+    const searchInPublicLibrary = url.searchParams.get('searchInPublicLibrary') === 'true';
 
     // Base filter
     const filter: Prisma.WtagWhereInput = {
@@ -27,7 +28,7 @@ export async function GET(req: NextRequest) {
 
     // Add organization filter if provided
     if (organizationId) {
-      filter.OR = [
+      const organizationConditions = [
         {
           texts: {
             some: {
@@ -50,6 +51,46 @@ export async function GET(req: NextRequest) {
           },
         },
       ];
+
+      // If searchInPublicLibrary is true, also include public materials excluding this organization
+      if (searchInPublicLibrary) {
+        const publicConditions = [
+          {
+            texts: {
+              some: {
+                isPublic: true,
+                NOT: {
+                  organizationId,
+                },
+              },
+            },
+          },
+          {
+            songs: {
+              some: {
+                isPublic: true,
+                NOT: {
+                  organizationId,
+                },
+              },
+            },
+          },
+          {
+            games: {
+              some: {
+                isPublic: true,
+                NOT: {
+                  organizationId,
+                },
+              },
+            },
+          },
+        ];
+        
+        filter.OR = [...organizationConditions, ...publicConditions];
+      } else {
+        filter.OR = organizationConditions;
+      }
     }
 
     // Search for tags with name containing the query

@@ -145,6 +145,7 @@ class MaterialServiceForSSR {
     searchTerm?: string;
     isPublic?: boolean | null;
     organizationId?: string;
+    isExcludeOrganizationId?: boolean;
     ownerId?: string;
     originalOnly?: boolean
   }): Promise<{ materials: TCatalogMaterial[]; totalCount: number; totalPages: number }> {
@@ -156,6 +157,7 @@ class MaterialServiceForSSR {
       type, 
       isPublic = true,
       organizationId,
+      isExcludeOrganizationId = false,
       ownerId,
       originalOnly = true
     } = searchParams;
@@ -184,8 +186,13 @@ class MaterialServiceForSSR {
       if (isPublic !== undefined && isPublic !== null) 
         conditions.push(Prisma.sql`m."isPublic" = ${isPublic}`);
       
-      if (organizationId)
-        conditions.push(Prisma.sql`m."organizationId" = ${organizationId}`);
+      if (organizationId) {
+        if (isExcludeOrganizationId) {
+          conditions.push(Prisma.sql`m."organizationId" != ${organizationId}`);
+        } else {
+          conditions.push(Prisma.sql`m."organizationId" = ${organizationId}`);
+        }
+      }
 
       if (originalOnly)
         conditions.push(Prisma.sql`m."originalId" IS NULL`);

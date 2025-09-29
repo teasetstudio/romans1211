@@ -5,7 +5,7 @@ import MaterialItem from "./MaterialItem";
 import MaterialModal from "./MaterialModal";
 
 interface MaterialsColumnProps {
-  materials: TMaterialWithType[];
+  materials: (TMaterialWithType & {isFromPublicLibrary: boolean})[];
   usedMaterials: Set<string>;
   isLoading: boolean;
   hoveredMaterialId: string | null;

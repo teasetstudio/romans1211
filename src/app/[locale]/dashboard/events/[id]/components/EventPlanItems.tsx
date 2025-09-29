@@ -19,7 +19,7 @@ import { IPlanItem } from "@/types/PlanItem";
 
 interface Columns {
   planItems: IPlanItem[]
-  materials: TMaterialWithType[]
+  materials: (TMaterialWithType & {isFromPublicLibrary: boolean})[]
 }
 
 type TColumn = (IPlanItem | TMaterialWithType)[]
@@ -42,6 +42,7 @@ const EventPlanItems = ({ event, session }: IProps) => {
   const [selectedType, setSelectedType] = useState<TMaterialType | "all">("all");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [originalOnly, setOriginalOnly] = useState(true);
+  const [searchInPublicLibrary, setSearchInPublicLibrary] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [showCustomItemModal, setShowCustomItemModal] = useState(false);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
@@ -84,6 +85,10 @@ const EventPlanItems = ({ event, session }: IProps) => {
         // Add organization ID
         params.append("organizationId", event.organizationId);
 
+        if (searchInPublicLibrary) {
+          params.append("searchInPublicLibrary", "true");
+        }
+
         const response = await fetch(`/api/materials?${params.toString()}`);
         if (!response.ok) {
           throw new Error('Failed to fetch materials');
@@ -94,7 +99,7 @@ const EventPlanItems = ({ event, session }: IProps) => {
         // Update columns with the new materials
         setColumns(prev => ({
           ...prev,
-          materials: data.materials as TMaterialWithType[]
+          materials: data.materials as (TMaterialWithType  & {isFromPublicLibrary: boolean})[]
         }));
       } catch (error) {
         console.error('Error fetching materials:', error);
@@ -107,7 +112,7 @@ const EventPlanItems = ({ event, session }: IProps) => {
     // Debounce the fetch to avoid too many requests
     const timeoutId = setTimeout(fetchMaterials, 300);
     return () => clearTimeout(timeoutId);
-  }, [selectedType, searchQuery, selectedTags, originalOnly, event.organizationId]);
+  }, [selectedType, searchQuery, selectedTags, originalOnly, event.organizationId, searchInPublicLibrary]);
 
   // Update columns with materials from API
   const [columns, setColumns] = useState<Columns>({
@@ -508,6 +513,8 @@ const EventPlanItems = ({ event, session }: IProps) => {
         setOriginalOnly={setOriginalOnly}
         organizationId={event.organizationId}
         onAddCustomItem={() => setShowCustomItemModal(true)}
+        searchInPublicLibrary={searchInPublicLibrary}
+        setSearchInPublicLibrary={setSearchInPublicLibrary}
       />
 
       {/* Main Content */}

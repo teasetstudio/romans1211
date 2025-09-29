@@ -26,6 +26,8 @@ export async function GET(req: NextRequest) {
                      searchParams.get('isPublic') === 'false' ? false : null;
     const organizationId = searchParams.get('organizationId');
     const originalOnly = searchParams.get('originalOnly') === 'true';
+    console.log('asd', searchParams.get('searchInPublicLibrary'))
+    const searchInPublicLibrary = searchParams.get('searchInPublicLibrary') === 'true';
 
     // Check if user has access to the organization
     if (organizationId) {
@@ -34,7 +36,8 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
       }
     }
-    // Get materials using the service
+
+    // Organization materials
     const result = await materialService.findInCatalog({
       type: type || undefined,
       page,
@@ -47,7 +50,56 @@ export async function GET(req: NextRequest) {
       originalOnly,
     });
 
-    return NextResponse.json(result);
+    // Public materials excluding organizationId's (they were added above)
+    let result2 = null;
+    if (searchInPublicLibrary) {
+      result2 = await materialService.findInCatalog({
+        type: type || undefined,
+        page,
+        limit,
+        searchTerm: searchTerm || undefined,
+        tags: tags.length > 0 ? tags : undefined,
+        isPublic: true,
+        organizationId: organizationId || undefined,
+        isExcludeOrganizationId: true,
+        // ownerId: session.user.id,
+        originalOnly,
+      });
+    }
+
+    // Combine and sort results
+    const organizationMaterials = result.materials.map(material => ({
+      ...material,
+      isFromPublicLibrary: false
+    }));
+
+    const publicMaterials = result2 ? result2.materials.map(material => ({
+      ...material,
+      isFromPublicLibrary: true
+    })) : [];
+
+    const combinedMaterials = [...organizationMaterials, ...publicMaterials]
+      .sort((a, b) => a.title.localeCompare(b.title));
+
+    const combinedTotalCount = result.totalCount + (result2?.totalCount || 0);
+    const combinedTotalPages = Math.ceil(combinedTotalCount / limit);
+
+    const generatedResults = {
+      materials: combinedMaterials,
+      totalCount: combinedTotalCount,
+      totalPages: combinedTotalPages,
+      limit,
+      organizationResults: {
+        totalCount: result.totalCount,
+        totalPages: result.totalPages
+      },
+      publicResults: {
+        totalCount: result2?.totalCount || 0,
+        totalPages: result2?.totalPages || 0
+      }
+    };
+
+    return NextResponse.json(generatedResults);
   } catch (error) {
     console.error('Error fetching materials:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
