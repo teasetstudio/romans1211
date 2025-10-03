@@ -54,7 +54,7 @@ export default function CoursesPage() {
     setIsCreateDialogOpen(false);
   };
 
-  const handleDeleteCourses = async (courseId: string, force?: boolean) => {
+  const handleDeleteCourse = async (courseId: string, force?: boolean) => {
     try {
       const response = await fetch(`/api/courses/${courseId}${force ? '?force=true' : ''}`, {
         method: "DELETE",
@@ -111,7 +111,7 @@ export default function CoursesPage() {
         <CourseList
           courses={courses}
           hasDeletePermission={hasDeletePermission}
-          onDelete={handleDeleteCourses}
+          onDelete={handleDeleteCourse}
           onEdit={(id) => navigateWithProgress(getDashboardCourseUrl(id))}
         />
       )}

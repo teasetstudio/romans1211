@@ -2,10 +2,10 @@
 
 import { useSearchParams } from 'next/navigation';
 import { usePathname } from '@/i18n/routing'
-import { useEffect } from 'react';
+import { useEffect, memo } from 'react';
 import { useNavigateWithProgress } from '@/hooks/useNavigateWithProgress';
 
-export function SubmitFormListener() {
+const SubmitFormListener = memo(function SubmitFormListener() {
   const { navigateWithProgress } = useNavigateWithProgress();
   const searchParams = useSearchParams();
   const pathname = usePathname()
@@ -13,6 +13,7 @@ export function SubmitFormListener() {
   useEffect(() => {
     const form = document.getElementById('library-catalog-form') as HTMLFormElement;
     if (!form) return;
+    console.log('hello')
 
     // Update select type value after removing active filter
     const typeSelect = form.querySelector('select[name="type"]') as HTMLSelectElement;
@@ -26,12 +27,7 @@ export function SubmitFormListener() {
       const searchTermParam = searchParams.get('search-term');
       if (searchTermParam !== searchTermInput.value) searchTermInput.value = searchTermParam || '';
     }
-    // Update tags input value after removing active filter
-    const tagsInput = form.querySelector('input[name="tags"]') as HTMLInputElement;
-    if (tagsInput) {
-      const tagsParam = searchParams.get('tags');
-      if (tagsParam !== tagsInput.value) tagsInput.value = tagsParam || '';
-    }
+    // tags is a react state and managed by the parent component - no need to update it here
 
     const handleSubmit = (e: SubmitEvent) => {
       e.preventDefault();
@@ -55,4 +51,6 @@ export function SubmitFormListener() {
   }, [navigateWithProgress, searchParams, pathname]);
 
   return null;
-}
+});
+
+export { SubmitFormListener };

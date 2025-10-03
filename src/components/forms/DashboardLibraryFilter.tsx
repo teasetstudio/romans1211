@@ -3,7 +3,7 @@
 import { ILibraryCatalogSearchParams } from '@/types/Params'
 import { IconSearch } from '@/res/icons'
 import { usePathname } from '@/i18n/routing'
-import { FormEvent, useState, useEffect } from 'react'
+import { FormEvent, useState, useEffect, useRef } from 'react'
 import { NAMESPACE_DASHBOARD } from '@/res/namespaces'
 import { useTranslations } from 'next-intl'
 import { IconX } from '@tabler/icons-react'
@@ -30,6 +30,9 @@ const DashboardLibraryFilter = ({ searchParams, className }: IProps) => {
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [tagTerm, setTagTerm] = useState('')
   const [isOriginalOnly, setIsOriginalOnly] = useState(originalOnly === 'true')
+  
+  // Ref for click-outside functionality
+  const tagDropdownRef = useRef<HTMLDivElement>(null)
 
   // Update state when props change
   useEffect(() => {
@@ -122,6 +125,24 @@ const DashboardLibraryFilter = ({ searchParams, className }: IProps) => {
     }
   }, [tagTerm, selectedTags])
 
+  // Handle click outside to close tag suggestions
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (tagDropdownRef.current && !tagDropdownRef.current.contains(event.target as Node)) {
+        setTagSuggestions([])
+        setTagTerm('')
+      }
+    }
+
+    if (tagSuggestions.length > 0) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [tagSuggestions])
+
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const params = new URLSearchParams()
@@ -190,8 +211,8 @@ const DashboardLibraryFilter = ({ searchParams, className }: IProps) => {
           </div>
 
           {/* Tags Input */}
-          <div className="w-[270px] relative">
-            <div className="flex flex-wrap items-center gap-1 px-2 py-1 bg-white border border-gray-200 rounded-lg focus-within:ring-1 focus-within:ring-primary focus-within:border-primary">
+          <div className="w-[270px] relative" ref={tagDropdownRef}>
+            <div className="relative flex flex-wrap items-center gap-1 px-2 py-1 bg-white border border-gray-200 rounded-lg focus-within:ring-1 focus-within:ring-primary focus-within:border-primary">
               {/* Chips */}
               {selectedTags.map((t) => (
                 <span key={t} className="flex items-center gap-1 px-2 py-0.5 bg-primary/10 text-primary rounded-full text-xs">
@@ -226,10 +247,13 @@ const DashboardLibraryFilter = ({ searchParams, className }: IProps) => {
                 placeholder={t('tags_placeholder')}
                 className="flex-1 min-w-[60px] px-1 py-1 outline-none bg-transparent text-gray-800 placeholder-gray-400"
               />
+              {isLoadingSuggestions && (
+                <div className='absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4'>
+                  <span className="absolute top-0 right-0 h-4 w-4 border-2 border-gray-300 border-t-primary rounded-full animate-spin" />
+                </div>
+              )}
             </div>
-            {isLoadingSuggestions && (
-              <span className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 border-2 border-gray-300 border-t-primary rounded-full animate-spin" />
-            )}
+            
             {tagSuggestions.length > 0 && (
               <ul className="absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-auto">
                 {tagSuggestions.map((s) => (
