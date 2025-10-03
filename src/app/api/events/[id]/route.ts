@@ -211,7 +211,7 @@ export async function DELETE(
       );
     }
 
-    // await prisma.event.delete({ where: { id } });
+    await prisma.event.delete({ where: { id } });
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -4,7 +4,7 @@ import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import Button from "@/components/buttons/Button";
-import { IconClose, IconCopy } from "@/res/icons";
+import { IconClose, IconCopy, IconTrash } from "@/res/icons";
 import { toast } from "react-hot-toast";
 import type { Event } from "@prisma/client";
 
@@ -15,11 +15,15 @@ interface EventSettingsDialogProps {
   onClose: () => void;
   event: LinkEvent;
   onUpdated?: (updated: LinkEvent) => void;
+  hasDeletePermission?: boolean;
+  onDelete?: () => void;
+  isDeleting?: boolean;
 }
 
-export default function EventSettingsDialog({ open, onClose, event, onUpdated }: EventSettingsDialogProps) {
+export default function EventSettingsDialog({ open, onClose, event, onUpdated, hasDeletePermission, onDelete, isDeleting }: EventSettingsDialogProps) {
   // We keep using the existing translation namespace for link access for now
   const t = useTranslations("dashboard_events.linkAccessDialog");
+  const tEvents = useTranslations("dashboard_events");
   const [working, setWorking] = useState(false);
   const [local, setLocal] = useState<LinkEvent>(event);
 
@@ -105,7 +109,20 @@ export default function EventSettingsDialog({ open, onClose, event, onUpdated }:
             )}
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t mt-6">
+          <div className="flex justify-between gap-3 pt-4 border-t mt-6">
+            <div>
+              {hasDeletePermission && onDelete && (
+                <Button
+                  onClick={onDelete}
+                  className="bg-white border border-red-300 text-red-700 hover:bg-red-50 hover:border-red-400 px-4 py-2 rounded-md text-sm font-medium transition-colors inline-flex items-center gap-1.5"
+                  type="button"
+                  disabled={isDeleting}
+                >
+                  <IconTrash className="w-4 h-4" />
+                  <span>{isDeleting ? tEvents("deleting") : tEvents("delete")}</span>
+                </Button>
+              )}
+            </div>
             <Button
               onClick={onClose}
               className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-md text-sm font-medium transition-colors"

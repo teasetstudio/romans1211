@@ -8,9 +8,10 @@ import Button from "@/components/buttons/Button";
 import { toast } from "react-hot-toast";
 import { ProgressLink as Link } from '@/components/buttons/ProgressLink';
 import { Text } from "@/components/typo/Text";
-import { IconEdit, IconTrash, IconSettings } from "@/res/icons";
+import { IconEdit, IconSettings } from "@/res/icons";
 import EventFormDialog from "@/app/[locale]/dashboard/components/EventFormDialog";
 import EventSettingsDialog from "./EventSettingsDialog";
+import ConfirmDialog from "@/components/dialogs/ConfirmDialog";
 import { useOrganization } from "@/components/contexts/OrganizationContext";
 import { userInOrganizationData } from "@/utils/permissions";
 import { Session } from "next-auth";
@@ -26,6 +27,7 @@ export default function EventDetails({ event: initialEvent, session }: EventDeta
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [openLinkSettings, setOpenLinkSettings] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [event, setEvent] = useState(initialEvent);
   
   const { selectedOrganization } = useOrganization();
@@ -40,11 +42,12 @@ export default function EventDetails({ event: initialEvent, session }: EventDeta
     setIsEditing(false);
   };
 
-  const handleDelete = async () => {
-    if (!confirm(t("confirm_delete"))) {
-      return;
-    }
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true);
+  };
 
+  const handleDeleteConfirm = async () => {
+    setShowDeleteConfirm(false);
     setIsDeleting(true);
     try {
       const response = await fetch(`/api/events/${event.id}`, {
@@ -143,17 +146,6 @@ export default function EventDetails({ event: initialEvent, session }: EventDeta
                     <span>{t("settings")}</span>
                   </Button>
                 }
-                {hasDeletePermission &&
-                  <Button
-                    onClick={handleDelete}
-                    paddingClass="py-3 px-4"
-                    className="inline-flex items-center text-gray-700 hover:text-red-600 rounded-md transition-colors gap-1.5 text-sm border border-transparent hover:border-red-600"
-                    disabled={isDeleting}
-                  >
-                    <IconTrash className="w-4 h-4" />
-                    <span>{isDeleting ? t("deleting") : t("delete")}</span>
-                  </Button>
-                }
               </div>
             </div>
           </div>
@@ -175,6 +167,21 @@ export default function EventDetails({ event: initialEvent, session }: EventDeta
         onUpdated={(updated) => {
           setEvent((prev) => ({ ...prev, ...updated }));
         }}
+        hasDeletePermission={hasDeletePermission}
+        onDelete={handleDeleteClick}
+        isDeleting={isDeleting}
+      />
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={handleDeleteConfirm}
+        title={t("delete")}
+        message={t("confirm_delete")}
+        confirmText={t("delete")}
+        cancelText={t("cancel")}
+        variant="danger"
+        isLoading={isDeleting}
       />
     </>
   );

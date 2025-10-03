@@ -8,6 +8,7 @@ import Button from "@/components/buttons/Button";
 import { Text } from "@/components/typo/Text";
 import { NAMESPACE_DASHBOARD_COURSES } from "@/res/namespaces";
 import { useState } from "react";
+import { toast } from "react-hot-toast";
 import DeleteConfirmationPopup from "@/components/popups/DeleteConfirmationPopup";
 
 interface CourseListProps {
@@ -39,6 +40,7 @@ export function CourseList({ courses, onDelete, onEdit, hasDeletePermission }: C
         if (course.events?.length > 0) {
           setHasEvents(true);
           setIsDeleting(false);
+          toast.error(t("cannotDeleteCourseWithEvents"))
           return;
         }
 
@@ -48,6 +50,9 @@ export function CourseList({ courses, onDelete, onEdit, hasDeletePermission }: C
         await onDelete(courseToDelete);
       } catch (error) {
         console.error("Error in handleConfirmDelete:", error);
+      } finally {
+        setIsDeleting(false);
+        setCourseToDelete(null);
       }
     }
   };

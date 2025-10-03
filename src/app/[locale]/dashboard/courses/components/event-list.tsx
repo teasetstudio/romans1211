@@ -3,19 +3,15 @@
 import { useTranslations } from "next-intl";
 import { Event } from "@prisma/client";
 import { format, isToday, isTomorrow, isYesterday, isThisYear } from "date-fns";
-import Button from "@/components/buttons/Button";
 import { Text } from "@/components/typo/Text";
-import { IconTrash } from "@tabler/icons-react";
 import { NAMESPACE_DASHBOARD_COURSES } from "@/res/namespaces";
 
 interface EventListProps {
   events: Event[];
-  onDelete: (id: string) => void;
   onEdit: (id: string) => void;
-  hasDeletePermission: boolean;
 }
 
-export function EventList({ events, onDelete, onEdit, hasDeletePermission }: EventListProps) {
+export function EventList({ events, onEdit }: EventListProps) {
   const t = useTranslations(NAMESPACE_DASHBOARD_COURSES);
 
   // Helper function to format dates in a more readable way
@@ -55,9 +51,6 @@ export function EventList({ events, onDelete, onEdit, hasDeletePermission }: Eve
             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               {t("table.endTime")}
             </th>
-            <th scope="col" className="relative px-6 py-3">
-              <span className="sr-only">{t("table.actions")}</span>
-            </th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
@@ -75,24 +68,6 @@ export function EventList({ events, onDelete, onEdit, hasDeletePermission }: Eve
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <Text>{formatEventDateTime(new Date(event.endTime))}</Text>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                {hasDeletePermission && (
-                  <div className="flex justify-center">
-                    <Button
-                      bgColor="bg-transparent"
-                      size="sm"
-                      paddingClass="p-1"
-                      className="text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-full w-10 h-10 flex items-center justify-center transition-all !min-w-0"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDelete(event.id);
-                      }}
-                    >
-                      <IconTrash size={20} />
-                    </Button>
-                  </div>
-                )}
               </td>
             </tr>
           ))}

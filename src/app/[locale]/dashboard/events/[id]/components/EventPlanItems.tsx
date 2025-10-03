@@ -13,7 +13,6 @@ import { EventWithPlanItems } from "@/types/Event";
 import HeaderControls from "./HeaderControls";
 import MaterialsColumn from "./MaterialsColumn";
 import PlanItemsColumn from "./PlanItemsColumn";
-import SaveControls from "./SaveControls";
 import ReadOnlyView from "./ReadOnlyView";
 import { IPlanItem } from "@/types/PlanItem";
 
@@ -534,6 +533,8 @@ const EventPlanItems = ({ event, session }: IProps) => {
         onAddCustomItem={() => setShowCustomItemModal(true)}
         searchInPublicLibrary={searchInPublicLibrary}
         setSearchInPublicLibrary={setSearchInPublicLibrary}
+        isSaving={isSaving}
+        saveStatus={saveStatus}
       />
 
       {/* Main Content */}
@@ -580,11 +581,6 @@ const EventPlanItems = ({ event, session }: IProps) => {
         isEditing={!!editingItemId}
       />
 
-      <SaveControls
-        onSave={handleSave}
-        isSaving={isSaving}
-        saveStatus={saveStatus}
-      />
     </div>
   );
 };

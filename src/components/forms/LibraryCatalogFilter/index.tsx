@@ -1,4 +1,5 @@
 "use client"
+
 import H2 from '@/components/typo/H2'
 import H8 from '@/components/typo/H8'
 import H9 from '@/components/typo/H9'
@@ -7,7 +8,7 @@ import { NAMESPACE_WIDGETS } from '@/res/namespaces'
 import { SubmitFormListener } from './SubmitFormListener'
 import { ILibraryCatalogSearchParams } from '@/types/Params'
 import { IconSearch } from '@/res/icons'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { IconX } from '@tabler/icons-react'
 
 interface IProps {
@@ -22,6 +23,7 @@ const LibraryCatalogFilter = ({ searchParams, className }: IProps) => {
   const [tagTerm, setTagTerm] = useState('')
   const [tagSuggestions, setTagSuggestions] = useState<string[]>([])
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false)
+  const tagDropdownRef = useRef<HTMLDivElement>(null)
 
   // initialize from searchParams
   useEffect(() => {
@@ -98,6 +100,24 @@ const LibraryCatalogFilter = ({ searchParams, className }: IProps) => {
     }
   }, [tagTerm, selectedTags])
 
+  // Handle click outside to close tag suggestions
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (tagDropdownRef.current && !tagDropdownRef.current.contains(event.target as Node)) {
+        setTagSuggestions([])
+        setTagTerm('')
+      }
+    }
+
+    if (tagSuggestions.length > 0) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [tagSuggestions])
+
   return (
     <div className={className}>
       <div className="container">
@@ -152,10 +172,10 @@ const LibraryCatalogFilter = ({ searchParams, className }: IProps) => {
                   <label className="block mb-2">
                     <H9 color="text-gray2" className="font-medium">{t('catalog_filter.tags')}</H9>
                   </label>
-                  <div className="relative">
+                  <div className="relative" ref={tagDropdownRef}>
                     {/* Hidden input to submit selected tags */}
                     <input type="hidden" name="tags" value={selectedTags.join(',')} />
-                    <div className="w-full px-2 py-2 bg-white/10 border border-gray3 rounded-xl text-gray1 focus-within:border-primary">
+                    <div className="relative w-full px-2 py-2 bg-white/10 border border-gray3 rounded-xl text-gray1 focus-within:border-primary">
                       <div className="flex flex-wrap items-center gap-2">
                         {selectedTags.map((t) => (
                           <span key={t} className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-primary/20 text-primary text-xs">
@@ -186,10 +206,12 @@ const LibraryCatalogFilter = ({ searchParams, className }: IProps) => {
                           className="flex-1 min-w-[120px] bg-transparent outline-none text-gray1 placeholder-gray2 py-1 px-1"
                         />
                       </div>
+                      {isLoadingSuggestions && (
+                        <div className='absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4'>
+                          <span className="absolute right-0 top-0 h-4 w-4 border-2 border-gray-300 border-t-primary rounded-full animate-spin" />
+                        </div>
+                      )}
                     </div>
-                    {isLoadingSuggestions && (
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 border-2 border-gray-300 border-t-primary rounded-full animate-spin" />
-                    )}
                     {tagSuggestions.length > 0 && (
                       <ul className="absolute z-50 left-0 right-0 mt-2 bg-gray5 border border-gray3 rounded-xl shadow-lg max-h-60 overflow-auto">
                         {tagSuggestions.map((s) => (

@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter, usePathname } from "@/i18n/routing";
+import { useSearchParams } from "next/navigation";
 import NProgress from "nprogress";
 
 /**
@@ -10,12 +11,18 @@ import NProgress from "nprogress";
 export const useNavigateWithProgress = () => {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const navigateWithProgress = (targetUrl: string) => {
     NProgress.start();
 
+    // Construct the full current URL including search parameters
+    const currentUrl = searchParams.toString() 
+      ? `${pathname}?${searchParams.toString()}`
+      : pathname;
+
     // Check if target URL is the same as current URL
-    if (pathname === targetUrl) {
+    if (currentUrl === targetUrl) {
       // If URLs are the same, complete progress after 100ms
       setTimeout(() => {
         NProgress.done();

@@ -42,19 +42,7 @@ export function CourseDetails({ course }: CourseDetailsProps) {
     setIsCreateEventOpen(false);
   };
 
-  const handleDeleteEvent = async (eventId: string) => {
-    try {
-      const response = await fetch(`/api/events/${eventId}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) throw new Error("Failed to delete event");
-      setEvents((prev) => prev.filter((event) => event.id !== eventId));
-    } catch (error) {
-      console.error("Error deleting event:", error);
-    }
-  };
-
-  const { hasCreatePermission, hasDeletePermission, hasEditPermission } = useMemo(() => 
+  const { hasCreatePermission, hasEditPermission } = useMemo(() => 
     userInOrganizationData(session?.user?.id ?? '', selectedOrganization), 
     [session?.user?.id, selectedOrganization]
   );
@@ -157,9 +145,7 @@ export function CourseDetails({ course }: CourseDetailsProps) {
         ) : (
           <>
             <EventList
-              hasDeletePermission={hasDeletePermission}
-              events={events} 
-              onDelete={handleDeleteEvent}
+              events={events}
               onEdit={(id) => navigateWithProgress(ROUTE_DASHBOARD_EVENT(id))}
             />
             <div className="mt-4 flex justify-end">
