@@ -36,7 +36,7 @@ export default async function Home() {
         className="mt-6 md:mt-12 mb-8 md:mb-16"
         title={t('songs')}
         cards={songs}
-        viewAllRoute={ROUTE_LIBRARY}
+        viewAllRoute={`${ROUTE_LIBRARY}?type=song`}
       />
 
       <SongsBanner />
@@ -45,7 +45,7 @@ export default async function Home() {
         className="mt-6 md:mt-12 mb-8 md:mb-16"
         title={t('games')}
         cards={games}
-        viewAllRoute={ROUTE_LIBRARY}
+        viewAllRoute={`${ROUTE_LIBRARY}?type=game`}
       />
 
       <MaterialTypesBanner />
@@ -54,7 +54,7 @@ export default async function Home() {
         className="mt-6 md:mt-12 mb-8 md:mb-16"
         title={t('texts')}
         cards={texts}
-        viewAllRoute={ROUTE_LIBRARY}
+        viewAllRoute={`${ROUTE_LIBRARY}?type=text`}
       />
 
       <FAQ faqs={faqs} />

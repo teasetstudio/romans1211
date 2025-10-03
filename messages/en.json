@@ -13,7 +13,7 @@
       "search": "Search",
       "search_materials": "Search materials...",
       "tags":"Tags",
-      "tags_placeholder": "Tags (comma-separated)",
+      "tags_placeholder": "Tags",
       "apply_filters": "Apply Filters"
     }
   },
@@ -176,7 +176,7 @@
     "search": "Search",
     "search_materials": "Search materials",
     "songs": "Songs",
-    "tags_placeholder": "Tags (comma-separated)",
+    "tags_placeholder": "Tags",
     "texts": "Texts",
     "total": "Total",
     "total_items": "Total: {totalCount} items",

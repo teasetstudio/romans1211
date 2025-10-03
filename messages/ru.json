@@ -13,7 +13,7 @@
       "search": "Поиск",
       "search_materials": "Поиск материалов...",
       "tags":"Теги",
-      "tags_placeholder": "Теги (через запятую)",
+      "tags_placeholder": "Теги",
       "apply_filters": "Применить"
     }
   },
@@ -186,7 +186,7 @@
     "search": "Поиск",
     "search_materials": "Поиск материалов",
     "songs": "Песни",
-    "tags_placeholder": "Теги (через запятую)",
+    "tags_placeholder": "Теги",
     "texts": "Тексты",
     "total": "Всего",
     "total_items": "Всего: {totalCount}",
