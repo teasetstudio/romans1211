@@ -15,6 +15,7 @@ import MaterialsColumn from "./MaterialsColumn";
 import PlanItemsColumn from "./PlanItemsColumn";
 import ReadOnlyView from "./ReadOnlyView";
 import { IPlanItem } from "@/types/PlanItem";
+import ItemModal from "./ItemModal";
 
 interface Columns {
   planItems: IPlanItem[]
@@ -44,6 +45,7 @@ const EventPlanItems = ({ event, session }: IProps) => {
   const [searchInPublicLibrary, setSearchInPublicLibrary] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [showCustomItemModal, setShowCustomItemModal] = useState(false);
+  const [showItemModal, setShowItemModal] = useState(false);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [expandedDescriptions, setExpandedDescriptions] = useState<Set<string>>(new Set());
   
@@ -156,6 +158,8 @@ const EventPlanItems = ({ event, session }: IProps) => {
         materialId,
         material,
         title: material?.title || "Unknown",
+        description: item.description,
+        isReserve: item.isReserve
       }
     }),
     materials: [],
@@ -332,6 +336,37 @@ const EventPlanItems = ({ event, session }: IProps) => {
     setShowCustomItemModal(true);
   };
 
+  // Start editing a material item
+  const startEditingItem = (item: IPlanItem) => {
+    setEditingItemId(item.id);
+    setShowItemModal(true);
+  };
+
+  // Save the edited item
+  const saveItem = (updatedItemData: Partial<IPlanItem>) => {
+    if (!editingItemId) {
+      return;
+    }
+
+    // Update existing item
+    setColumns(prev => ({
+      ...prev,
+      planItems: prev.planItems.map(item => 
+        item.id === editingItemId
+          ? { 
+              ...item, 
+              description: updatedItemData.description,
+              isReserve: updatedItemData.isReserve,
+            }
+          : item
+      )
+    }));
+    
+    // Reset state
+    setEditingItemId(null);
+    setShowItemModal(false);
+  };
+
   // Save the edited custom item
   const saveCustomItem = (updatedItemData: Partial<IPlanItem>) => {
     if (!editingItemId) {
@@ -429,6 +464,8 @@ const EventPlanItems = ({ event, session }: IProps) => {
           type: item.type.toUpperCase(),
           order: index,
           title: item.title,
+          description: item.description || "",
+          isReserve: item.isReserve || false,
           // Use the string materialId
           [getItemIdField(item.type as TMaterialType)]: materialId,
           eventId: event.id,
@@ -563,6 +600,7 @@ const EventPlanItems = ({ event, session }: IProps) => {
             expandedDescriptions={expandedDescriptions}
             onToggleDescription={toggleDescriptionExpansion}
             onEditCustomItem={startEditingCustomItem}
+            onEditItem={startEditingItem}
             onDeleteCustomItem={deleteCustomItem}
           />
         </div>
@@ -581,6 +619,16 @@ const EventPlanItems = ({ event, session }: IProps) => {
         isEditing={!!editingItemId}
       />
 
+      {/* Item Modal */}
+      <ItemModal
+        isOpen={showItemModal}
+        onClose={() => {
+          setShowItemModal(false);
+          setEditingItemId(null);
+        }}
+        onSave={saveItem}
+        editingItem={editingItemId ? columns.planItems.find(item => item.id === editingItemId) || null : null}
+      />
     </div>
   );
 };

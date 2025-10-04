@@ -1,4 +1,4 @@
-import { TMaterialType, TMaterialWithIncluded, TMaterialObjectType, TMaterial } from "./Materials"
+import { TMaterialType, TMaterial } from "./Materials"
 
 export interface IPlanItem {
   id: string
@@ -7,4 +7,5 @@ export interface IPlanItem {
   materialId: string | null
   material?: TMaterial
   description?: string | null
+  isReserve?: boolean
 }

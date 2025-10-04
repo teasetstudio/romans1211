@@ -1,10 +1,56 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { Event, EventPlanItem, Song, Text as TextMat, Game } from "@prisma/client";
 import MaterialModal from "@/app/[locale]/dashboard/events/[id]/components/MaterialModal";
 import CustomItemDialog from "./CustomItemDialog";
+import Tooltip from "@/components/ui/Tooltip";
 import type { TMaterialType } from "@/types/Materials";
+
+import '@/styles/tiptap-components.css';
+
+// Component for expandable description
+function ExpandableDescription({ description }: { description: string }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isClamped, setIsClamped] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const checkIfClamped = () => {
+      if (contentRef.current) {
+        const element = contentRef.current;
+        setIsClamped(element.scrollHeight > element.clientHeight);
+      }
+    };
+
+    checkIfClamped();
+    // Check again after a short delay to ensure content is fully rendered
+    const timer = setTimeout(checkIfClamped, 100);
+    
+    return () => clearTimeout(timer);
+  }, [description]);
+
+  return (
+    <div className="mt-1 text-sm text-gray-600">
+      <div
+        ref={contentRef}
+        className={`tiptap-wrapper ${isExpanded ? "" : "line-clamp-2"}`}
+        dangerouslySetInnerHTML={{ __html: description }}
+      />
+      {isClamped && (
+        <div
+          className="mt-1 text-xs text-blue-600 hover:text-blue-800 focus:outline-none hover:underline"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsExpanded(!isExpanded);
+          }}
+        >
+          {isExpanded ? "Show less" : "Show more"}
+        </div>
+      )}
+    </div>
+  );
+}
 
 // Shape of event passed from the server page include
 type PlanItemWithRelations = EventPlanItem & {
@@ -94,15 +140,21 @@ export default function PublicEventView({ event }: { event: PublicEvent }) {
                 {renderItemTypeBadge(item)}
                 <span className="font-medium text-gray-900">{renderItemTitle(item)}</span>
               </div>
-              <div className="text-xs text-gray-500">
-                {typeof item.duration === "number" && item.duration > 0 ? `${item.duration} min` : null}
+              <div className="flex items-center gap-2">
+                {item.isReserve && (
+                  <Tooltip tooltipText="Material in Reserve">
+                    <div className="flex items-center justify-center w-4 h-4 bg-gray-600 text-gray-100 font-bold text-xs rounded-full">
+                      R
+                    </div>
+                  </Tooltip>
+                )}
+                <div className="text-xs text-gray-500">
+                  {typeof item.duration === "number" && item.duration > 0 ? `${item.duration} min` : null}
+                </div>
               </div>
             </div>
             {item.description && (
-              <div
-                className="mt-1 text-sm text-gray-600 line-clamp-2"
-                dangerouslySetInnerHTML={{ __html: item.description }}
-              />
+              <ExpandableDescription description={item.description} />
             )}
           </button>
         ))}

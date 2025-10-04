@@ -6,12 +6,41 @@ import { IPlanItem } from "@/types/PlanItem";
 import { TMaterialType } from "@/types/Materials";
 import DeleteConfirmationPopup from "@/components/popups/DeleteConfirmationPopup";
 
+const EmptyPlanState = () => {
+  return (
+    <div className="flex flex-col items-center justify-center py-12 text-center">
+      <div className="mb-6">
+        <svg 
+          className="w-16 h-16 text-gray-300 mx-auto mb-4" 
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+        >
+          <path 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            strokeWidth={1.5} 
+            d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" 
+          />
+        </svg>
+        <h4 className="text-lg font-medium text-gray-600 mb-2">
+          Your event plan is empty
+        </h4>
+        <p className="text-sm text-gray-500 max-w-xs">
+          Drag and drop materials from the library to build your event plan
+        </p>
+      </div>
+    </div>
+  );
+};
+
 
 interface PlanItemsColumnProps {
   planItems: IPlanItem[];
   expandedDescriptions: Set<string>;
   onToggleDescription: (itemId: string, e: React.MouseEvent) => void;
   onEditCustomItem: (item: IPlanItem) => void;
+  onEditItem?: (item: IPlanItem) => void;
   onDeleteCustomItem?: (itemId: string) => void;
 }
 
@@ -20,6 +49,7 @@ const PlanItemsColumn = ({
   expandedDescriptions,
   onToggleDescription,
   onEditCustomItem,
+  onEditItem,
   onDeleteCustomItem
 }: PlanItemsColumnProps) => {
 
@@ -92,30 +122,7 @@ const PlanItemsColumn = ({
             className="min-h-[400px]"
           >
             {planItems.length === 0 ? (
-              // Empty state with skeleton
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="mb-6">
-                  <svg 
-                    className="w-16 h-16 text-gray-300 mx-auto mb-4" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round" 
-                      strokeWidth={1.5} 
-                      d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" 
-                    />
-                  </svg>
-                  <h4 className="text-lg font-medium text-gray-600 mb-2">
-                    Your event plan is empty
-                  </h4>
-                  <p className="text-sm text-gray-500 max-w-xs">
-                    Drag and drop materials from the library to build your event plan
-                  </p>
-                </div>
-              </div>
+              <EmptyPlanState />
             ) : (
               planItems.map((item, index) => (
                 <PlanItem
@@ -125,6 +132,7 @@ const PlanItemsColumn = ({
                   expandedDescriptions={expandedDescriptions}
                   onToggleDescription={onToggleDescription}
                   onEditCustomItem={onEditCustomItem}
+                  onEditItem={onEditItem}
                   onDeleteCustomItem={requestDeleteCustomItem}
                   onItemClick={handleItemClick}
                 />
