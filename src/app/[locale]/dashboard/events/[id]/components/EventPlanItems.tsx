@@ -106,7 +106,7 @@ const EventPlanItems = ({ event, session }: IProps) => {
         }
 
         const data = await response.json();
-        
+
         // Update pagination state
         setTotalCount(data.totalCount || 0);
         setTotalPages(data.totalPages || 0);
@@ -318,7 +318,7 @@ const EventPlanItems = ({ event, session }: IProps) => {
       title: item.title || "",
       type: CUSTOM_PLAN_ITEM_TYPE,
       materialId: null,
-      description: item.description || null
+      description: cleanDescription(item.description) || null
     };
     
     setColumns(prev => ({
@@ -355,7 +355,7 @@ const EventPlanItems = ({ event, session }: IProps) => {
         item.id === editingItemId
           ? { 
               ...item, 
-              description: updatedItemData.description,
+              description: cleanDescription(updatedItemData.description),
               isReserve: updatedItemData.isReserve,
             }
           : item
@@ -383,7 +383,7 @@ const EventPlanItems = ({ event, session }: IProps) => {
           ? { 
               ...item, 
               title: updatedItemData.title || item.title,
-              description: updatedItemData.description 
+              description: cleanDescription(updatedItemData.description)
             }
           : item
       )
@@ -436,6 +436,24 @@ const EventPlanItems = ({ event, session }: IProps) => {
       default:
         return 'textId';
     }
+  }, []);
+
+  // Helper function to clean description from empty HTML tags
+  const cleanDescription = useCallback((description: string | null | undefined): string => {
+    if (!description) return "";
+    
+    // Create a temporary DOM element to parse HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = description;
+    
+    // Get the text content, which removes all HTML tags
+    const textContent = tempDiv.textContent || tempDiv.innerText || '';
+
+    if (textContent.trim() === '') {
+      return "";
+    }
+    
+    return description;
   }, []);
 
   const handleSave = useCallback(async () => {
