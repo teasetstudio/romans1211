@@ -2,6 +2,9 @@ import { useState, useRef } from "react";
 import { Draggable } from "@hello-pangea/dnd";
 import { IconChevronDown, IconChevronUp } from "@tabler/icons-react";
 import { IPlanItem } from "@/types/PlanItem";
+import Tooltip from "@/components/ui/Tooltip";
+
+import '@/styles/tiptap-components.css';
 
 interface PlanItemProps {
   item: IPlanItem;
@@ -9,6 +12,7 @@ interface PlanItemProps {
   expandedDescriptions: Set<string>;
   onToggleDescription: (itemId: string, e: React.MouseEvent) => void;
   onEditCustomItem?: (item: IPlanItem) => void;
+  onEditItem?: (item: IPlanItem) => void;
   onDeleteCustomItem?: (itemId: string) => void;
   onItemClick?: (item: IPlanItem) => void;
   isReadOnly?: boolean;
@@ -20,6 +24,7 @@ const PlanItem = ({
   expandedDescriptions, 
   onToggleDescription, 
   onEditCustomItem,
+  onEditItem,
   onDeleteCustomItem,
   onItemClick,
   isReadOnly = false
@@ -90,36 +95,39 @@ const PlanItem = ({
           <div className={`text-sm font-medium ${styles.title}`}>
             {item.title}
           </div>
-          {item.type === "CUSTOM" && item.description && (
+          {item.type !== "CUSTOM" && (
+            <div className={`text-xs mt-0.5 ${styles.type}`}>
+              {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
+            </div>
+          )}
+          {item.description && (
             <div className="mt-1">
               <div 
-                className="flex items-center text-xs text-amber-600 cursor-pointer hover:text-amber-800"
-                onClick={(e) => onToggleDescription(item.id, e)}
+                className={`flex items-center text-xs ${styles.type} cursor-pointer hover:opacity-80`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleDescription(item.id, e)
+                }}
               >
                 {expandedDescriptions.has(item.id) ? (
                   <>
                     <IconChevronUp size={14} className="mr-1" />
-                    <span>Hide description</span>
+                    {item.type === "CUSTOM" ? "Hide Description" : "Hide Comment"}
                   </>
                 ) : (
                   <>
                     <IconChevronDown size={14} className="mr-1" />
-                    <span>Show description</span>
+                    {item.type === "CUSTOM" ? "Show Description" : "Show Comment"}
                   </>
                 )}
               </div>
               
               {expandedDescriptions.has(item.id) && (
                 <div 
-                  className="mt-1.5 text-sm text-amber-800 max-h-40 overflow-y-auto p-2 bg-amber-100/50 rounded"
+                  className={`tiptap-wrapper mt-1.5 text-sm ${styles.title} max-h-40 overflow-y-auto p-2 ${styles.container} rounded`}
                   dangerouslySetInnerHTML={{ __html: item.description || "" }}
                 />
               )}
-            </div>
-          )}
-          {item.type !== "CUSTOM" && (
-            <div className={`text-xs mt-0.5 ${styles.type}`}>
-              {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
             </div>
           )}
         </div>
@@ -145,6 +153,30 @@ const PlanItem = ({
                 className="text-xs font-medium text-red-600 hover:text-red-800 bg-red-100 px-2 py-0.5 rounded"
               >
                 Delete
+              </button>
+            )}
+          </div>
+        )}
+        {item.isReserve && (
+          <div className="flex flex-col items-end space-y-1">
+            <Tooltip tooltipText="Material in Reserve">
+              <div className="flex items-center justify-center w-4 h-4 bg-gray-600 text-gray-100 font-bold text-xs rounded-full">
+                R
+              </div>
+            </Tooltip>
+          </div>
+        )}
+        {item.type !== "CUSTOM" && !isReadOnly && onEditItem && (
+          <div className="flex flex-col items-end space-y-1">
+            {onEditItem && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEditItem(item);
+                }}
+                className="text-xs font-medium text-amber-600 hover:text-amber-800 bg-amber-100 px-2 py-0.5 rounded"
+              >
+                Edit
               </button>
             )}
           </div>

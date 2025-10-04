@@ -177,6 +177,7 @@ model EventPlanItem {
   title       String?           // Optional title for comments
   description String?           @db.Text // Optional description/notes
   order       Int               // Order field for sorting items
+  isReserve   Boolean           @default(false) // Mark item as reserve
 
   // Timings
   duration    Int?              // Duration in minutes (optional)
