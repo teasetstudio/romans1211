@@ -38,7 +38,11 @@ export function CourseDetails({ course }: CourseDetailsProps) {
   };
 
   const handleCreateEvent = async (event: Event) => {
-    setEvents((prev) => [...prev, event]);
+    setEvents((prev) =>
+      [event, ...prev].sort(
+        (a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
+      )
+    );
     setIsCreateEventOpen(false);
   };
 

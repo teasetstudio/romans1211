@@ -13,6 +13,7 @@ import Button from "@/components/buttons/Button";
 import { DateTimePicker } from "@/components/inputs/DateTimePicker";
 import { IconClose } from "@/res/icons";
 import { addMinutes } from "date-fns";
+import { predictNextEventTimes } from "@/utils/dates";
 
 const eventSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -60,16 +61,27 @@ export default function EventFormDialog({
       };
     }
 
+    // @ts-ignore - `events` is included on `course` from the page's data loader
+    const eventsForCourse: Array<{ startTime: Date | string; endTime: Date | string; title?: string; description?: string }> | undefined = course?.events;
+    // @ts-ignore
+    const lastEvent: Event | undefined = eventsForCourse?.[0];
+
     // Create mode
-    const defaultStartTime = course ? new Date(course.startDate) : new Date();
-    const defaultEndTime = addMinutes(defaultStartTime, 60); // 1 hour default if no course
+    const prediction = predictNextEventTimes(
+      eventsForCourse,
+      course ? new Date(course.startDate) : undefined
+    );
+
+    const startTime = prediction?.startTime
+      || (lastEvent ? new Date(lastEvent.startTime) : course ? new Date(course.startDate) : new Date());
+    const endTime = prediction?.endTime || addMinutes(startTime, 60); // 1 hour default if no course
 
     return {
-      title: course?.title || "",
-      description: course?.description || "",
+      title: lastEvent?.title || course?.title || "",
+      description: lastEvent?.description || course?.description || "",
       location: course?.location || "",
-      startTime: defaultStartTime,
-      endTime: defaultEndTime,
+      startTime,
+      endTime,
       isCancelled: false,
     };
   };
@@ -81,12 +93,14 @@ export default function EventFormDialog({
 
   const startTime = methods.watch("startTime");
 
-  // Helper function to update end time when start time changes
-  const updateEndTime = (newStartTime: Date) => {
+  // Helper function to update end time when start time changes.
+  // Uses the previous start time to preserve duration when shifting the start.
+  const updateEndTime = (newStartTime: Date, prevStartTime: Date) => {
     const currentEndTime = methods.getValues("endTime");
-    const currentDuration = currentEndTime.getTime() - methods.getValues("startTime").getTime();
-    const newEndTime = new Date(newStartTime.getTime() + currentDuration);
-    methods.setValue("endTime", newEndTime);
+    if (!currentEndTime || !prevStartTime) return;
+    const currentDuration = currentEndTime.getTime() - prevStartTime.getTime();
+    const newEndTime = new Date(newStartTime.getTime() + Math.max(0, currentDuration));
+    methods.setValue("endTime", newEndTime, { shouldDirty: true, shouldValidate: true });
   };
 
   const handleSubmit = async (data: EventFormData) => {
@@ -197,8 +211,9 @@ export default function EventFormDialog({
                   selected={startTime}
                   onChange={(date) => {
                     if (date) {
-                      methods.setValue("startTime", date);
-                      updateEndTime(date);
+                      const prevStart = methods.getValues("startTime");
+                      methods.setValue("startTime", date, { shouldDirty: true, shouldValidate: true });
+                      updateEndTime(date, prevStart);
                     }
                   }}
                 />
