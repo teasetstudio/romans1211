@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma";
 import Link from "next/link";
-import { format } from "date-fns";
+import { ClientTime } from "@/components/ClientTime";
 
 interface EventsSectionProps {
   organizationId: string;
@@ -67,7 +67,7 @@ export default async function EventsSection({ organizationId }: EventsSectionPro
             </div>
             <div className="text-base font-semibold text-gray-900">{closestUpcoming.title}</div>
             <div className="text-sm text-gray-700 mt-1">
-              {format(new Date(closestUpcoming.startTime), "EEE, MMM d, HH:mm")} — {format(new Date(closestUpcoming.endTime), "HH:mm")}
+              <ClientTime date={closestUpcoming.startTime} formatStr="EEE, MMM d, HH:mm" /> — <ClientTime date={closestUpcoming.endTime} formatStr="HH:mm" />
               {closestUpcoming.course?.title ? ` · ${closestUpcoming.course.title}` : ""}
               {closestUpcoming.location ? ` · ${closestUpcoming.location}` : ""}
             </div>
@@ -120,7 +120,7 @@ export default async function EventsSection({ organizationId }: EventsSectionPro
                     <Link href={`./dashboard/events/${ev.id}`} className="hover:underline text-primary">{ev.title}</Link>
                   </td>
                   <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">{ev.course?.title ?? "—"}</td>
-                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">{format(new Date(ev.startTime), "MMM d, HH:mm")}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700"><ClientTime date={ev.startTime} /></td>
                 </tr>
               ))}
             </tbody>
