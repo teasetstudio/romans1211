@@ -8,15 +8,15 @@ import { Course } from "@prisma/client";
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import Input from "@/components/inputs/Input";
 import Button from "@/components/buttons/Button";
-import { DatePicker } from "@/components/inputs/DatePicker";
+// import { DatePicker } from "@/components/inputs/DatePicker";
 import { NAMESPACE_DASHBOARD_COURSES } from "@/res/namespaces";
 
 const courseSchema = z.object({
   title: z.string().min(1),
   description: z.string().optional(),
-  location: z.string().optional(),
-  startDate: z.date(),
-  endDate: z.date().optional().nullable(),
+  // location: z.string().optional(),
+  // startDate: z.date().optional().nullable(),
+  // endDate: z.date().optional().nullable(),
 });
 
 type CourseFormData = z.infer<typeof courseSchema>;
@@ -44,15 +44,15 @@ export function CourseDialog({
     defaultValues: mode === 'edit' && course ? {
       title: course.title,
       description: course.description || "",
-      location: course.location || "",
-      startDate: new Date(course.startDate),
-      endDate: course.endDate ? new Date(course.endDate) : null,
+      // location: course.location || "",
+      // startDate: course.startDate ? new Date(course.startDate) : null,
+      // endDate: course.endDate ? new Date(course.endDate) : null,
     } : {
       title: "",
       description: "",
-      location: "",
-      startDate: new Date(),
-      endDate: null,
+      // location: "",
+      // startDate: new Date(),
+      // endDate: null,
     },
   });
 
@@ -72,8 +72,8 @@ export function CourseDialog({
         body: JSON.stringify({
           ...data,
           ...(mode === 'create' && { organizationId }),
-          startDate: data.startDate.toISOString(),
-          endDate: data.endDate?.toISOString() || null,
+          // startDate: data.startDate?.toISOString() || null,
+          // endDate: data.endDate?.toISOString() || null,
         }),
       });
 
@@ -89,8 +89,8 @@ export function CourseDialog({
     }
   };
 
-  const startDate = methods.watch("startDate");
-  const endDate = methods.watch("endDate");
+  // const startDate = methods.watch("startDate");
+  // const endDate = methods.watch("endDate");
 
   return (
     <Dialog open={open} onClose={() => onOpenChange(false)} className="relative z-50">
@@ -112,7 +112,7 @@ export function CourseDialog({
                 name="description"
                 placeholder={t("fields.description")}
               />
-
+{/* 
               <Input
                 name="location"
                 placeholder={t("fields.location")}
@@ -120,7 +120,7 @@ export function CourseDialog({
 
               <DatePicker
                 label={t("fields.startDate")}
-                selected={startDate}
+                selected={startDate || null}
                 onChange={(date) => date && methods.setValue("startDate", date)}
               />
 
@@ -129,7 +129,7 @@ export function CourseDialog({
                 selected={endDate || null}
                 onChange={(date) => methods.setValue("endDate", date)}
                 isClearable
-              />
+              /> */}
 
               <div className="flex justify-end gap-3 pt-2">
                 <Button

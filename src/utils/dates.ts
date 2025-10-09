@@ -13,7 +13,7 @@ export const dateToDDMMYYY = (date: string | Date) => {
 export const predictNextEventTimes = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   events: Array<{ startTime: Date | string; endTime: Date | string }> | undefined,
-  courseStartDate?: Date
+  // courseStartDate?: Date
 ): { startTime: Date; endTime: Date } | null => {
   if (!events || events.length === 0) return null;
 
@@ -32,9 +32,10 @@ export const predictNextEventTimes = (
   if (normalized.length >= 2) {
     const prev = normalized[1];
     cadenceMs = last.start.getTime() - prev.start.getTime();
-  } else if (courseStartDate) {
-    cadenceMs = last.start.getTime() - courseStartDate.getTime();
   }
+  // else if (courseStartDate) {
+  //   cadenceMs = last.start.getTime() - courseStartDate.getTime();
+  // }
 
   // Fallbacks and sanity checks
   const ONE_DAY = 24 * 60 * 60 * 1000;

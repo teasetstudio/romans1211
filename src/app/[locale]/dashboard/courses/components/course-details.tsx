@@ -81,24 +81,24 @@ export function CourseDetails({ course }: CourseDetailsProps) {
                   <p className="mt-1 text-sm text-gray-600 line-clamp-1">{course.description}</p>
                 )}
                 <div className="mt-1 flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-gray-500">
-                  <div className="flex items-center gap-1">
+                  {/* <div className="flex items-center gap-1">
                     <IconCalendar className="w-4 h-4" />
                     {new Date(course.startDate).toLocaleString()}
-                  </div>
-                  {course.endDate &&
+                  </div> */}
+                  {/* {course.endDate &&
                     <div className="flex items-center gap-1">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       {new Date(course.endDate).toLocaleString()}
                     </div>
-                  }
-                  {course.location && (
+                  } */}
+                  {/* {course.location && (
                     <div className="flex items-center gap-1">
                       <IconMapPin className="w-4 h-4" />
                       {course.location}
                     </div>
-                  )}
+                  )} */}
                 </div>
               </div>
               <div className="flex shrink-0 gap-2 self-start sm:self-center">

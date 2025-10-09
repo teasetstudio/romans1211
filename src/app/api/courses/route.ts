@@ -5,16 +5,6 @@ import prisma from "@/lib/prisma";
 import { z } from "zod";
 import { ORG_CREATE_PERMISSIONS, ORG_READ_PERMISSIONS } from "@/lib/permissions";
 
-// Schema for creating an event blueprint
-const createEventBlueprintSchema = z.object({
-  title: z.string().min(1),
-  description: z.string().optional(),
-  organizationId: z.string(),
-  startDate: z.string().transform((str) => new Date(str)),
-  endDate: z.string().nullable().optional().transform((str) => str ? new Date(str) : null),
-  location: z.string().optional(),
-});
-
 // GET /api/courses
 export async function GET(request: NextRequest) {
   try {
@@ -99,6 +89,16 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// Schema for creating an event blueprint
+const createEventBlueprintSchema = z.object({
+  title: z.string().min(1),
+  description: z.string().optional(),
+  organizationId: z.string(),
+  // startDate: z.string().nullable().optional().transform((str) => str ? new Date(str) : null),
+  // endDate: z.string().nullable().optional().transform((str) => str ? new Date(str) : null),
+  // location: z.string().optional(),
+});
+
 // POST /api/courses
 export async function POST(request: NextRequest) {
   try {
@@ -145,16 +145,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Create blueprint
-    const blueprint = await prisma.course.create({
+    const course = await prisma.course.create({
       data: validatedData,
     });
 
-    return NextResponse.json(blueprint, { status: 201 });
+    return NextResponse.json(course, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors }, { status: 400 });
     }
-    console.error("Error in POST /api/event-blueprints:", error);
+    console.error("Error in POST /api/courses:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

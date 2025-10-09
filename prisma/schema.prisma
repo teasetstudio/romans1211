@@ -124,7 +124,7 @@ model Course {
   organizationId    String
   organization      Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-  startDate         DateTime          // Series start date
+  startDate         DateTime?         // Series start date
   endDate           DateTime?         // Optional series end date
 
   events            Event[]           // All events in this course

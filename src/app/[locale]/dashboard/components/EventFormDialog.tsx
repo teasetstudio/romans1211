@@ -69,17 +69,21 @@ export default function EventFormDialog({
     // Create mode
     const prediction = predictNextEventTimes(
       eventsForCourse,
-      course ? new Date(course.startDate) : undefined
+      // course?.startDate ? new Date(course.startDate) : undefined
     );
 
     const startTime = prediction?.startTime
-      || (lastEvent ? new Date(lastEvent.startTime) : course ? new Date(course.startDate) : new Date());
+      || (lastEvent
+        ? new Date(lastEvent.startTime)
+        // : course?.startDate
+        //   ? new Date(course.startDate)
+          : new Date());
     const endTime = prediction?.endTime || addMinutes(startTime, 60); // 1 hour default if no course
 
     return {
       title: lastEvent?.title || course?.title || "",
       description: lastEvent?.description || course?.description || "",
-      location: course?.location || "",
+      location: lastEvent?.location || "",
       startTime,
       endTime,
       isCancelled: false,

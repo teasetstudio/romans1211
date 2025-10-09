@@ -85,7 +85,7 @@ export function CourseList({ courses, onDelete, onEdit, hasDeletePermission }: C
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t("table.title")}
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {/* <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t("table.startDate")}
               </th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -93,7 +93,7 @@ export function CourseList({ courses, onDelete, onEdit, hasDeletePermission }: C
               </th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t("table.location")}
-              </th>
+              </th> */}
               <th scope="col" className="relative px-6 py-3">
                 <span className="sr-only">{t("table.actions")}</span>
               </th>
@@ -109,15 +109,15 @@ export function CourseList({ courses, onDelete, onEdit, hasDeletePermission }: C
                 <td className="px-6 py-4 whitespace-nowrap">
                   <Text>{course.title}</Text>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                {/* <td className="px-6 py-4 whitespace-nowrap">
                   <Text>{format(course.startDate, "PPP")}</Text>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <Text>{course.endDate ? format(course.endDate, "PPP") : "-"}</Text>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                </td> */}
+                {/* <td className="px-6 py-4 whitespace-nowrap">
                   <Text>{course.location || "-"}</Text>
-                </td>
+                </td> */}
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div className="flex justify-center min-h-9">
                     {hasDeletePermission && (
