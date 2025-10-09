@@ -8,6 +8,7 @@ import DashboardHeader from "./components/DashboardHeader";
 import { MaterialStats } from "./components/MaterialStats";
 import { organizationService } from "@/lib/OrganizationServiceForSSR";
 import { DailyVerse } from "./components/DailyVerse";
+import EventsSection from "./components/EventsSection";
 
 export default async function Dashboard() {
   const session = await getSession();
@@ -37,6 +38,7 @@ export default async function Dashboard() {
           {/* Main Content Area */}
           <div className="lg:col-span-9 order-first">
             <DailyVerse />
+            <EventsSection organizationId={organization.id} />
 
             <MaterialStats
               gamesCount={gamesCount}
