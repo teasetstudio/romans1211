@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { Draggable } from "@hello-pangea/dnd";
-import { IconChevronDown, IconChevronUp } from "@tabler/icons-react";
-import { IPlanItem } from "@/types/PlanItem";
+import { IconChevronDown, IconChevronUp, IconCheck, IconClipboardList } from "@tabler/icons-react";
+import { IPlanItem, IPreparation } from "@/types/PlanItem";
 import Tooltip from "@/components/ui/Tooltip";
 
 import '@/styles/tiptap-components.css';
@@ -16,6 +16,7 @@ interface PlanItemProps {
   onDeleteCustomItem?: (itemId: string) => void;
   onItemClick?: (item: IPlanItem) => void;
   isReadOnly?: boolean;
+  updatePreparationCheckbox?: (eventId: string, preparationId: string, checked: boolean) => void;
 }
 
 const PlanItem = ({ 
@@ -27,9 +28,11 @@ const PlanItem = ({
   onEditItem,
   onDeleteCustomItem,
   onItemClick,
-  isReadOnly = false
+  isReadOnly = false,
+  updatePreparationCheckbox,
 }: PlanItemProps) => {
   const [isDragging, setIsDragging] = useState(false);
+  const [expandedPreparations, setExpandedPreparations] = useState(false);
   const dragStartPos = useRef<{ x: number; y: number } | null>(null);
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -48,6 +51,12 @@ const PlanItem = ({
       e.preventDefault();
       e.stopPropagation();
       onItemClick(item);
+    }
+  };
+
+  const handlePreparationCheckboxChange = (preparationId: string, isCompleted: boolean) => {
+    if (updatePreparationCheckbox) {
+      updatePreparationCheckbox(item.id, preparationId, isCompleted);
     }
   };
 
@@ -127,6 +136,60 @@ const PlanItem = ({
                   className={`tiptap-wrapper mt-1.5 text-sm ${styles.title} max-h-40 overflow-y-auto p-2 ${styles.container} rounded`}
                   dangerouslySetInnerHTML={{ __html: item.description || "" }}
                 />
+              )}
+            </div>
+          )}
+          
+          {/* Preparations Section */}
+          {item.preparations && item.preparations.length > 0 && (
+            <div className="mt-1">
+              <div 
+                className={`flex items-center text-xs ${styles.type} cursor-pointer hover:opacity-80`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setExpandedPreparations(!expandedPreparations);
+                }}
+              >
+                <IconClipboardList size={14} className="mr-1" />
+                {expandedPreparations ? (
+                  <>
+                    <IconChevronUp size={14} className="mr-1" />
+                    Preparations ({item.preparations.filter(p => p.isCompleted).length}/{item.preparations.length})
+                  </>
+                ) : (
+                  <>
+                    <IconChevronDown size={14} className="mr-1" />
+                    Preparations ({item.preparations.filter(p => p.isCompleted).length}/{item.preparations.length})
+                  </>
+                )}
+              </div>
+              
+              {expandedPreparations && (
+                <div className={`mt-1.5 p-2 ${styles.container} rounded border`}>
+                  <div className="space-y-2">
+                    {item.preparations.map((prep: IPreparation) => (
+                      <div key={prep.id} className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          className={`flex-shrink-0 w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${
+                            prep.isCompleted 
+                              ? 'bg-green-500 border-green-500 text-white' 
+                              : 'border-gray-300 hover:border-gray-400'
+                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handlePreparationCheckboxChange(prep.id, !prep.isCompleted);
+                          }}
+                        >
+                          {prep.isCompleted && <IconCheck size={10} />}
+                        </button>
+                        <span className={`text-xs ${styles.title} ${prep.isCompleted ? 'line-through opacity-60' : ''}`}>
+                          {prep.title}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
           )}

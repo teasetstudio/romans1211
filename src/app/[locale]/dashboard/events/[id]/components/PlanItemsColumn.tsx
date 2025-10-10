@@ -42,6 +42,7 @@ interface PlanItemsColumnProps {
   onEditCustomItem: (item: IPlanItem) => void;
   onEditItem?: (item: IPlanItem) => void;
   onDeleteCustomItem?: (itemId: string) => void;
+  updatePreparationCheckbox?: (eventId: string, preparationId: string, checked: boolean) => void;
 }
 
 const PlanItemsColumn = ({
@@ -50,7 +51,8 @@ const PlanItemsColumn = ({
   onToggleDescription,
   onEditCustomItem,
   onEditItem,
-  onDeleteCustomItem
+  onDeleteCustomItem,
+  updatePreparationCheckbox,
 }: PlanItemsColumnProps) => {
 
 
@@ -135,6 +137,7 @@ const PlanItemsColumn = ({
                   onEditItem={onEditItem}
                   onDeleteCustomItem={requestDeleteCustomItem}
                   onItemClick={handleItemClick}
+                  updatePreparationCheckbox={updatePreparationCheckbox}
                 />
               ))
             )}

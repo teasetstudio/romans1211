@@ -30,6 +30,18 @@ const updateEventSchema = z.object({
         songId: z.string().optional(),
         textId: z.string().optional(),
         gameId: z.string().optional(),
+        preparations: z
+          .array(
+            z.object({
+              id: z.string().optional(), // Existing preparation ID
+              title: z.string(),
+              order: z.number().int(),
+              isCompleted: z.boolean().optional(),
+              completedAt: z.string().transform((str) => str ? new Date(str) : null).optional(),
+              completedBy: z.string().optional(),
+            })
+          )
+          .optional(),
       })
     )
     .optional(),
@@ -94,41 +106,129 @@ export async function PUT(
     };
 
     if (validatedData.eventPlanItems) {
-      // Delete existing items not in the update
-      const existingItemIds = event.eventPlanItems.map((item) => item.id);
-      const updatedItemIds = validatedData.eventPlanItems
-        .filter((item) => item.id)
-        .map((item) => item.id as string);
-      
-      const itemsToDelete = existingItemIds.filter(
-        (id) => !updatedItemIds.includes(id)
-      );
+      // Use transaction to handle event plan items and preparations
+      await prisma.$transaction(async (tx) => {
+        // Delete existing items not in the update (this will cascade delete preparations)
+        const existingItemIds = event.eventPlanItems.map((item) => item.id);
+        const updatedItemIds = validatedData.eventPlanItems!
+          .filter((item) => item.id)
+          .map((item) => item.id as string);
+        
+        const itemsToDelete = existingItemIds.filter(
+          (id) => !updatedItemIds.includes(id)
+        );
 
-      if (itemsToDelete.length > 0) {
-        await prisma.eventPlanItem.deleteMany({
-          where: { id: { in: itemsToDelete } },
-        });
-      }
-
-      // Update existing items and create new ones
-      for (const item of validatedData.eventPlanItems) {
-        if (item.id) {
-          await prisma.eventPlanItem.update({
-            where: { id: item.id },
-            data: {
-              ...item,
-              id: undefined, // Remove id from update data
-            },
-          });
-        } else {
-          await prisma.eventPlanItem.create({
-            data: {
-              ...item,
-              eventId: id,
-            },
+        if (itemsToDelete.length > 0) {
+          await tx.eventPlanItem.deleteMany({
+            where: { id: { in: itemsToDelete } },
           });
         }
-      }
+
+        // Update existing items and create new ones
+        for (const item of validatedData.eventPlanItems!) {
+          const { preparations, ...itemData } = item;
+          
+          if (item.id) {
+            // Update existing item
+            await tx.eventPlanItem.update({
+              where: { id: item.id },
+              data: {
+                type: itemData.type,
+                title: itemData.title,
+                description: itemData.description,
+                order: itemData.order,
+                duration: itemData.duration,
+                startHour: itemData.startHour,
+                startMinute: itemData.startMinute,
+                endHour: itemData.endHour,
+                endMinute: itemData.endMinute,
+                songId: itemData.songId,
+                textId: itemData.textId,
+                gameId: itemData.gameId,
+              },
+            });
+
+            // Handle preparations for existing item
+            if (preparations) {
+              // Delete existing preparations not in the update
+              const existingPreparations = await tx.preparationItem.findMany({
+                where: { eventPlanItemId: item.id },
+                select: { id: true }
+              });
+              
+              const existingPrepIds = existingPreparations.map(p => p.id);
+              const updatedPrepIds = preparations
+                .filter(prep => prep.id)
+                .map(prep => prep.id as string);
+              
+              const prepsToDelete = existingPrepIds.filter(
+                id => !updatedPrepIds.includes(id)
+              );
+
+              if (prepsToDelete.length > 0) {
+                await tx.preparationItem.deleteMany({
+                  where: { id: { in: prepsToDelete } }
+                });
+              }
+
+              // Update existing preparations and create new ones
+              for (const prep of preparations) {
+                if (prep.id) {
+                  await tx.preparationItem.update({
+                    where: { id: prep.id },
+                    data: {
+                      title: prep.title,
+                      order: prep.order,
+                      isCompleted: prep.isCompleted ?? false,
+                      completedAt: prep.completedAt || null,
+                      completedBy: prep.completedBy || null,
+                    }
+                  });
+                } else {
+                  await tx.preparationItem.create({
+                    data: {
+                      title: prep.title,
+                      order: prep.order,
+                      isCompleted: prep.isCompleted ?? false,
+                      completedAt: prep.completedAt || null,
+                      completedBy: prep.completedBy || null,
+                      eventPlanItemId: item.id,
+                    }
+                  });
+                }
+              }
+            }
+          } else {
+            // Create new item with preparations
+            await tx.eventPlanItem.create({
+              data: {
+                eventId: id,
+                type: itemData.type,
+                title: itemData.title,
+                description: itemData.description,
+                order: itemData.order,
+                duration: itemData.duration,
+                startHour: itemData.startHour,
+                startMinute: itemData.startMinute,
+                endHour: itemData.endHour,
+                endMinute: itemData.endMinute,
+                songId: itemData.songId,
+                textId: itemData.textId,
+                gameId: itemData.gameId,
+                preparations: preparations && preparations.length > 0 ? {
+                  create: preparations.map(prep => ({
+                    title: prep.title,
+                    order: prep.order,
+                    isCompleted: prep.isCompleted ?? false,
+                    completedAt: prep.completedAt || null,
+                    completedBy: prep.completedBy || null,
+                  }))
+                } : undefined
+              }
+            });
+          }
+        }
+      });
     }
 
     const updatedEvent = await prisma.event.update({
@@ -141,6 +241,9 @@ export async function PUT(
             song: true,
             text: true,
             game: true,
+            preparations: {
+              orderBy: { order: 'asc' }
+            }
           },
           orderBy: {
             order: "asc",

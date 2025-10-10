@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import type { Event, EventPlanItem, Song, Text as TextMat, Game } from "@prisma/client";
+import type { Event, EventPlanItem, Song, Text as TextMat, Game, PreparationItem } from "@prisma/client";
 import MaterialModal from "@/app/[locale]/dashboard/events/[id]/components/MaterialModal";
 import CustomItemDialog from "./CustomItemDialog";
 import Tooltip from "@/components/ui/Tooltip";
 import type { TMaterialType } from "@/types/Materials";
+import { IconChevronDown, IconChevronUp, IconCheck, IconClipboardList } from "@tabler/icons-react";
 
 import '@/styles/tiptap-components.css';
 
@@ -57,6 +58,7 @@ type PlanItemWithRelations = EventPlanItem & {
   song: Song | null;
   text: TextMat | null;
   game: Game | null;
+  preparations: PreparationItem[];
 };
 
 type PublicEvent = Event & {
@@ -69,6 +71,20 @@ export default function PublicEventView({ event }: { event: PublicEvent }) {
   const [modalMaterialType, setModalMaterialType] = useState<TMaterialType>("text");
   const [customOpen, setCustomOpen] = useState(false);
   const [customItem, setCustomItem] = useState<PlanItemWithRelations | null>(null);
+  const [expandedPreparations, setExpandedPreparations] = useState<Set<string>>(new Set());
+
+  const togglePreparations = (itemId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExpandedPreparations(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(itemId)) {
+        newSet.delete(itemId);
+      } else {
+        newSet.add(itemId);
+      }
+      return newSet;
+    });
+  };
 
   const openMaterial = (item: PlanItemWithRelations) => {
     // Determine type and id from linked content
@@ -156,6 +172,52 @@ export default function PublicEventView({ event }: { event: PublicEvent }) {
             {item.description && (
               <ExpandableDescription description={item.description} />
             )}
+            
+            {/* Preparations Section */}
+            {item.preparations && item.preparations.length > 0 && (
+              <div className="mt-2">
+                <div 
+                  className="flex items-center text-xs text-gray-600 cursor-pointer hover:text-gray-800"
+                  onClick={(e) => togglePreparations(item.id, e)}
+                >
+                  <IconClipboardList size={14} className="mr-1" />
+                  {expandedPreparations.has(item.id) ? (
+                    <>
+                      <IconChevronUp size={14} className="mr-1" />
+                      To Do ({item.preparations.filter(p => p.isCompleted).length}/{item.preparations.length})
+                    </>
+                  ) : (
+                    <>
+                      <IconChevronDown size={14} className="mr-1" />
+                      To Do ({item.preparations.filter(p => p.isCompleted).length}/{item.preparations.length})
+                    </>
+                  )}
+                </div>
+                
+                {expandedPreparations.has(item.id) && (
+                  <div className="mt-2 p-3 bg-gray-50 rounded border">
+                    <div className="space-y-2">
+                      {item.preparations.map((prep) => (
+                        <div key={prep.id} className="flex items-center gap-2">
+                          <div
+                            className={`flex-shrink-0 w-4 h-4 rounded border-2 flex items-center justify-center ${
+                              prep.isCompleted 
+                                ? 'bg-green-500 border-green-500 text-white' 
+                                : 'border-gray-300'
+                            }`}
+                          >
+                            {prep.isCompleted && <IconCheck size={10} />}
+                          </div>
+                          <span className={`text-xs text-gray-700 ${prep.isCompleted ? 'line-through opacity-60' : ''}`}>
+                            {prep.title}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </button>
         ))}
       </div>
@@ -174,6 +236,7 @@ export default function PublicEventView({ event }: { event: PublicEvent }) {
         title={customItem ? renderItemTitle(customItem) : ""}
         badge="Custom"
         contentHtml={customItem?.description ?? null}
+        preparations={customItem?.preparations ?? []}
       />
     </div>
   );

@@ -144,6 +144,7 @@ const EventPlanItems = ({ event, session }: IProps) => {
           type: CUSTOM_PLAN_ITEM_TYPE,
           materialId: null,
           title: item.title || "Custom Item",
+          preparations: item.preparations || [],
           description: item.description
         }
       }
@@ -158,6 +159,7 @@ const EventPlanItems = ({ event, session }: IProps) => {
         materialId,
         material,
         title: material?.title || "Unknown",
+        preparations: item.preparations || [],
         description: item.description,
         isReserve: item.isReserve
       }
@@ -318,7 +320,8 @@ const EventPlanItems = ({ event, session }: IProps) => {
       title: item.title || "",
       type: CUSTOM_PLAN_ITEM_TYPE,
       materialId: null,
-      description: cleanDescription(item.description) || null
+      description: cleanDescription(item.description) || null,
+      preparations: item.preparations || []
     };
     
     setColumns(prev => ({
@@ -357,6 +360,7 @@ const EventPlanItems = ({ event, session }: IProps) => {
               ...item, 
               description: cleanDescription(updatedItemData.description),
               isReserve: updatedItemData.isReserve,
+              preparations: updatedItemData.preparations || item.preparations,
             }
           : item
       )
@@ -383,7 +387,8 @@ const EventPlanItems = ({ event, session }: IProps) => {
           ? { 
               ...item, 
               title: updatedItemData.title || item.title,
-              description: cleanDescription(updatedItemData.description)
+              description: cleanDescription(updatedItemData.description),
+              preparations: updatedItemData.preparations || item.preparations
             }
           : item
       )
@@ -393,6 +398,31 @@ const EventPlanItems = ({ event, session }: IProps) => {
     setEditingItemId(null);
     setShowCustomItemModal(false);
   };
+
+  const updatePreparationCheckbox = (eventId: string, preparationId: string, checked: boolean) => {
+    // Update existing item
+    setColumns(prev => ({
+      ...prev,
+      planItems: prev.planItems.map(item => 
+        item.id === eventId && item.preparations
+          ? { 
+              ...item, 
+              preparations: item.preparations.map(preparation => 
+                preparation.id === preparationId
+                  ? { 
+                      ...preparation, 
+                      isCompleted: checked,
+                      completedAt: checked ? new Date() : null,
+                      completedBy: checked ? session.user?.email || null : null
+                    }
+                  : preparation
+              )
+            }
+          : item
+      )
+    }));
+  };
+
 
   // Delete a custom plan item
   const deleteCustomItem = (itemId: string) => {
@@ -471,6 +501,7 @@ const EventPlanItems = ({ event, session }: IProps) => {
             order: index,
             title: item.title,
             description: item.description || "",
+            preparations: item.preparations || [],
             eventId: event.id,
           };
         }
@@ -484,6 +515,7 @@ const EventPlanItems = ({ event, session }: IProps) => {
           title: item.title,
           description: item.description || "",
           isReserve: item.isReserve || false,
+          preparations: item.preparations || [],
           // Use the string materialId
           [getItemIdField(item.type as TMaterialType)]: materialId,
           eventId: event.id,
@@ -620,6 +652,7 @@ const EventPlanItems = ({ event, session }: IProps) => {
             onEditCustomItem={startEditingCustomItem}
             onEditItem={startEditingItem}
             onDeleteCustomItem={deleteCustomItem}
+            updatePreparationCheckbox={updatePreparationCheckbox}
           />
         </div>
       </DragDropContext>

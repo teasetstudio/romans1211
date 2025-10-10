@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { ClientTime } from "@/components/ClientTime";
+import { ROUTE_DASHBOARD_EVENT } from "@/res/routes";
 
 interface EventsSectionProps {
   organizationId: string;
@@ -46,7 +47,7 @@ export default async function EventsSection({ organizationId }: EventsSectionPro
       {/* Closest upcoming event */}
       <div className="mb-4">
         {closestUpcoming ? (
-          <Link href={`./dashboard/events/${closestUpcoming.id}`} className="block rounded-lg border border-primary/20 bg-primary/5 p-4 hover:bg-primary/10 transition-colors">
+          <Link href={`${ROUTE_DASHBOARD_EVENT(closestUpcoming.id)}`} className="block rounded-lg border border-primary/20 bg-primary/5 p-4 hover:bg-primary/10 transition-colors">
             <div className="flex items-center gap-2 text-sm text-gray-700 mb-1">
               <span>Next up</span>
               {(() => {
@@ -117,7 +118,7 @@ export default async function EventsSection({ organizationId }: EventsSectionPro
               {upcomingEvents.map((ev) => (
                 <tr key={ev.id} className="hover:bg-gray-50">
                   <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
-                    <Link href={`./dashboard/events/${ev.id}`} className="hover:underline text-primary">{ev.title}</Link>
+                    <Link href={`${ROUTE_DASHBOARD_EVENT(ev.id)}`} className="hover:underline text-primary">{ev.title}</Link>
                   </td>
                   <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">{ev.course?.title ?? "—"}</td>
                   <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700"><ClientTime date={ev.startTime} /></td>

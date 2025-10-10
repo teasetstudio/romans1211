@@ -200,10 +200,33 @@ model EventPlanItem {
   eventId     String
   event       Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
   
+  // Preparation items
+  preparations PreparationItem[]
+  
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
 
   @@index([eventId])
+  @@index([order])
+}
+
+model PreparationItem {
+  id                String         @id @default(cuid())
+  title             String         // Description of what needs to be prepared
+  isCompleted       Boolean        @default(false) // Checkbox state
+  order             Int            // Order for sorting preparations
+  completedAt       DateTime?      // When it was marked as completed
+  completedBy       String?        // Optional: who completed it
+  
+  // Relation to EventPlanItem
+  eventPlanItemId   String
+  eventPlanItem     EventPlanItem  @relation(fields: [eventPlanItemId], references: [id], onDelete: Cascade)
+  
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  @@index([eventPlanItemId])
+  @@index([isCompleted])
   @@index([order])
 }
 

@@ -24,6 +24,7 @@ class EventServiceForSSR {
             song: true,
             text: true,
             game: true,
+            preparations: true,
           },
           orderBy: { order: "asc" },
         },

@@ -3,7 +3,18 @@
 import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react';
 import TextEditor from "@/components/inputs/TextEditor";
 import { useState, useEffect } from "react";
+import { IconTrash, IconPlus, IconGripVertical, IconCheck } from "@tabler/icons-react";
 import { IPlanItem } from "@/types/PlanItem";
+
+// Local interface for form state (simpler version)
+interface IPreparationForm {
+  id: string;
+  title: string;
+  order: number;
+  isCompleted?: boolean;
+  completedAt?: Date;
+  completedBy?: string;
+}
 
 interface ItemModalProps {
   isOpen: boolean;
@@ -21,6 +32,7 @@ const ItemModal = ({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [isReserve, setIsReserve] = useState(false);
+  const [preparations, setPreparations] = useState<IPreparationForm[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Reset form or populate with editing item when modal opens/changes
@@ -29,6 +41,22 @@ const ItemModal = ({
       setTitle(editingItem.title);
       setDescription(editingItem.description || "");
       setIsReserve(editingItem.isReserve || false);
+      // Convert IPreparation[] to IPreparationForm[] for editing
+      const formPreparations = (editingItem.preparations || []).map(prep => ({
+        id: prep.id,
+        title: prep.title,
+        order: prep.order,
+        isCompleted: prep.isCompleted,
+        completedAt: prep.completedAt || undefined,
+        completedBy: prep.completedBy || undefined
+      }));
+      setPreparations(formPreparations);
+      setShowDeleteConfirm(false);
+    } else if (isOpen) {
+      setTitle("");
+      setDescription("");
+      setIsReserve(false);
+      setPreparations([]);
       setShowDeleteConfirm(false);
     }
   }, [isOpen, editingItem]);
@@ -40,12 +68,60 @@ const ItemModal = ({
       title,
       description,
       isReserve,
+      // Convert IPreparationForm[] back to IPreparation[] format
+      preparations: preparations.map(prep => ({
+        ...prep,
+        isCompleted: prep.isCompleted || false,
+        completedAt: prep.completedAt || null,
+        completedBy: prep.completedBy || null,
+        eventPlanItemId: '', // Will be set by the backend
+        createdAt: new Date(), // Will be set by the backend
+        updatedAt: new Date()  // Will be set by the backend
+      })),
     });
 
     // Reset form
     setTitle("");
     setDescription("");
     setIsReserve(false);
+    setPreparations([]);
+  };
+
+  // Preparation management functions
+  const addPreparation = () => {
+    const newPrep: IPreparationForm = {
+      id: `temp-${Date.now()}`, // Temporary ID for new items
+      title: "",
+      order: preparations.length,
+      isCompleted: false,
+    };
+    setPreparations(prev => [...prev, newPrep]);
+  };
+
+  const updatePreparation = (id: string, updates: Partial<IPreparationForm>) => {
+    setPreparations(prev => prev.map(prep => 
+      prep.id === id ? { ...prep, ...updates } : prep
+    ));
+  };
+
+  const deletePreparation = (id: string) => {
+    setPreparations(prev => {
+      const filtered = prev.filter(prep => prep.id !== id);
+      // Reorder remaining preparations
+      return filtered.map((prep, index) => ({ ...prep, order: index }));
+    });
+  };
+
+  const togglePreparationComplete = (id: string) => {
+    setPreparations(prev => prev.map(prep => 
+      prep.id === id 
+        ? { 
+            ...prep, 
+            isCompleted: !prep.isCompleted,
+            completedAt: !prep.isCompleted ? new Date() : undefined,
+          }
+        : prep
+    ));
   };
 
   return (
@@ -110,6 +186,69 @@ const ItemModal = ({
                     <p className="text-xs text-gray-500 ml-7">
                       Reserve items are backup materials that can be used if needed during the event.
                     </p>
+                  </div>
+
+                  {/* Preparations Section */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="block text-sm font-medium text-gray-700">
+                        Required To Do
+                      </label>
+                      <button
+                        type="button"
+                        onClick={addPreparation}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 text-sm bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-md transition-colors"
+                      >
+                        <IconPlus size={16} />
+                        Add To Do
+                      </button>
+                    </div>
+
+                    {preparations.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
+                        <p className="text-sm">No to do items added yet</p>
+                        <p className="text-xs mt-1">Click &ldquo;Add To Do&rdquo; to get started</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {preparations.map((prep, index) => (
+                          <div key={prep.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border">
+                            <div className="flex items-center cursor-move text-gray-400">
+                              <IconGripVertical size={16} />
+                            </div>
+                            
+                            <button
+                              type="button"
+                              onClick={() => togglePreparationComplete(prep.id)}
+                              className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                                prep.isCompleted 
+                                  ? 'bg-green-500 border-green-500 text-white' 
+                                  : 'border-gray-300 hover:border-gray-400'
+                              }`}
+                            >
+                              {prep.isCompleted && <IconCheck size={12} />}
+                            </button>
+
+                            <input
+                              type="text"
+                              value={prep.title}
+                              onChange={(e) => updatePreparation(prep.id, { title: e.target.value })}
+                              placeholder={`To Do ${index + 1}`}
+                              className="flex-1 px-3 py-1.5 text-sm border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            />
+
+                            <button
+                              type="button"
+                              onClick={() => deletePreparation(prep.id)}
+                              className="flex-shrink-0 p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
+                              title="Delete to do item"
+                            >
+                              <IconTrash size={16} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

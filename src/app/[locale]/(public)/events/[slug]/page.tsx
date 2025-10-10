@@ -19,6 +19,7 @@ export default async function PublicEventPage({ params }: AsyncParams<{ slug: st
           song: true,
           text: true,
           game: true,
+          preparations: true,
         },
         orderBy: { order: "asc" },
       },

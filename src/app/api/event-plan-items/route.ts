@@ -38,6 +38,26 @@ export async function POST(request: NextRequest) {
         );
       }
       orderSet.add(item.order);
+
+      // Validate preparations if they exist
+      if (item.preparations && Array.isArray(item.preparations)) {
+        const prepOrderSet = new Set();
+        for (const prep of item.preparations) {
+          if (!prep.title || prep.order === undefined) {
+            return NextResponse.json(
+              { error: "Each preparation must have a title and order" },
+              { status: 400 }
+            );
+          }
+          if (prepOrderSet.has(prep.order)) {
+            return NextResponse.json(
+              { error: "Preparation order values must be unique within each item" },
+              { status: 400 }
+            );
+          }
+          prepOrderSet.add(prep.order);
+        }
+      }
     }
 
     // Check if the event exists and user has access
@@ -66,23 +86,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Event not found or don't have permission" }, { status: 404 });
     }
 
-    // Prepare data for createMany
-    const dataToCreate = planItems.map(data => ({
-      eventId,
-      type: data.type.toUpperCase() as EventPlanItemType,
-      title: data.title,
-      description: data.description || null,
-      duration: data.duration || 0,
-      order: data.order,
-      songId: data.songId || null,
-      textId: data.textId || null,
-      gameId: data.gameId || null,
-      isReserve: data.isReserve || false,
-    }));
-
     // Use transaction to ensure atomicity of delete and create operations
     const result = await prisma.$transaction(async (tx) => {
-      // Delete existing items for the event
+      // Delete existing items for the event (this will cascade delete preparations)
       await tx.eventPlanItem.deleteMany({
         where: { eventId },
       });
@@ -91,10 +97,39 @@ export async function POST(request: NextRequest) {
         return [];
       }
 
-      // Create new plan items
-      const createdItems = await tx.eventPlanItem.createMany({
-        data: dataToCreate,
-      });
+      // Create new plan items with preparations
+      const createdItems = [];
+      for (const item of planItems) {
+        const createdItem = await tx.eventPlanItem.create({
+          data: {
+            eventId,
+            type: item.type.toUpperCase() as EventPlanItemType,
+            title: item.title,
+            description: item.description || null,
+            duration: item.duration || 0,
+            order: item.order,
+            songId: item.songId || null,
+            textId: item.textId || null,
+            gameId: item.gameId || null,
+            isReserve: item.isReserve || false,
+            preparations: item.preparations && item.preparations.length > 0 ? {
+              create: item.preparations.map((prep: any) => ({
+                title: prep.title,
+                order: prep.order,
+                isCompleted: prep.isCompleted || false,
+                completedAt: prep.completedAt || null,
+                completedBy: prep.completedBy || null,
+              }))
+            } : undefined
+          },
+          include: {
+            preparations: {
+              orderBy: { order: 'asc' }
+            }
+          }
+        });
+        createdItems.push(createdItem);
+      }
 
       return createdItems;
     });
