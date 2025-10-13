@@ -1,5 +1,3 @@
-"use server"
-
 import { getServerSession } from "next-auth";
 import { notFound } from "next/navigation";
 import { AsyncIdParam } from "@/types/Params";

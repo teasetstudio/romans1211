@@ -319,6 +319,7 @@ model Game {
   organization   Organization @relation(fields: [organizationId], references: [id])
   tags           Wtag[]
   eventPlanItems EventPlanItem[]
+  preparations   GamePreparation[]
 
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
@@ -326,6 +327,23 @@ model Game {
   @@index([organizationId])
   @@index([isPublic])
   @@index([title])
+}
+
+model GamePreparation {
+  id         String   @id @default(cuid())
+  title      String   @db.VarChar(1000)
+  isOptional Boolean  @default(false)
+  order      Int      // Order for sorting preparations
+  
+  // Relation to Game
+  gameId     String
+  game       Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([gameId])
+  @@index([order])
 }
 
 model Wtag {

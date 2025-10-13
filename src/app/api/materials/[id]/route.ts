@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { materialApiService } from '@/lib/MaterialServiceForAPI';
 import { apiTagService } from '@/lib/TagServiceForAPI';
 import { AsyncIdParam } from '@/types/Params';
+import { GamePreparation } from '@prisma/client';
 
 // GET /api/materials/[id]
 export async function GET(
@@ -27,12 +28,13 @@ export async function GET(
     {
       tags: true,
       translations: true,
+      preparations: true,
       original: {
         include: {
           translations: true,
         },
       },
-    });
+    } as any);
 
     if (!material) {
       return NextResponse.json({ error: 'Material not found or unauthorized' }, { status: 404 });
@@ -56,7 +58,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { title, content, isPublic, language = 'en', tags = [] } = await req.json();
+    const { title, content, isPublic, language = 'en', tags = [], preparations = [] } = await req.json();
     const { id } = await params;
 
     // Verify material belongs to user's organization
@@ -65,9 +67,7 @@ export async function PUT(
       userId: session.user.id,
       orgPermissions: 'edit',
     },
-    {
-      tags: true,
-    });
+    { tags: true });
 
     if (!material) {
       return NextResponse.json({ error: 'Material not found or unauthorized' }, { status: 404 });
@@ -102,6 +102,16 @@ export async function PUT(
         disconnect: material.tags?.map(tag => ({ id: tag.id })),
         connect: tagObjects.map(tag => ({ id: tag.id })),
       },
+      ...(material.type === 'game' && {
+        preparations: {
+          deleteMany: {},
+          create: preparations.map((prep: GamePreparation, index: number) => ({
+            title: prep.title,
+            isOptional: prep.isOptional || false,
+            order: prep.order || index + 1,
+          })),
+        },
+      }),
     };
 
     const updatedMaterial = await materialApiService.update(material.type, id, updateData);

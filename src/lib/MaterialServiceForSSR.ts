@@ -65,7 +65,12 @@ class MaterialServiceForSSR {
               where: { userId }
             }
           }
-        }
+        },
+        ...(type === 'game' && {
+          preparations: {
+            orderBy: { order: 'asc' },
+          },
+        }),
       }
     });
   }
@@ -76,6 +81,11 @@ class MaterialServiceForSSR {
       include: {
         tags: true,
         organization: true,
+        ...(type === 'game' && {
+          preparations: {
+            orderBy: { order: 'asc' },
+          },
+        }),
         original: {
           where: { isPublic: true },
           include: { translations: { where: { isPublic: true }} }
@@ -169,7 +179,7 @@ class MaterialServiceForSSR {
     const isSong = !validatedType || (Array.isArray(validatedType) ? validatedType.includes('song') : validatedType === 'song');
     const isGame = !validatedType || (Array.isArray(validatedType) ? validatedType.includes('game') : validatedType === 'game');
 
-    const SELECT = Prisma.sql`
+    const SELECT = (type: 'Text' | 'Song' | 'Game') => Prisma.sql`
       SELECT m.id,
       m.title,
       m.content,
@@ -178,6 +188,7 @@ class MaterialServiceForSSR {
       m."organizationId",
       m."isPublic",
       row_to_json(o) AS organization,
+      ${type === 'Game' ? Prisma.sql`COALESCE(json_agg(row_to_json(gameprep)) FILTER (WHERE gameprep.id IS NOT NULL), '[]') AS preparations` : Prisma.sql`'[]'::json AS preparations`},
       COALESCE(json_agg(row_to_json(t)) FILTER (WHERE t.id IS NOT NULL), '[]') AS tags`;
 
     const WHERE = (type: 'Text' | 'Song' | 'Game') => {
@@ -231,9 +242,10 @@ class MaterialServiceForSSR {
     };
 
     const QUERY = (type: 'Text' | 'Song' | 'Game') => Prisma.sql`
-      ${SELECT}, '${Prisma.raw(type.toLowerCase())}' AS type 
+      ${SELECT(type)}, '${Prisma.raw(type.toLowerCase())}' AS type 
       FROM "${Prisma.raw(type)}" m
       LEFT JOIN "Organization" o ON m."organizationId" = o.id
+      ${type === 'Game' ? Prisma.sql`LEFT JOIN "GamePreparation" gameprep ON m.id = gameprep."gameId"` : Prisma.empty}
       LEFT JOIN "_${Prisma.raw(type)}ToWtag" midt ON m.id = midt."A"
       LEFT JOIN "Wtag" t ON midt."B" = t.id
       ${WHERE(type)}

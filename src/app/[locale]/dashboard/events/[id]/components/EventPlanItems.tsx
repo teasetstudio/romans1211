@@ -106,6 +106,7 @@ const EventPlanItems = ({ event, session }: IProps) => {
         }
 
         const data = await response.json();
+        console.log('data', data.materials[0].preparations)
 
         // Update pagination state
         setTotalCount(data.totalCount || 0);
@@ -257,14 +258,25 @@ const EventPlanItems = ({ event, session }: IProps) => {
       const sourceMaterials = Array.from(columns.materials);
       const planItems = Array.from(columns.planItems);
       const movedMaterial = sourceMaterials[source.index];
-      
+      const tempItemId = `${Date.now()}-${destination.index}`;
       // Add the item to the destination
       planItems.splice(destination.index, 0, {
         materialId: movedMaterial.id,
         material: movedMaterial,
         title: movedMaterial.title,
         type: movedMaterial.type,
-        id: `${Date.now()}-${destination.index}`,
+        preparations: movedMaterial.preparations ? movedMaterial.preparations.map(p => ({
+          id: p.id,
+          order: p.order,
+          title: p.title,
+          isCompleted: false,
+          completedAt: null,
+          completedBy: null,
+          eventPlanItemId: tempItemId,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })) : [],
+        id: tempItemId,
       });
       
       // Mark the item as used

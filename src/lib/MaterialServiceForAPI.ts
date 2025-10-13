@@ -76,7 +76,12 @@ class MaterialServiceForAPI {
     const [text, song, game] = await Promise.all([
       prisma.text.findFirst({ where, include }),
       prisma.song.findFirst({ where, include }),
-      prisma.game.findFirst({ where, include }),
+      prisma.game.findFirst({ where, include: {
+        ...include,
+        preparations: {
+          orderBy: { order: 'asc' },
+        },
+      } }),
     ]);
 
     const type = text ? 'text' : song ? 'song' : game ? 'game' : null;
@@ -95,7 +100,14 @@ class MaterialServiceForAPI {
     const updatedMaterial = await this.getModel(type).update({
       where: { id },
       data,
-      include: { tags: true },
+      include: {
+        tags: true,
+        ...(type === 'game' && {
+          preparations: {
+            orderBy: { order: 'asc' },
+          },
+        }),
+      },
     });
 
     return {

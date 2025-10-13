@@ -50,7 +50,6 @@ export async function GET(req: NextRequest) {
       includePublicLibrary,
     });
 
-
     // Mark materials as from public library if they don't belong to the organization
     const materialsWithLibraryFlag = result.materials.map(material => ({
       ...material,
@@ -98,7 +97,8 @@ export async function POST(req: NextRequest) {
       type, 
       language = 'en', 
       tags = [],
-      originalId = null // ID of the original material this is a translation of
+      originalId = null, // ID of the original material this is a translation of
+      preparations = [], // Only used for game materials
     } = body;
 
     if (!title || !content || !organizationId || !type) {
@@ -169,8 +169,18 @@ export async function POST(req: NextRequest) {
       })
     );
 
+    // Validate unique order values for game preparations
+    if (preparations.length > 0) {
+      const orderValues = preparations.map((prep: any) => prep.order);
+      const uniqueOrders = new Set(orderValues);
+      
+      if (orderValues.length !== uniqueOrders.size) {
+        return NextResponse.json({ error: 'Preparation order values must be unique' }, { status: 400 });
+      }
+    }
+
     // Create the material with translation relationship if applicable
-    let material;
+    let material: any;
     if (type === 'text' || type === 'song' || type === 'game') {
       // @ts-ignore
       material = await prisma[type].create({
@@ -184,12 +194,26 @@ export async function POST(req: NextRequest) {
           tags: {
             connect: tagObjects.map((tag) => ({ id: tag.id })),
           },
+          ...(type === 'game' && preparations.length > 0 && {
+            preparations: {
+              create: preparations.map((prep: any) => ({
+                title: prep.title,
+                isOptional: prep.isOptional || false,
+                order: prep.order,
+              })),
+            },
+          }),
         },
         include: {
           organization: true,
           tags: true,
           translations: true,
           original: !!originalId,
+          ...(type === 'game' && {
+            preparations: {
+              orderBy: { order: 'asc' },
+            },
+          }),
         },
       });
     } else {

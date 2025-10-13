@@ -45,6 +45,24 @@ export default async function MaterialPage({ params }: IdAndTypeParams) {
           />
         </div>
 
+        {material.preparations && material.preparations.length > 0 && (
+          <div className="mb-6 bg-slate-100 border border-slate-200 rounded-lg shadow p-4">
+            <h3 className="text-base font-semibold text-gray-800 mb-3">Preparations</h3>
+            <ol className="list-decimal pl-6 space-y-2 marker:text-slate-400">
+              {material.preparations.map((prep) => (
+                <li key={prep.id} className="text-gray-800 leading-relaxed">
+                  <span className="font-medium">{prep.title}</span>
+                  {prep.isOptional && (
+                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200">
+                      Optional
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+
         {/* Footer Section */}
         <div className="flex justify-between text-sm text-gray-500">
           <div className="text-sm text-gray-500">

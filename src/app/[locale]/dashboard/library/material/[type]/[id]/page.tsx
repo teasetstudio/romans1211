@@ -66,6 +66,20 @@ export default async function MaterialPage({ params }: IdAndTypeParams) {
               <div className="tiptap-wrapper whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: material.content }} />
             </div>
 
+            {material.preparations && material.preparations.length > 0 && (
+              <div className="mt-8">
+                <h3 className="text-sm font-medium text-gray-300 mb-2">Preparations:</h3>
+                <ol className="list-decimal pl-6 space-y-1">
+                  {material.preparations.map((prep) => (
+                    <li key={prep.id} className="text-gray-800">
+                      {prep.title}
+                      {prep.isOptional && <span className="text-gray-500"> (Optional)</span>}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
+
             <MaterialDashboardFooter
               organizationName={material.organization.name}
               createdAt={material.createdAt}

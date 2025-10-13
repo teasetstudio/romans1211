@@ -1,4 +1,4 @@
-import { Text, Song, Game, Wtag, Organization } from '@prisma/client';
+import { Text, Song, Game, Wtag, Organization, GamePreparation } from '@prisma/client';
 
 export type TMaterialType = 'text' | 'song' | 'game';
 
@@ -12,11 +12,12 @@ export type TMaterialsIncludedTags = { tags?: Array<Wtag> };
 export type TMaterialsIncluded = {
   organization: Organization;
   tags: Array<Wtag>;
+  preparations?: Array<GamePreparation>;
   original: TMaterial & { translations: Array<TMaterial> } | null;
   translations: Array<TMaterial>;
 };
 
-export type TMaterialWithType = TMaterial & TMaterialObjectType;
+export type TMaterialWithType = TMaterial & TMaterialObjectType & { preparations?: Array<GamePreparation> };
 
 export type TMaterialWithIncluded = TMaterial & TMaterialsIncluded;
 export type TCatalogMaterial = TMaterialWithType & TMaterialsIncluded;

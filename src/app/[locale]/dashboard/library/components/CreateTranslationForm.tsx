@@ -7,9 +7,10 @@ import { TMaterial, TMaterialsIncludedTags, TMaterialType } from '@/types/Materi
 import { getDashboardMaterialUrl } from '@/utils/urls';
 import { NAMESPACE_DASHBOARD } from '@/res/namespaces';
 import { useTranslations } from 'next-intl';
+import { GamePreparation } from '@prisma/client';
 
 interface CreateTranslationFormProps {
-  material: TMaterial & Required<TMaterialsIncludedTags>;
+  material: TMaterial & Required<TMaterialsIncludedTags> & { preparations?: Array<GamePreparation> };
   type: TMaterialType;
 }
 
@@ -58,7 +59,8 @@ export default function CreateTranslationForm({ material, type }: CreateTranslat
           isPublic: material.isPublic,
           tags: material.tags.map(tag => tag.name),
           organizationId: material.organizationId,
-          type
+          type,
+          preparations: material.preparations,
         }}
         onSubmit={onAddTranslation}
         editType={type}

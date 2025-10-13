@@ -4,10 +4,11 @@ import { useRouter } from '@/i18n/routing';
 import MaterialForm from '@/components/forms/MaterialForm';
 import { getDashboardMaterialUrl } from '@/utils/urls';
 import { TMaterial_Tags_Org, TMaterialType } from '@/types/Materials';
+import { GamePreparation } from '@prisma/client';
 
 type Material = TMaterial_Tags_Org & { type: TMaterialType };
 interface IProps {
-  material: Material;
+  material: Material & { preparations?: Array<GamePreparation> };
 }
 
 export default function EditForm({ material }: IProps) {
@@ -50,6 +51,7 @@ export default function EditForm({ material }: IProps) {
           type: material.type,
           tags: material.tags.map(tag => tag.name),
           organizationId: material.organization.id,
+          preparations: material.preparations,
         }}
         editType={material.type}
         onSubmit={handleSubmit}

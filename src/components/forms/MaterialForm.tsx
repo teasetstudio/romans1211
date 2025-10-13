@@ -8,7 +8,7 @@ import { IconCheck, IconChevronDown, IconX, IconLanguage, IconWorld, IconTag } f
 import TabGroup from '../tabs/TabGroup';
 import TextMaterialForm from './TextMaterialForm';
 import SongMaterialForm from './SongMaterialForm';
-import GameMaterialForm from './GameMaterialForm';
+import GameMaterialForm, { GamePreparation } from './GameMaterialForm';
 import MaterialTypeBadge from '../badges/MaterialTypeBadge';
 import { NAMESPACE_DASHBOARD } from '@/res/namespaces';
 import { useTranslations } from 'next-intl';
@@ -34,6 +34,7 @@ export interface ISubmitData {
   tags: string[];
   organizationId: string;
   type: 'text' | 'song' | 'game';
+  preparations?: GamePreparation[];
 }
 
 interface MaterialFormProps {
@@ -46,6 +47,7 @@ interface MaterialFormProps {
     tags?: string[];
     organizationId: string;
     type?: 'text' | 'song' | 'game';
+    preparations?: GamePreparation[];
   };
   onSubmit: (data: ISubmitData) => Promise<void>;
   cancelHref?: string;
@@ -63,6 +65,7 @@ export default function MaterialForm({
     tags: [],
     organizationId: '',
     type: 'text' as const,
+    preparations: [],
   },
   onSubmit,
   editType,
@@ -87,6 +90,7 @@ export default function MaterialForm({
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<'text' | 'song' | 'game'>(initialData.type || 'text');
+  const [preparations, setPreparations] = useState<GamePreparation[]>(initialData.preparations || []);
 
   // Debounced fetch for tag suggestions
   useEffect(() => {
@@ -181,6 +185,7 @@ export default function MaterialForm({
         tags,
         organizationId: initialData.organizationId,
         type: activeTab,
+        ...(activeTab === 'game' && { preparations }),
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -235,8 +240,10 @@ export default function MaterialForm({
             <GameMaterialForm
               title={title}
               content={content}
+              preparations={preparations}
               onTitleChange={setTitle}
               onContentChange={setContent}
+              onPreparationsChange={setPreparations}
             />
           )}
         </>
@@ -264,8 +271,10 @@ export default function MaterialForm({
             <GameMaterialForm
               title={title}
               content={content}
+              preparations={preparations}
               onTitleChange={setTitle}
               onContentChange={setContent}
+              onPreparationsChange={setPreparations}
             />
           )}
         </TabGroup>
