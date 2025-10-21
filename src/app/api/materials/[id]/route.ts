@@ -28,7 +28,6 @@ export async function GET(
     {
       tags: true,
       translations: true,
-      preparations: true,
       original: {
         include: {
           translations: true,
