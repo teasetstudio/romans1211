@@ -31,7 +31,7 @@ const AuthPopup = ({ isOpen, onClose }: IProps) => {
       //   !isMobile.current && 'body_padding'
       // }`}
       // overlayClassName="fixed top-0 left-0 w-full h-screen bg-black bg-opacity-50 flex items-center"
-      className="relative z-50"
+      className="relative z-[110]"
       // className="mx-auto bg-white w-full max-w-[530px] rounded-2xl sm:rounded-[36px] p-8 sm:p-14 border border-gray3"
       onClose={onClose}
       // onRequestClose={onClose}

@@ -106,7 +106,6 @@ const EventPlanItems = ({ event, session }: IProps) => {
         }
 
         const data = await response.json();
-        console.log('data', data.materials[0].preparations)
 
         // Update pagination state
         setTotalCount(data.totalCount || 0);

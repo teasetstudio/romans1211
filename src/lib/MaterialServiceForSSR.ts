@@ -188,8 +188,8 @@ class MaterialServiceForSSR {
       m."organizationId",
       m."isPublic",
       row_to_json(o) AS organization,
-      ${type === 'Game' ? Prisma.sql`COALESCE(json_agg(row_to_json(gameprep)) FILTER (WHERE gameprep.id IS NOT NULL), '[]') AS preparations` : Prisma.sql`'[]'::json AS preparations`},
-      COALESCE(json_agg(row_to_json(t)) FILTER (WHERE t.id IS NOT NULL), '[]') AS tags`;
+      ${type === 'Game' ? Prisma.sql`COALESCE(json_agg(DISTINCT to_jsonb(gameprep)) FILTER (WHERE gameprep.id IS NOT NULL), '[]') AS preparations` : Prisma.sql`'[]'::json AS preparations`},
+      COALESCE(json_agg(DISTINCT to_jsonb(t)) FILTER (WHERE t.id IS NOT NULL), '[]') AS tags`;
 
     const WHERE = (type: 'Text' | 'Song' | 'Game') => {
       const conditions = [];

@@ -89,10 +89,14 @@ const ItemModal = ({
 
   // Preparation management functions
   const addPreparation = () => {
+    const highestOrder = preparations.reduce(
+      (max, item) => Math.max(max, item.order),
+      1
+    );
     const newPrep: IPreparationForm = {
       id: `temp-${Date.now()}`, // Temporary ID for new items
       title: "",
-      order: preparations.length,
+      order: highestOrder + 1,
       isCompleted: false,
     };
     setPreparations(prev => [...prev, newPrep]);

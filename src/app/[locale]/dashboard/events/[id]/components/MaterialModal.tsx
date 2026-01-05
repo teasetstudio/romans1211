@@ -22,6 +22,12 @@ interface MaterialWithTags {
   tags: { id: string; name: string }[];
   translations?: MaterialWithTags[];
   original?: MaterialWithTags & { translations?: MaterialWithTags[] };
+  preparations?: Array<{
+    id: string;
+    title: string;
+    isOptional: boolean;
+    order: number;
+  }>;
 }
 
 interface MaterialModalProps {
@@ -148,6 +154,7 @@ const MaterialModal = ({ isOpen, onClose, materialId, materialType, eventSlug }:
   };
 
   const styles = getTypeStyles(material?.type || materialType);
+  console.log('material', material)
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-[10001]">
@@ -264,11 +271,35 @@ const MaterialModal = ({ isOpen, onClose, materialId, materialType, eventSlug }:
               </div>
 
               {/* Content */}
-              <div className="px-6 py-4 overflow-y-auto max-h-[calc(90vh-300px)]">
+              <div className="px-6 py-4 overflow-y-auto max-h-[calc(90vh-300px)] space-y-6">
                 <div
                   className="tiptap-wrapper whitespace-pre-wrap"
                   dangerouslySetInnerHTML={{ __html: material.content }}
                 />
+
+                {/* Preparations Section - Only show for game materials */}
+                {material.preparations && material.preparations.length > 0 && (
+                  <div className="mt-6">
+                    <h3 className="text-base font-semibold text-gray-900 mb-2">
+                      Preparations:
+                    </h3>
+
+                    <ol className="list-decimal list-inside space-y-1 text-sm text-gray-800">
+                      {material.preparations
+                        .sort((a, b) => a.order - b.order)
+                        .map((prep) => (
+                          <li key={prep.id}>
+                            {prep.title}
+                            {prep.isOptional && (
+                              <span className="ml-2 text-gray-500 italic">
+                                (optional)
+                              </span>
+                            )}
+                          </li>
+                        ))}
+                    </ol>
+                  </div>
+                )}
               </div>
 
               {/* Footer */}

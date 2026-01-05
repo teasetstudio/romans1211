@@ -12,7 +12,7 @@ function Header() {
   const t = useTranslations(NAMESPACE_COMMON)
   return (
     <>
-      <div className="bg-dark sticky z-[10000] top-0 left-0 shadow-lg">
+      <div className="bg-dark sticky z-[100] top-0 left-0 shadow-lg">
         <div className="container">
           <div className="flex justify-between py-2.5 items-center relative">
             <div className="flex items-center gap-8">

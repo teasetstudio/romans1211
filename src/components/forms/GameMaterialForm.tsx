@@ -35,12 +35,15 @@ export default function GameMaterialForm({
 
   const handleAddPreparation = () => {
     if (!newPrepTitle.trim() || !onPreparationsChange) return;
-    
+    const highestOrder = preparations.reduce(
+      (max, item) => Math.max(max, item.order),
+      1
+    );
     const newPrep: GamePreparation = {
       id: `prep-${Date.now()}`,
       title: newPrepTitle.trim(),
       isOptional: false,
-      order: preparations.length + 1,
+      order: highestOrder + 1,
     };
     
     onPreparationsChange([...preparations, newPrep]);
