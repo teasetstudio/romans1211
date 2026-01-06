@@ -6,7 +6,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Course } from "@prisma/client";
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
-import { IconCaretUp, IconCaretDown } from "@tabler/icons-react";
+import { IconCaretUpFilled, IconCaretDownFilled } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import Input from "@/components/inputs/Input";
 import Button from "@/components/buttons/Button";
@@ -323,7 +323,7 @@ export function CourseDialog({
                                         disabled={changingPlanItemOrder || idx === 0}
                                         className="text-sm text-gray-700 hover:text-gray-900 disabled:opacity-40"
                                       >
-                                        <IconCaretUp />
+                                        <IconCaretUpFilled />
                                       </button>
                                       <button
                                         type="button"
@@ -331,7 +331,7 @@ export function CourseDialog({
                                         disabled={changingPlanItemOrder || idx === arr.length - 1}
                                         className="text-sm text-gray-700 hover:text-gray-900 disabled:opacity-40"
                                       >
-                                        <IconCaretDown />
+                                        <IconCaretDownFilled />
                                       </button>
                                     </>
                                   )}
