@@ -6,6 +6,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Course } from "@prisma/client";
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
+import { IconCaretUp, IconCaretDown } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import Input from "@/components/inputs/Input";
 import Button from "@/components/buttons/Button";
@@ -43,6 +44,8 @@ export function CourseDialog({
   const t = useTranslations(`${NAMESPACE_DASHBOARD_COURSES}.courseDialog`);
   const [planItems, setPlanItems] = useState<any[]>([]);
   const [loadingDefaultPlanItems, setLoadingDefaultPlanItems] = useState(false);
+  const [changingPlanItemOrder, setChangingPlanItemOrder] = useState(false);
+  const [changingPlanItemOrderId, setChangingPlanItemOrderId] = useState<string | null>(null);
   const [isPlanItemModalOpen, setIsPlanItemModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any | null>(null);
 
@@ -99,6 +102,39 @@ export function CourseDialog({
   const handleEditPlanItem = (item: any) => {
     setEditingItem(item);
     setIsPlanItemModalOpen(true);
+  };
+
+  const handleMovePlanItem = async (itemId: string, direction: 'up' | 'down') => {
+    if (!course) return;
+    try {
+      setChangingPlanItemOrder(true);
+      setChangingPlanItemOrderId(itemId);
+      const response = await fetch(
+        `/api/courses/${course.id}/default-event-plan-items/change-order`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ itemId, direction }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to change order');
+      }
+
+      const result = await response.json();
+      const items = Array.isArray(result) ? result : result.items;
+      if (Array.isArray(items)) {
+        setPlanItems(items);
+      }
+    } catch (error) {
+      console.error('Error changing plan item order:', error);
+    } finally {
+      setChangingPlanItemOrder(false);
+      setChangingPlanItemOrderId(null);
+    }
   };
 
   const handleSavePlanItem = async (item: any) => {
@@ -263,7 +299,10 @@ export function CourseDialog({
                 <>
                   {planItems.length > 0 ? (
                     <div className="space-y-2">
-                      {planItems.map((item) => (
+                      {planItems
+                        .slice()
+                        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+                        .map((item, idx, arr) => (
                         <div 
                           key={item.id} 
                           className="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100"
@@ -271,13 +310,42 @@ export function CourseDialog({
                           <div>
                             <p className="font-medium">{item.title}</p>
                           </div>
-                          <button
-                            type="button"
-                            onClick={() => handleEditPlanItem(item)}
-                            className="text-sm text-primary hover:text-primary/80"
-                          >
-                            Edit
-                          </button>
+                            <div className="flex items-center gap-2">
+                              {planItems.length > 1 &&
+                                <div>
+                                  {changingPlanItemOrder && changingPlanItemOrderId === item.id ? (
+                                    <span className="text-sm text-gray-500">Moving...</span>
+                                  ) : (
+                                    <>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleMovePlanItem(item.id, 'up')}
+                                        disabled={changingPlanItemOrder || idx === 0}
+                                        className="text-sm text-gray-700 hover:text-gray-900 disabled:opacity-40"
+                                      >
+                                        <IconCaretUp />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleMovePlanItem(item.id, 'down')}
+                                        disabled={changingPlanItemOrder || idx === arr.length - 1}
+                                        className="text-sm text-gray-700 hover:text-gray-900 disabled:opacity-40"
+                                      >
+                                        <IconCaretDown />
+                                      </button>
+                                    </>
+                                  )}
+                                </div>
+                              }
+                              <button
+                                type="button"
+                                onClick={() => handleEditPlanItem(item)}
+                                disabled={changingPlanItemOrder}
+                                className="text-sm text-primary hover:text-primary/80 disabled:opacity-40"
+                              >
+                                Edit
+                              </button>
+                            </div>
                         </div>
                       ))}
                     </div>
