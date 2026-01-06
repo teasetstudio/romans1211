@@ -22,3 +22,18 @@ export interface IPlanItem {
   isReserve?: boolean
   preparations?: IPreparation[]
 }
+
+export interface IDefaultPreparation {
+  id: string
+  title: string
+  order: number
+  eventPlanItemId?: string
+}
+
+export interface IDefaultPlanItem {
+  id: string
+  title: string
+
+  description?: string | null
+  preparations?: IDefaultPreparation[]
+}

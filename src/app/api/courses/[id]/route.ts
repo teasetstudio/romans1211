@@ -47,8 +47,8 @@ export async function GET(
 const updateCoursesSchema = z.object({
   title: z.string().min(1),
   description: z.string().optional(),
-  startDate: z.string().transform((str) => new Date(str)),
-  endDate: z.string().nullable().transform((str) => str ? new Date(str) : null),
+  startDate: z.string().optional().nullable().transform((str) => str ? new Date(str) : null),
+  endDate: z.string().optional().nullable().transform((str) => str ? new Date(str) : null),
   location: z.string().optional(),
 });
 

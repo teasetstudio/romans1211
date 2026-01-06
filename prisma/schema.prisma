@@ -130,6 +130,7 @@ model Course {
   events            Event[]           // All events in this course
   location          String?
   members           CourseMember[]
+  defaultEventPlanItems    DefaultEventPlanItem[]
 
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
@@ -137,6 +138,51 @@ model Course {
   @@index([organizationId])
   @@index([startDate])
   @@index([endDate])
+}
+
+model DefaultEventPlanItem {
+  id          String            @id @default(cuid())
+  type        EventPlanItemType
+  title       String?           // Optional title for comments
+  description String?           @db.Text // Optional description/notes
+  order       Int               // Order field for sorting items
+  isReserve   Boolean           @default(false) // Mark item as reserve
+
+  // Timings
+  duration    Int?              // Duration in minutes (optional)
+  startHour   Int?              // Hour of the day (0-23)
+  startMinute Int?              // Minute (0-59)
+  endHour     Int?              // Hour of the day (0-23)
+  endMinute   Int?              // Minute (0-59)
+  
+  // Course relation
+  courseId     String
+  course       Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  
+  // Preparation items
+  preparations DefaultPreparationItem[]
+  
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([courseId])
+  @@index([order])
+}
+
+model DefaultPreparationItem {
+  id                String         @id @default(cuid())
+  title             String         // Description of what needs to be prepared
+  order             Int            // Order for sorting preparations
+
+  // Relation to EventPlanItem
+  eventPlanItemId   String
+  eventPlanItem     DefaultEventPlanItem  @relation(fields: [eventPlanItemId], references: [id], onDelete: Cascade)
+  
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  @@index([eventPlanItemId])
+  @@index([order])
 }
 
 model Event {

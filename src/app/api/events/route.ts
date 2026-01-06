@@ -14,24 +14,24 @@ const createEventSchema = z.object({
   location: z.string().optional(),
   organizationId: z.string(),
   courseId: z.string().optional(),
-  eventPlanItems: z
-    .array(
-      z.object({
-        type: z.enum(["SONG", "TEXT", "GAME", "COMMENT"]),
-        title: z.string().optional(),
-        description: z.string().optional(),
-        order: z.number().int(),
-        duration: z.number().int().optional(),
-        startHour: z.number().int().min(0).max(23).optional(),
-        startMinute: z.number().int().min(0).max(59).optional(),
-        endHour: z.number().int().min(0).max(23).optional(),
-        endMinute: z.number().int().min(0).max(59).optional(),
-        songId: z.string().optional(),
-        textId: z.string().optional(),
-        gameId: z.string().optional(),
-      })
-    )
-    .optional(),
+  // eventPlanItems: z
+  //   .array(
+  //     z.object({
+  //       type: z.enum(["SONG", "TEXT", "GAME", "COMMENT"]),
+  //       title: z.string().optional(),
+  //       description: z.string().optional(),
+  //       order: z.number().int(),
+  //       duration: z.number().int().optional(),
+  //       startHour: z.number().int().min(0).max(23).optional(),
+  //       startMinute: z.number().int().min(0).max(59).optional(),
+  //       endHour: z.number().int().min(0).max(23).optional(),
+  //       endMinute: z.number().int().min(0).max(59).optional(),
+  //       songId: z.string().optional(),
+  //       textId: z.string().optional(),
+  //       gameId: z.string().optional(),
+  //     })
+  //   )
+  //   .optional(),
 });
 
 // GET /api/events
@@ -193,6 +193,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Get all default event plan items for the course
+    const defaultEventPlanItems = await prisma.defaultEventPlanItem.findMany({
+      where: { courseId: validatedData.courseId },
+      include: {
+        preparations: {
+          orderBy: { order: "asc" }
+        }
+      },
+      orderBy: { order: "asc" }
+    });
+
     // Create event with plan items if provided
     const event = await prisma.event.create({
       data: {
@@ -209,11 +220,22 @@ export async function POST(request: NextRequest) {
         //     role: "ADMIN",
         //   },
         // },
-        eventPlanItems: validatedData.eventPlanItems
-          ? {
-              create: validatedData.eventPlanItems,
-            }
-          : undefined,
+        eventPlanItems: {
+          create: [
+            ...(defaultEventPlanItems || []).map(item => ({
+              type: item.type,
+              title: item.title,
+              description: item.description,
+              order: item.order,
+              preparations: item.preparations?.length > 0 ? {
+                create: item.preparations.map(prep => ({
+                  title: prep.title,
+                  order: prep.order,
+                }))
+              } : undefined
+            })),
+          ]
+        }
       },
       include: {
         course: true,
