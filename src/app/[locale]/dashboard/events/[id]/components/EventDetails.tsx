@@ -61,6 +61,7 @@ export default function EventDetails({ event: initialEvent, session }: EventDeta
 
       toast.success(t("deleted"));
       router.push(`/dashboard/courses/${event.courseId}`);
+      // router.refresh();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "An error occurred");
       setIsDeleting(false);

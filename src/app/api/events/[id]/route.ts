@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
@@ -315,6 +316,7 @@ export async function DELETE(
     }
 
     await prisma.event.delete({ where: { id } });
+    revalidatePath(`/dashboard/courses/${event.courseId}`);
 
     return NextResponse.json({ success: true });
   } catch (error) {
