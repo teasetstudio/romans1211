@@ -148,7 +148,7 @@ export function CourseDialog({
       const method = isEditing ? 'PUT' : 'POST';
       if (!isEditing) {
         item.type = "CUSTOM";
-        const highestOrder = item.preparations.reduce(
+        const highestOrder = planItems.reduce(
           (max: number, prep: { order: number }) => Math.max(max, prep.order),
           0
         );
