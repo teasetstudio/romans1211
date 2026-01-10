@@ -12,6 +12,8 @@ export const ROUTE_DASHBOARD_ORGANIZATIONS_NEW = '/dashboard/organizations/new'
 export const ROUTE_DASHBOARD_ORGANIZATIONS_SETTINGS = (id: string) => `${ROUTE_DASHBOARD_ORGANIZATIONS}/${id}/settings/profile`
 export const ROUTE_DASHBOARD_LIBRARY = '/dashboard/library'
 export const ROUTE_DASHBOARD_COURSES = '/dashboard/courses'
+export const ROUTE_DASHBOARD_COURSE = (id: string) => `${ROUTE_DASHBOARD_COURSES}/${id}`
+export const ROUTE_DASHBOARD_COURSES_INFO = (id: string) => `${ROUTE_DASHBOARD_COURSES}/${id}/info`
 export const ROUTE_DASHBOARD_EVENTS = '/dashboard/events'
 export const ROUTE_DASHBOARD_EVENT = (id: string) => `${ROUTE_DASHBOARD_EVENTS}/${id}`
 export const ROUTE_DASHBOARD_MATERIAL = '/dashboard/library/material'

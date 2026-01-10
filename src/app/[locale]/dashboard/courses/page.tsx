@@ -10,7 +10,6 @@ import { IconPlus } from "@tabler/icons-react";
 import H1 from "@/components/typo/H1";
 import { Text } from "@/components/typo/Text";
 import { useOrganization } from "@/components/contexts/OrganizationContext";
-import { getDashboardCourseUrl } from "@/utils/urls";
 import { NAMESPACE_DASHBOARD_COURSES } from "@/res/namespaces";
 
 import { CourseList } from "./components/course-list";
@@ -18,6 +17,7 @@ import SecondTimothy4_7 from "./components/SecondTimothy4_7";
 import { CreateCourseDialog } from "./components/create-course-dialog";
 import { userInOrganizationData } from "@/utils/permissions";
 import { useNavigateWithProgress } from '@/hooks/useNavigateWithProgress';
+import { ROUTE_DASHBOARD_COURSE } from "@/res/routes";
 
 export default function CoursesPage() {
   const t = useTranslations(NAMESPACE_DASHBOARD_COURSES);
@@ -112,7 +112,7 @@ export default function CoursesPage() {
           courses={courses}
           hasDeletePermission={hasDeletePermission}
           onDelete={handleDeleteCourse}
-          onEdit={(id) => navigateWithProgress(getDashboardCourseUrl(id))}
+          onEdit={(id) => navigateWithProgress(ROUTE_DASHBOARD_COURSE(id))}
         />
       )}
 

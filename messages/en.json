@@ -258,6 +258,7 @@
     "deleteConfirmation": "Are you sure you want to delete this course? This action cannot be undone.",
     "deleteConfirmationWithEvents": "This course has associated events. Are you sure you want to delete the course and all its events?",
     "cannotDeleteCourseWithEvents": "Cannot delete course with events. Please delete the events first.",
+    "info": "Info",
     "table": {
       "title": "Title",
       "startDate": "Start Date",

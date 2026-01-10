@@ -17,7 +17,7 @@ interface IButton {
   href?: string
   className?: string
   size?: 'lg' | 'md' | 'sm'
-  rounded?: 'rounded-xl' | 'rounded-lg'
+  rounded?: 'rounded-md' | 'rounded-xl' | 'rounded-lg'
   bgColor?: TBGColors
   paddingClass?: 'py-5' | string
   children?: ReactNode;

@@ -1,4 +1,4 @@
-import { ROUTE_DASHBOARD_COURSES, ROUTE_DASHBOARD_MATERIAL, ROUTE_MATERIAL } from '@/res/routes'
+import { ROUTE_DASHBOARD_MATERIAL, ROUTE_MATERIAL } from '@/res/routes'
 import { TMaterialType } from '@/types/Materials'
 
 type TGetMaterialUrlProps = { type: TMaterialType; id: string }
@@ -11,8 +11,6 @@ export const getDashboardEditMaterialUrl = ({ type, id }: TGetMaterialUrlProps) 
 type TTranslateMaterialUrlProps = { type: TMaterialType; originalId: string }
 export const getDashboardTranslateMaterialUrl = ({ type, originalId }: TTranslateMaterialUrlProps) =>
   `${ROUTE_DASHBOARD_MATERIAL}/${type}/${originalId}/translate`
-
-export const getDashboardCourseUrl = (id: string) => `${ROUTE_DASHBOARD_COURSES}/${id}`
 
 type TAppendParamsToUrlProps = { url: string; params: { [key: string]: string | null } }
 export const appendParamsToUrl = ({ url, params }: TAppendParamsToUrlProps) => {

@@ -4,18 +4,19 @@ import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { Event, Course } from "@prisma/client";
 import Button from "@/components/buttons/Button";
-import { IconPlus, IconEdit } from "@tabler/icons-react";
+import { IconPlus, IconInfoSquare } from "@tabler/icons-react";
 import { Text } from "@/components/typo/Text";
-import { ProgressLink as Link } from '@/components/buttons/ProgressLink';
 import { ROUTE_DASHBOARD_COURSES, ROUTE_DASHBOARD_EVENT } from "@/res/routes";
 import { EventList } from "./event-list";
 import { CourseDialog } from "./course-dialog";
+import CourseHeader from "./course-header";
 import { NAMESPACE_DASHBOARD_COURSES } from "@/res/namespaces";
 import EventFormDialog from "../../components/EventFormDialog";
 import { useOrganization } from "@/components/contexts/OrganizationContext";
 import { useSession } from "next-auth/react";
 import { userInOrganizationData } from "@/utils/permissions";
 import { useNavigateWithProgress } from '@/hooks/useNavigateWithProgress';
+import { ROUTE_DASHBOARD_COURSES_INFO } from "@/res/routes";
 
 interface CourseDetailsProps {
   course: Course & {
@@ -46,7 +47,7 @@ export function CourseDetails({ course }: CourseDetailsProps) {
     setIsCreateEventOpen(false);
   };
 
-  const { hasCreatePermission, hasEditPermission } = useMemo(() => 
+  const { hasCreatePermission } = useMemo(() => 
     userInOrganizationData(session?.user?.id ?? '', selectedOrganization), 
     [session?.user?.id, selectedOrganization]
   );
@@ -61,74 +62,36 @@ export function CourseDetails({ course }: CourseDetailsProps) {
 
   return (
     <div>
-      <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="py-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-3">
-                  <Link 
-                    href={ROUTE_DASHBOARD_COURSES}
-                    className="text-primary hover:text-primary/80"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clipRule="evenodd" />
-                    </svg>
-                  </Link>
-                  <h1 className="text-xl font-semibold text-gray-900 truncate">{course.title}</h1>
-                </div>
-                {course.description && (
-                  <p className="mt-1 text-sm text-gray-600 line-clamp-1">{course.description}</p>
-                )}
-                <div className="mt-1 flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-gray-500">
-                  {/* <div className="flex items-center gap-1">
-                    <IconCalendar className="w-4 h-4" />
-                    {new Date(course.startDate).toLocaleString()}
-                  </div> */}
-                  {/* {course.endDate &&
-                    <div className="flex items-center gap-1">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      {new Date(course.endDate).toLocaleString()}
-                    </div>
-                  } */}
-                  {/* {course.location && (
-                    <div className="flex items-center gap-1">
-                      <IconMapPin className="w-4 h-4" />
-                      {course.location}
-                    </div>
-                  )} */}
-                </div>
-              </div>
-              <div className="flex shrink-0 gap-2 self-start sm:self-center">
-                {hasCreatePermission && (
-                  <Button
-                    onClick={() => setIsCreateEventOpen(true)}
-                    paddingClass="px-3 py-2"
-                  className="inline-flex items-center text-gray-700 hover:text-primary rounded-md transition-colors gap-1.5 text-sm border border-transparent hover:border-primary"
-                >
-                  <IconPlus className="w-4 h-4" />
-                    {t("createEvent")}
-                  </Button>
-                )}
-                {hasEditPermission && (
-                  <Button
-                    onClick={() => setIsEditCourseOpen(true)}
-                    paddingClass="px-3 py-2"
-                    className="inline-flex items-center text-gray-700 hover:text-primary  rounded-md transition-colors gap-1.5 text-sm border border-transparent hover:border-primary"
-                >
-                  <IconEdit className="w-4 h-4" />
-                    <span>{t("edit")}</span>
-                  </Button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <CourseHeader course={course} backTo={ROUTE_DASHBOARD_COURSES} />
 
-      <div className="mt-8 max-w-7xl mx-auto px-2 sm:px-4 lg:px-6">
+      {/* Container */}
+      <div className="mt-2 max-w-7xl mx-auto px-2 sm:px-4 lg:px-6">
+        {/* Info / Additional Buttons */}
+        <div className="flex items-center justify-between mb-4">
+          <Button 
+            onClick={() => navigateWithProgress(ROUTE_DASHBOARD_COURSES_INFO(course.id))}
+            rounded="rounded-md"
+            paddingClass="px-2 py-1"
+            className="inline-flex items-center text-gray-400 hover:text-primary transition-colors gap-1.5 text-sm border border-transparent hover:border-primary"
+          >
+            <IconInfoSquare size={20} strokeWidth={2.5} />
+              {t("info")}
+          </Button>
+
+          {hasCreatePermission && (
+            <Button
+              onClick={() => setIsCreateEventOpen(true)}
+              rounded="rounded-md"
+              paddingClass="px-2 py-1"
+              className="inline-flex items-center text-gray-400 hover:text-primary transition-colors gap-1.5 text-sm border border-transparent hover:border-primary"
+            >
+              <IconPlus className="w-4 h-4" />
+                {t("createEvent")}
+            </Button>
+          )}
+        </div>
+
+        {/* Events */}
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold">{t("events")}</h2>
         </div>
@@ -139,10 +102,10 @@ export function CourseDetails({ course }: CourseDetailsProps) {
             {hasCreatePermission && (
               <Button 
                 onClick={() => setIsCreateEventOpen(true)}
-              className="px-8 py-3 text-base font-semibold flex items-center gap-2 bg-primary text-white shadow-md hover:shadow-lg transition-all duration-200"
-            >
-              <IconPlus size={20} strokeWidth={2.5} />
-                {t("createFirstEvent")}
+                className="px-8 py-3 text-base font-semibold flex items-center gap-2 bg-primary text-white shadow-md hover:shadow-lg transition-all duration-200"
+              >
+                <IconPlus size={20} strokeWidth={2.5} />
+                  {t("createFirstEvent")}
               </Button>
             )}
           </div>
