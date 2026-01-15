@@ -54,10 +54,10 @@ const TopBanner = ({ className = '' }: IProps) => {
             <div className="w-full md:w-5/12 lg:w-7/12 flex justify-center md:justify-end">
               <div className="max-w-md w-full bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm rounded-2xl p-8 shadow-[-13px_20px_18px_rgb(0,0,0,0.85)] border border-white/10">
                 <H3 color="text-white" className="text-center leading-relaxed">
-                  {t('top_banner.ephesians_4_12')}
+                  {t('top_banner.romans_12_11')}
                 </H3>
                 <div className="text-right mt-4">
-                  <H8 color="text-gray3" className="italic">{t('top_banner.ref_ephesians_4_12')}</H8>
+                  <H8 color="text-gray3" className="italic">{t('top_banner.ref_romans_12_11')}</H8>
                 </div>
               </div>
             </div>

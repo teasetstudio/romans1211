@@ -17,7 +17,7 @@ function Header() {
           <div className="flex justify-between py-2.5 items-center relative">
             <div className="flex items-center gap-8">
               <Link href="/" className="text-white text-2xl font-black tracking-wider hover:text-gray2 transition-colors">
-                <span className="hidden sm:inline">Ephesians </span>4:12
+                <span className="hidden sm:inline">Romans </span>12:11
               </Link>
 
               <Link href={ROUTE_LIBRARY} className="hidden md:block">
