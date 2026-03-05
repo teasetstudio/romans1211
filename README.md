@@ -1,3 +1,21 @@
+# Christian Material Library
+
+> *"Do not lag in zeal, be ardent in spirit, serve the Lord."* — Romans 12:11
+
+**Christian Material Library** ([romans1211.com](https://www.romans1211.com/)) is an online library for Christian ministry resources, with a primary focus on **youth, teens, and children's ministry**. It is designed to help churches, youth leaders, Sunday school teachers, and children's ministry workers discover, organize, and contribute materials for their work with the next generation.
+
+The library hosts three types of content:
+
+- **Songs** — Christian songs, hymns, and spiritual music curated for youth worship, teen groups, and children's services.
+- **Texts** — Sermons, Bible studies, and teaching materials tailored for Sunday school, teen groups, and children's ministry.
+- **Games** — Interactive and engaging games built specifically for youth events, teen gatherings, camps, and Sunday school activities.
+
+Users can browse the public catalog or log in to contribute their own materials, helping grow a shared resource base for those serving children and young people in Christian communities.
+
+Built with **Next.js**, **Prisma**, and **PostgreSQL**.
+
+---
+
 Node version v20.6.1 (npm v9.8.1)
 
 ## Getting Started
