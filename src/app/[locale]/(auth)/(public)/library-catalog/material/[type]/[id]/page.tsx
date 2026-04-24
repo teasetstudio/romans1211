@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: IdAndTypeParams): Promise<Met
   const description = material.tags.length > 0
     ? material.tags.map((tag) => tag.name).join(', ')
     : material.organization.name;
-  const url = `/${locale}/library-catalog/material/${type}/${id}`;
+  const url = `${locale === "en" ? "" : `/${locale}`}/library-catalog/material/${type}/${id}`;
 
   const ogImageMap: Record<string, string> = {
     text: 'https://www.romans1211.com/images/text.png',
@@ -29,6 +29,7 @@ export async function generateMetadata({ params }: IdAndTypeParams): Promise<Met
     game: 'https://www.romans1211.com/images/game.png',
   };
   const image = ogImageMap[type];
+  const fullUrl = `https://www.romans1211.com${url}`;
 
   return {
     title: material.title,
@@ -36,8 +37,20 @@ export async function generateMetadata({ params }: IdAndTypeParams): Promise<Met
     openGraph: {
       title: material.title,
       description,
-      url: `https://www.romans1211.com${url}`,
-      images: [{ url: image }],
+      url: fullUrl,
+      type: 'article',
+      siteName: 'Romans 12:11',
+      locale: locale,
+      images: [{ url: image, width: 1200, height: 630, alt: material.title }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: material.title,
+      description,
+      images: [image],
+    },
+    alternates: {
+      canonical: fullUrl,
     },
   };
 }
