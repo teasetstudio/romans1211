@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+import { cache } from 'react';
 import prisma from './prisma';
 import { TMaterialType, TMaterial, TMaterialWithIncluded, TCatalogMaterial, TMaterialWithType, TMaterialsIncluded } from '@/types/Materials';
 import { ORG_READ_PERMISSIONS } from './permissions';
@@ -76,6 +77,7 @@ class MaterialServiceForSSR {
   }
 
   async findPublicById(type: TMaterialType, id: string): Promise<TMaterialWithIncluded | null> {
+    
     return this.getModel(type).findUnique({
       where: { id, isPublic: true },
       include: {
@@ -308,3 +310,8 @@ class MaterialServiceForSSR {
 }
 
 export const materialService = new MaterialServiceForSSR();
+
+// Cache the public material fetch at request level to avoid duplicate queries
+export const getCachedPublicMaterial = cache((type: TMaterialType, id: string) =>
+  materialService.findPublicById(type, id)
+);

@@ -1,18 +1,53 @@
 import { notFound } from 'next/navigation';
 import { IdAndTypeParams } from '@/types/Params';
 import React from 'react';
-import { materialService } from '@/lib/MaterialServiceForSSR';
+import { getCachedPublicMaterial } from '@/lib/MaterialServiceForSSR';
 import { isValidMaterialType } from '@/utils';
 import MaterialTranslations from '../../../components/MaterialTranslations';
+import type { Metadata } from 'next';
+import { getLocale } from 'next-intl/server';
 
 import '@/styles/tiptap-components.css';
+
+export async function generateMetadata({ params }: IdAndTypeParams): Promise<Metadata> {
+  const { id, type } = await params;
+
+  if (!isValidMaterialType(type)) return {};
+
+  const material = await getCachedPublicMaterial(type, id);
+  if (!material) return {};
+
+  const locale = await getLocale();
+  const description = material.tags.length > 0
+    ? material.tags.map((tag) => tag.name).join(', ')
+    : material.organization.name;
+  const url = `/${locale}/library-catalog/material/${type}/${id}`;
+
+  const ogImageMap: Record<string, string> = {
+    text: '/images/text_placeholder.png',
+    song: '/images/music_placeholder.png',
+    game: '/images/game_placeholder.png',
+  };
+  const image = ogImageMap[type];
+
+  return {
+    title: material.title,
+    description,
+    openGraph: {
+      title: material.title,
+      description,
+      url,
+      images: [{ url: image }],
+    },
+  };
+}
 
 export default async function MaterialPage({ params }: IdAndTypeParams) {
   const { id, type } = await params;
 
   if (!isValidMaterialType(type)) notFound();
 
-  const material = await materialService.findPublicById(type, id);
+  const material = await getCachedPublicMaterial(type, id);
   if (!material) notFound();
 
   return (
