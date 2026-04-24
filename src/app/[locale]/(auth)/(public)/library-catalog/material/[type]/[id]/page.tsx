@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: IdAndTypeParams): Promise<Met
     openGraph: {
       title: material.title,
       description,
-      url,
+      // url,
       // images: [{ url: image }],
     },
   };
