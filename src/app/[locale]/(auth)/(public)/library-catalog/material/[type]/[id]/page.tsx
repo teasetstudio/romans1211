@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: IdAndTypeParams): Promise<Met
       title: material.title,
       description,
       url,
-      images: [{ url: image }],
+      // images: [{ url: image }],
     },
   };
 }
