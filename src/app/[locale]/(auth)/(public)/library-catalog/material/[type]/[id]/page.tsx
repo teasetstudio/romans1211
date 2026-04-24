@@ -24,9 +24,9 @@ export async function generateMetadata({ params }: IdAndTypeParams): Promise<Met
   const url = `/${locale}/library-catalog/material/${type}/${id}`;
 
   const ogImageMap: Record<string, string> = {
-    text: '/images/text_placeholder.png',
-    song: '/images/music_placeholder.png',
-    game: '/images/game_placeholder.png',
+    text: 'https://www.romans1211.com/images/text.png',
+    song: 'https://www.romans1211.com/images/music.png',
+    game: 'https://www.romans1211.com/images/game.png',
   };
   const image = ogImageMap[type];
 
@@ -36,8 +36,8 @@ export async function generateMetadata({ params }: IdAndTypeParams): Promise<Met
     openGraph: {
       title: material.title,
       description,
-      // url,
-      // images: [{ url: image }],
+      url: `https://www.romans1211.com${url}`,
+      images: [{ url: image }],
     },
   };
 }
