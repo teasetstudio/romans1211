@@ -125,6 +125,22 @@ Key relationships:
 
 ---
 
+## Agent Delegation
+
+Delegate to a subagent automatically — don't wait to be asked — in these situations:
+
+| Trigger | Agent to use |
+|---|---|
+| User asks to review changes, diff, or code before a commit/PR | `code-reviewer` |
+| Any Prisma schema change or migration is about to be applied | `db-guardian` |
+| User asks for a pre-PR sweep, release check, or i18n audit | `i18n-auditor` |
+
+Invoke the agent, surface its findings, then proceed (or block if the agent returns NO-GO).
+
+For large tasks that have independent subtasks (e.g. adding a feature across schema + API + UI + i18n), **split into parallel subagents** — one per layer — so work proceeds concurrently instead of sequentially.
+
+---
+
 ## Key Conventions
 
 ### i18n — All User-Facing Strings
