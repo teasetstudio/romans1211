@@ -6,6 +6,7 @@ import prisma from "@/lib/prisma";
 import { z } from "zod";
 import { AsyncIdParam } from "@/types/Params";
 import { ORG_DELETE_PERMISSIONS, ORG_EDIT_PERMISSIONS } from "@/lib/permissions";
+import { getDayCount } from "@/utils/eventDays";
 
 // Schema for updating an event
 const updateEventSchema = z.object({
@@ -15,6 +16,7 @@ const updateEventSchema = z.object({
   endTime: z.string().transform((str) => new Date(str)).optional(),
   location: z.string().optional().nullable(),
   isCancelled: z.boolean().optional(),
+  type: z.enum(["LIST", "SCHEDULE"]).optional(),
   eventPlanItems: z
     .array(
       z.object({
@@ -23,6 +25,7 @@ const updateEventSchema = z.object({
         title: z.string().optional(),
         description: z.string().optional(),
         order: z.number().int(),
+        dayIndex: z.number().int().min(0).optional(),
         duration: z.number().int().optional(),
         startHour: z.number().int().min(0).max(23).optional(),
         startMinute: z.number().int().min(0).max(59).optional(),
@@ -138,6 +141,7 @@ export async function PUT(
                 title: itemData.title,
                 description: itemData.description,
                 order: itemData.order,
+                dayIndex: itemData.dayIndex,
                 duration: itemData.duration,
                 startHour: itemData.startHour,
                 startMinute: itemData.startMinute,
@@ -208,6 +212,7 @@ export async function PUT(
                 title: itemData.title,
                 description: itemData.description,
                 order: itemData.order,
+                dayIndex: itemData.dayIndex,
                 duration: itemData.duration,
                 startHour: itemData.startHour,
                 startMinute: itemData.startMinute,
@@ -232,6 +237,16 @@ export async function PUT(
       });
     }
 
+    // Clamp plan items whose dayIndex falls outside the (possibly new) date range
+    const dayCount = getDayCount({
+      startTime: validatedData.startTime ?? event.startTime,
+      endTime: validatedData.endTime ?? event.endTime,
+    });
+    await prisma.eventPlanItem.updateMany({
+      where: { eventId: id, dayIndex: { gt: dayCount - 1 } },
+      data: { dayIndex: dayCount - 1 },
+    });
+
     const updatedEvent = await prisma.event.update({
       where: { id },
       data: updateData,
@@ -246,9 +261,7 @@ export async function PUT(
               orderBy: { order: 'asc' }
             }
           },
-          orderBy: {
-            order: "asc",
-          },
+          orderBy: [{ dayIndex: "asc" }, { order: "asc" }],
         },
       },
     });

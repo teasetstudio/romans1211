@@ -75,6 +75,11 @@ enum EventPlanItemType {
   CUSTOM
 }
 
+enum EventType {
+  LIST     // Ordered plan items (default, original behavior)
+  SCHEDULE // Items placed on a day/time calendar (e.g. multi-day camps)
+}
+
 model OrganizationMember {
   id             String           @id @default(cuid())
   userId         String
@@ -149,12 +154,13 @@ model DefaultEventPlanItem {
   isReserve   Boolean           @default(false) // Mark item as reserve
 
   // Timings
+  dayIndex    Int               @default(0) // 0-based day offset, for SCHEDULE event templates
   duration    Int?              // Duration in minutes (optional)
   startHour   Int?              // Hour of the day (0-23)
   startMinute Int?              // Minute (0-59)
   endHour     Int?              // Hour of the day (0-23)
   endMinute   Int?              // Minute (0-59)
-  
+
   // Course relation
   courseId     String
   course       Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
@@ -189,6 +195,7 @@ model Event {
   id                String           @id @default(cuid())
   title             String           // Can override course title
   description       String?          @db.Text // Can override course description
+  type              EventType        @default(LIST)
   // Timings
   startTime         DateTime
   endTime           DateTime
@@ -226,6 +233,7 @@ model EventPlanItem {
   isReserve   Boolean           @default(false) // Mark item as reserve
 
   // Timings
+  dayIndex    Int               @default(0) // 0-based day offset from date(event.startTime), for SCHEDULE events
   duration    Int?              // Duration in minutes (optional)
   startHour   Int?              // Hour of the day (0-23)
   startMinute Int?              // Minute (0-59)
@@ -254,6 +262,7 @@ model EventPlanItem {
 
   @@index([eventId])
   @@index([order])
+  @@index([eventId, dayIndex, order])
 }
 
 model PreparationItem {

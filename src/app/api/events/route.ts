@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { z } from "zod";
 import { Prisma } from '@prisma/client';
+import { clampDayIndex, getDayCount } from "@/utils/eventDays";
 
 // Schema for creating an event
 const createEventSchema = z.object({
@@ -14,6 +15,7 @@ const createEventSchema = z.object({
   location: z.string().optional(),
   organizationId: z.string(),
   courseId: z.string().optional(),
+  type: z.enum(["LIST", "SCHEDULE"]).optional().default("LIST"),
   // eventPlanItems: z
   //   .array(
   //     z.object({
@@ -32,7 +34,13 @@ const createEventSchema = z.object({
   //     })
   //   )
   //   .optional(),
-});
+}).refine(
+  (data) => data.type !== "SCHEDULE" || data.endTime >= data.startTime,
+  {
+    message: "endTime must be greater than or equal to startTime for SCHEDULE events",
+    path: ["endTime"],
+  }
+);
 
 // GET /api/events
 export async function GET(request: NextRequest) {
@@ -76,9 +84,7 @@ export async function GET(request: NextRequest) {
               text: true,
               game: true,
             },
-            orderBy: {
-              order: "asc",
-            },
+            orderBy: [{ dayIndex: "asc" }, { order: "asc" }],
           },
         },
       });
@@ -142,9 +148,7 @@ export async function GET(request: NextRequest) {
             text: true,
             game: true,
           },
-          orderBy: {
-            order: "asc",
-          },
+          orderBy: [{ dayIndex: "asc" }, { order: "asc" }],
         },
       },
       orderBy: { startTime: "asc" },
@@ -204,6 +208,11 @@ export async function POST(request: NextRequest) {
       orderBy: { order: "asc" }
     });
 
+    const dayCount = getDayCount({
+      startTime: validatedData.startTime,
+      endTime: validatedData.endTime,
+    });
+
     // Create event with plan items if provided
     const event = await prisma.event.create({
       data: {
@@ -214,6 +223,7 @@ export async function POST(request: NextRequest) {
         location: validatedData.location,
         organizationId: validatedData.organizationId,
         courseId: validatedData.courseId,
+        type: validatedData.type,
         // members: {
         //   create: {
         //     organizationMemberId: userMembership.id,
@@ -227,6 +237,10 @@ export async function POST(request: NextRequest) {
               title: item.title,
               description: item.description,
               order: item.order,
+              dayIndex: clampDayIndex(item.dayIndex, dayCount),
+              startHour: item.startHour,
+              startMinute: item.startMinute,
+              duration: item.duration,
               preparations: item.preparations?.length > 0 ? {
                 create: item.preparations.map(prep => ({
                   title: prep.title,
@@ -260,9 +274,7 @@ export async function POST(request: NextRequest) {
             text: true,
             game: true,
           },
-          orderBy: {
-            order: "asc",
-          },
+          orderBy: [{ dayIndex: "asc" }, { order: "asc" }],
         },
       },
     });

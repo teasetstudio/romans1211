@@ -17,6 +17,7 @@ interface PlanItemProps {
   onItemClick?: (item: IPlanItem) => void;
   isReadOnly?: boolean;
   updatePreparationCheckbox?: (eventId: string, preparationId: string, checked: boolean) => void;
+  timeLabel?: string | null;
 }
 
 const PlanItem = ({ 
@@ -30,6 +31,7 @@ const PlanItem = ({
   onItemClick,
   isReadOnly = false,
   updatePreparationCheckbox,
+  timeLabel,
 }: PlanItemProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [expandedPreparations, setExpandedPreparations] = useState(false);
@@ -102,6 +104,11 @@ const PlanItem = ({
       <div className="flex justify-between items-start">
         <div className="flex-1">
           <div className={`text-sm font-medium ${styles.title}`}>
+            {timeLabel && (
+              <span className="inline-block text-xs font-semibold text-gray-700 bg-gray-100 border border-gray-200 rounded px-1.5 py-0.5 mr-2 align-middle">
+                {timeLabel}
+              </span>
+            )}
             {item.title}
           </div>
           {item.type !== "CUSTOM" && (

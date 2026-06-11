@@ -17,6 +17,10 @@ interface MaterialsColumnProps {
   totalPages: number;
   pageSize: number;
   onPageChange: (page: number) => void;
+  // Native HTML5 drag mode (used by the schedule calendar; no DragDropContext required)
+  nativeDragMode?: boolean;
+  onNativeDragStart?: (item: TMaterialWithType & {isFromPublicLibrary: boolean}) => void;
+  onNativeDragEnd?: () => void;
 }
 
 const MaterialsColumn = ({
@@ -30,7 +34,10 @@ const MaterialsColumn = ({
   totalCount,
   totalPages,
   pageSize,
-  onPageChange
+  onPageChange,
+  nativeDragMode = false,
+  onNativeDragStart,
+  onNativeDragEnd
 }: MaterialsColumnProps) => {
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
@@ -110,49 +117,62 @@ const MaterialsColumn = ({
           )
         )}
       </div>
-      <Droppable 
-        droppableId="materials"
-        isDropDisabled={false}
-      >
-        {(provided) => (
-          <div
-            ref={provided.innerRef}
-            {...provided.droppableProps}
-            className="min-h-[400px]"
-          >
-            {isLoading ? (
-              <div className="space-y-2">
-                {Array.from({ length: 8 }).map((_, index) => (
-                  <div key={index} className="p-1 border border-gray-200 rounded-lg animate-pulse bg-white">
-                    {/* Header with title and type badge */}
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="h-4 bg-gray-200 rounded w-4/5 mb-1"></div>
-                        <div className="h-3 bg-gray-200 rounded w-10"></div>
-                      </div>
-                      <div className="h-4 w-14 bg-gray-200 rounded-full ml-3"></div>
-                    </div>
+      {(() => {
+        const listContent = isLoading ? (
+          <div className="space-y-2">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <div key={index} className="p-1 border border-gray-200 rounded-lg animate-pulse bg-white">
+                {/* Header with title and type badge */}
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="h-4 bg-gray-200 rounded w-4/5 mb-1"></div>
+                    <div className="h-3 bg-gray-200 rounded w-10"></div>
                   </div>
-                ))}
+                  <div className="h-4 w-14 bg-gray-200 rounded-full ml-3"></div>
+                </div>
               </div>
-            ) : (
-              materials.map((item, index) => (
-                <MaterialItem
-                  key={item.id}
-                  item={item}
-                  index={index}
-                  isUsed={usedMaterials.has(item.id)}
-                  isHovered={hoveredMaterialId === item.id}
-                  isDraggingRightToLeft={isDraggingRightToLeft}
-                  isDraggingFromRight={isDraggingFromRight}
-                  onItemClick={handleItemClick}
-                />
-              ))
-            )}
-            {provided.placeholder}
+            ))}
           </div>
-        )}
-      </Droppable>
+        ) : (
+          materials.map((item, index) => (
+            <MaterialItem
+              key={item.id}
+              item={item}
+              index={index}
+              isUsed={usedMaterials.has(item.id)}
+              isHovered={hoveredMaterialId === item.id}
+              isDraggingRightToLeft={isDraggingRightToLeft}
+              isDraggingFromRight={isDraggingFromRight}
+              onItemClick={handleItemClick}
+              nativeDragMode={nativeDragMode}
+              onNativeDragStart={onNativeDragStart}
+              onNativeDragEnd={onNativeDragEnd}
+            />
+          ))
+        );
+
+        if (nativeDragMode) {
+          return <div className="min-h-[400px]">{listContent}</div>;
+        }
+
+        return (
+          <Droppable
+            droppableId="materials"
+            isDropDisabled={false}
+          >
+            {(provided) => (
+              <div
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+                className="min-h-[400px]"
+              >
+                {listContent}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        );
+      })()}
       
       <MaterialModal
         isOpen={modalState.isOpen}

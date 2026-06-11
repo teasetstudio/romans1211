@@ -5,6 +5,7 @@ import TextEditor from "@/components/inputs/TextEditor";
 import { useState, useEffect } from "react";
 import { IconTrash, IconPlus, IconGripVertical, IconCheck } from "@tabler/icons-react";
 import { IPlanItem } from "@/types/PlanItem";
+import ScheduleFields, { parseTimeValue, formatTimeValue } from "./ScheduleFields";
 
 // Local interface for form state (simpler version)
 interface IPreparationForm {
@@ -23,6 +24,8 @@ interface CustomItemModalProps {
   onDelete?: (itemId: string) => void;
   editingItem?: IPlanItem | null;
   isEditing: boolean;
+  scheduleDays?: Date[] | null;
+  defaultSchedule?: { dayIndex: number; startHour: number | null; startMinute: number | null; duration: number | null } | null;
 }
 
 const CustomItemModal = ({
@@ -32,11 +35,16 @@ const CustomItemModal = ({
   onDelete,
   editingItem,
   isEditing,
+  scheduleDays,
+  defaultSchedule,
 }: CustomItemModalProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [preparations, setPreparations] = useState<IPreparationForm[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [dayIndex, setDayIndex] = useState(0);
+  const [timeValue, setTimeValue] = useState("");
+  const [durationValue, setDurationValue] = useState("");
 
   // Reset form or populate with editing item when modal opens/changes
   useEffect(() => {
@@ -54,20 +62,35 @@ const CustomItemModal = ({
       }));
       setPreparations(formPreparations);
       setShowDeleteConfirm(false);
+      setDayIndex(editingItem.dayIndex ?? 0);
+      setTimeValue(formatTimeValue(editingItem.startHour, editingItem.startMinute));
+      setDurationValue(editingItem.duration ? String(editingItem.duration) : "");
     } else if (isOpen && !isEditing) {
       setTitle("");
       setDescription("");
       setPreparations([]);
       setShowDeleteConfirm(false);
+      setDayIndex(defaultSchedule?.dayIndex ?? 0);
+      setTimeValue(formatTimeValue(defaultSchedule?.startHour, defaultSchedule?.startMinute));
+      setDurationValue(defaultSchedule?.duration ? String(defaultSchedule.duration) : "");
     }
-  }, [isOpen, isEditing, editingItem]);
+  }, [isOpen, isEditing, editingItem, defaultSchedule]);
 
   const handleSubmit = () => {
     if (!title.trim()) return;
 
+    const scheduleFields = scheduleDays && scheduleDays.length > 0
+      ? {
+          dayIndex,
+          ...parseTimeValue(timeValue),
+          duration: durationValue ? Number(durationValue) : null,
+        }
+      : {};
+
     onSave({
       title,
       description,
+      ...scheduleFields,
       // Convert IPreparationForm[] back to IPreparation[] format
       preparations: preparations.map(prep => ({
         ...prep,
@@ -209,6 +232,18 @@ const CustomItemModal = ({
                       <TextEditor content={description} onChange={setDescription} />
                     </div>
                   </div>
+
+                  {scheduleDays && scheduleDays.length > 0 && (
+                    <ScheduleFields
+                      days={scheduleDays}
+                      dayIndex={dayIndex}
+                      timeValue={timeValue}
+                      durationValue={durationValue}
+                      onDayIndexChange={setDayIndex}
+                      onTimeChange={setTimeValue}
+                      onDurationChange={setDurationValue}
+                    />
+                  )}
 
                   {/* Preparations Section */}
                   <div className="space-y-3">

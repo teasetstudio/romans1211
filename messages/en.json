@@ -356,13 +356,40 @@
         "description": "Description",
         "location": "Location",
         "startTime": "Start Time",
-        "endTime": "End Time"
+        "endTime": "End Time",
+        "event_type": "Event type",
+        "event_type_list": "List",
+        "event_type_list_hint": "Ordered list of plan items",
+        "event_type_schedule": "Schedule",
+        "event_type_schedule_hint": "Plan items on a calendar with days and times",
+        "start_date": "Start date",
+        "end_date": "End date",
+        "days_count": "{count} days",
+        "end_after_start_error": "End date must be after the start date"
       },
       "cancel": "Cancel",
       "create": "Create",
       "created": "Event created successfully",
       "save": "Save",
       "updated": "Event updated successfully"
+    },
+    "schedule": {
+      "day_label": "Day {number}",
+      "day_label_with_date": "Day {number} — {date}",
+      "unscheduled": "Unscheduled",
+      "unscheduled_hint": "Drag items onto the calendar to schedule them",
+      "empty_day": "No items planned for this day",
+      "day": "Day",
+      "start_time": "Start time",
+      "duration_minutes": "Duration (min)",
+      "no_time": "No time set",
+      "calendar_today": "Today",
+      "calendar_previous": "Back",
+      "calendar_next": "Next",
+      "calendar_week": "Week",
+      "calendar_day": "Day",
+      "calendar_agenda": "Agenda",
+      "calendar_no_events": "No items in this range"
     }
   },
   "NotFound": {

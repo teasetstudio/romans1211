@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { EventPlanItemType } from "@prisma/client";
 import { ORG_EDIT_PERMISSIONS } from "@/lib/permissions";
+import { clampDayIndex, getDayCount } from "@/utils/eventDays";
 
 // POST /api/event-plan-items - Create/Save a new plan item for an event
 export async function POST(request: NextRequest) {
@@ -38,6 +39,25 @@ export async function POST(request: NextRequest) {
         );
       }
       orderSet.add(item.order);
+
+      if (item.dayIndex !== undefined && item.dayIndex !== null && (!Number.isInteger(item.dayIndex) || item.dayIndex < 0)) {
+        return NextResponse.json(
+          { error: "dayIndex must be a non-negative integer" },
+          { status: 400 }
+        );
+      }
+      if (item.startHour !== undefined && item.startHour !== null && (!Number.isInteger(item.startHour) || item.startHour < 0 || item.startHour > 23)) {
+        return NextResponse.json(
+          { error: "startHour must be an integer between 0 and 23" },
+          { status: 400 }
+        );
+      }
+      if (item.startMinute !== undefined && item.startMinute !== null && (!Number.isInteger(item.startMinute) || item.startMinute < 0 || item.startMinute > 59)) {
+        return NextResponse.json(
+          { error: "startMinute must be an integer between 0 and 59" },
+          { status: 400 }
+        );
+      }
 
       // Validate preparations if they exist
       if (item.preparations && Array.isArray(item.preparations)) {
@@ -86,6 +106,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Event not found or don't have permission" }, { status: 404 });
     }
 
+    const dayCount = getDayCount(event);
+
     // Use transaction to ensure atomicity of delete and create operations
     const result = await prisma.$transaction(async (tx) => {
       // Delete existing items for the event (this will cascade delete preparations)
@@ -108,6 +130,9 @@ export async function POST(request: NextRequest) {
             description: item.description || null,
             duration: item.duration || 0,
             order: item.order,
+            dayIndex: clampDayIndex(item.dayIndex, dayCount),
+            startHour: item.startHour ?? null,
+            startMinute: item.startMinute ?? null,
             songId: item.songId || null,
             textId: item.textId || null,
             gameId: item.gameId || null,
