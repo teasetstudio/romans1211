@@ -1,7 +1,6 @@
 # Database Migration Workflow
 
-Schema: `prisma/schema.prisma`  
-ORM: Prisma 6, PostgreSQL
+Schema: `prisma/schema.prisma` | ORM: Prisma 6 | DB: PostgreSQL
 
 ---
 
@@ -13,40 +12,42 @@ Open `prisma/schema.prisma` and make your changes.
 
 Conventions in this project:
 - IDs: `String @id @default(cuid())`
-- Timestamps on every model: `createdAt DateTime @default(now())` + `updatedAt DateTime @updatedAt`
-- Long text: `@db.Text`; short strings: `@db.VarChar(N)`
-- Add `@@index([fieldName])` for any field used in `where`, `orderBy`, or relation lookups.
+- Every model has `createdAt DateTime @default(now())` and `updatedAt DateTime @updatedAt`
+- Long text: `@db.Text` | Short strings: `@db.VarChar(N)`
+- Add `@@index([fieldName])` for any field used in `where`, `orderBy`, or foreign key lookups
+- Optional fields use `?`; boolean and numeric fields always have `@default(...)`
 
-### 2. Create the migration file for review
+### 2. Create the migration file (do NOT apply yet)
 
 ```bash
 yarn migrate:create <descriptive-name>
 # Runs: npx prisma migrate dev --create-only --name <descriptive-name>
+# Writes: prisma/migrations/<timestamp>_<name>/migration.sql
 ```
 
-This writes `prisma/migrations/<timestamp>_<name>/migration.sql` without applying it.
+The `--create-only` flag writes the SQL to disk without executing it.
 
 ### 3. Review the generated SQL
 
-Open the migration file and check for:
+Open `prisma/migrations/<timestamp>_<name>/migration.sql` and check for:
 
-| Red flag | What to do |
+| Red flag | Action |
 |---|---|
-| `DROP COLUMN` | Confirm the column is truly unused; consider a two-phase migration (keep → backfill → drop). |
-| `ALTER COLUMN ... SET NOT NULL` | Ensure every existing row has a value, or provide a `DEFAULT` in the SQL before the constraint. |
-| `DROP TABLE` | Almost always wrong unless you explicitly removed a model. |
-| `ALTER TYPE` (enum changes) | PostgreSQL requires casting; add an explicit CAST or split into two migrations. |
-| Large-table index addition | Consider `CREATE INDEX CONCURRENTLY` in the migration SQL to avoid locking. |
+| `DROP COLUMN` | Confirm the column is truly unused. Prefer a two-phase migration: keep column → backfill → drop in a separate PR. |
+| `ALTER COLUMN … SET NOT NULL` without a prior default | Add a `DEFAULT` or an `UPDATE` backfill before the constraint (see backfill section below). |
+| `DROP TABLE` | Should be intentional only if you explicitly removed a model from the schema. |
+| `ALTER TYPE` on an enum | PostgreSQL requires an explicit CAST. Split into two migrations or add the cast manually. |
+| Index on a large table | Consider replacing `CREATE INDEX` with `CREATE INDEX CONCURRENTLY` to avoid table lock. |
 
 ### 4. Apply in development
 
 ```bash
 yarn migrate
-# Runs: npx prisma migrate dev --name <same-name>
-# Also regenerates the Prisma client automatically.
+# Runs: npx prisma migrate dev --name <name>
+# Applies the pending migration and regenerates the Prisma client.
 ```
 
-If `prisma migrate dev` regenerates the client but your IDE still shows type errors, run:
+If the IDE still shows type errors after regeneration:
 
 ```bash
 npx prisma generate
@@ -57,36 +58,36 @@ npx prisma generate
 ```bash
 yarn migrate:deploy
 # Runs: npx prisma migrate deploy
+# Applies all pending migrations from prisma/migrations/ without prompting.
+# Does NOT regenerate the client — that happens at build time via:
+# "build": "prisma generate && next build"
 ```
-
-`migrate:deploy` applies all pending migrations from `prisma/migrations/` without prompting and without generating the client. The client is generated at build time via `"build": "prisma generate && next build"`.
 
 ---
 
 ## When a data backfill is needed
 
-If you are adding a NOT NULL column to a table that already has rows, or splitting/renaming data:
+Use this pattern whenever adding a NOT NULL column to a table that already has rows,
+or when renaming / splitting data.
 
-1. Create the migration with `yarn migrate:create <name>`.
-2. Open the generated SQL file.
-3. Edit the SQL to:
-   a. Add the column as nullable first.
-   b. Write an `UPDATE` statement to fill existing rows.
-   c. Then `ALTER COLUMN ... SET NOT NULL`.
+1. `yarn migrate:create <name>` to generate the SQL file.
+2. Edit the generated SQL to follow the three-step pattern:
 
-Example pattern:
 ```sql
--- Step 1: add nullable
+-- Step 1: add the column as nullable
 ALTER TABLE "Song" ADD COLUMN "difficulty" INTEGER;
 
--- Step 2: backfill
+-- Step 2: backfill existing rows
 UPDATE "Song" SET "difficulty" = 1 WHERE "difficulty" IS NULL;
 
--- Step 3: enforce constraint
+-- Step 3: add the NOT NULL constraint
 ALTER TABLE "Song" ALTER COLUMN "difficulty" SET NOT NULL;
 ```
 
-4. Apply with `yarn migrate`.
+3. `yarn migrate` to apply.
+
+For relation backfills or complex transforms, write the `UPDATE` as a sub-select or
+use a CTE — Prisma executes raw SQL exactly as written.
 
 ---
 
@@ -96,13 +97,19 @@ ALTER TABLE "Song" ALTER COLUMN "difficulty" SET NOT NULL;
 |---|---|
 | `yarn migrate:status` | Show which migrations are applied vs. pending |
 | `yarn migrate:reset` | **Destructive.** Drops the DB and re-applies all migrations. Dev only. |
-| `yarn postgres` | Start the local PostgreSQL container via Docker Compose |
+| `yarn postgres` | Start the local PostgreSQL container (`docker compose -f docker-compose.dev.yml up -d`) |
+| `npx prisma studio` | Browser-based DB viewer (dev only) |
 
 ---
 
 ## Hard rules
 
-- **NEVER use `npx prisma db push`** in any environment. It bypasses the migration history and will desync production.
+- **NEVER use `npx prisma db push`** in any environment. It bypasses migration history
+  and will desync production schemas silently.
 - **NEVER run `migrate:reset` against production or staging.**
-- Always commit the migration file alongside the schema change in the same PR.
-- Migration files in `prisma/migrations/` are immutable once merged — never edit an already-applied migration.
+- Always commit the migration SQL file and the updated `schema.prisma` together in the
+  same PR/commit.
+- Migration files in `prisma/migrations/` are immutable once merged to main — never
+  edit an already-applied migration. Create a new one instead.
+- The `migrate:deploy` command is for production/CI. It never generates the client —
+  that is handled by the `build` script.
