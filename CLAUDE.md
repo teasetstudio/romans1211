@@ -125,6 +125,21 @@ Key relationships:
 
 ---
 
+## Skill Usage
+
+Follow a skill automatically when the user's request matches its scope:
+
+| Request Pattern | Skill to follow |
+|---|---|
+| User wants to add/change a field, attribute, or feature to songs, texts, or games | `add-material-feature` |
+| User is making any Prisma schema change or data model modification | `db-migration` |
+| User is adding new UI text, labels, or translation keys | `i18n-strings` |
+| User is creating, scaffolding, or building a new React component | `new-component` |
+
+Invoke the skill, follow its steps, and report progress. If the user doesn't explicitly name the skill, proactively mention which one you're using.
+
+---
+
 ## Agent Delegation
 
 Delegate to a subagent automatically — don't wait to be asked — in these situations:
