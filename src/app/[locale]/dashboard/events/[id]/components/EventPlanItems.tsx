@@ -31,9 +31,10 @@ interface IProps {
   session: Session;
 }
 
-interface SaveResponse {
-  success: boolean;
-  message: string;
+interface SavedItem {
+  id: string;
+  order: number;
+  preparations: Array<{ id: string; order: number }>;
 }
 
 // Create constant for the custom plan item type to avoid mismatches
@@ -224,6 +225,8 @@ const EventPlanItems = ({ event, session }: IProps) => {
 
   // Add new state for loading
   const [isSaving, setIsSaving] = useState(false);
+  // Ref-based guard prevents concurrent auto-saves from racing
+  const isSavingRef = useRef(false);
 
   const onDragStart = (start: DragStart) => {
     // Check if dragging from planItems
@@ -594,6 +597,9 @@ const EventPlanItems = ({ event, session }: IProps) => {
   }, []);
 
   const handleSave = useCallback(async () => {
+    // Prevent concurrent saves from racing
+    if (isSavingRef.current) return;
+    isSavingRef.current = true;
     setIsSaving(true);
     setSaveStatus(null);
 
@@ -623,7 +629,7 @@ const EventPlanItems = ({ event, session }: IProps) => {
         // If it's a custom item
         if (item.type === CUSTOM_PLAN_ITEM_TYPE) {
           return {
-            // Use a type assertion here
+            id: item.id,
             type: CUSTOM_PLAN_ITEM_TYPE,
             order: index,
             title: item.title,
@@ -637,14 +643,13 @@ const EventPlanItems = ({ event, session }: IProps) => {
         // Otherwise it's a material item
         const materialId = item.materialId === null ? "" : item.materialId;
         return {
-          // Use a type assertion here
+          id: item.id,
           type: item.type.toUpperCase(),
           order: index,
           title: item.title,
           description: item.description || "",
           isReserve: item.isReserve || false,
           preparations: item.preparations || [],
-          // Use the string materialId
           [getItemIdField(item.type as TMaterialType)]: materialId,
           eventId: event.id,
           ...scheduleFields,
@@ -662,11 +667,25 @@ const EventPlanItems = ({ event, session }: IProps) => {
         }),
       });
 
-      const data: SaveResponse = await response.json();
+      const savedItems: SavedItem[] = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to save plan items');
+        throw new Error('Failed to save plan items');
       }
+
+      // Promote server-assigned IDs back into local state.
+      // itemsToSave[i] was sent as order=i; savedItems is returned sorted by order,
+      // so savedItems[i] corresponds to itemsToSave[i].
+      const localIdToServerId = new Map(
+        itemsToSave.map((item, i) => [item.id, savedItems[i]?.id])
+      );
+      setColumns(prev => ({
+        ...prev,
+        planItems: prev.planItems.map(item => ({
+          ...item,
+          id: localIdToServerId.get(item.id) ?? item.id,
+        })),
+      }));
 
       setSaveStatus({
         message: 'Plan items saved successfully!',
@@ -678,6 +697,7 @@ const EventPlanItems = ({ event, session }: IProps) => {
         isError: true,
       });
     } finally {
+      isSavingRef.current = false;
       setIsSaving(false);
     }
   }, [columns.planItems, event.id, getItemIdField, isSchedule]);
