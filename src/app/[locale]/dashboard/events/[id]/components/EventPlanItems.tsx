@@ -227,6 +227,9 @@ const EventPlanItems = ({ event, session }: IProps) => {
   const [isSaving, setIsSaving] = useState(false);
   // Ref-based guard prevents concurrent auto-saves from racing
   const isSavingRef = useRef(false);
+  // Maps local (possibly temp) item IDs to the real server-assigned IDs after first save.
+  // Using a ref avoids triggering the auto-save loop that setColumns would cause.
+  const serverIdMapRef = useRef<Map<string, string>>(new Map());
 
   const onDragStart = (start: DragStart) => {
     // Check if dragging from planItems
@@ -617,8 +620,12 @@ const EventPlanItems = ({ event, session }: IProps) => {
           })
         : columns.planItems;
 
-      // Map plan items to the format expected by the API
+      // Map plan items to the format expected by the API.
+      // For each item, resolve the real server ID via the ref (for items that were
+      // created in a previous save and got a real CUID back). Temp IDs fall through
+      // to the server as unknown IDs, which treats them as new creates.
       const planItemsData = itemsToSave.map((item, index) => {
+        const serverId = serverIdMapRef.current.get(item.id) ?? item.id;
         const scheduleFields = {
           dayIndex: item.dayIndex ?? 0,
           startHour: item.startHour ?? null,
@@ -629,7 +636,7 @@ const EventPlanItems = ({ event, session }: IProps) => {
         // If it's a custom item
         if (item.type === CUSTOM_PLAN_ITEM_TYPE) {
           return {
-            id: item.id,
+            id: serverId,
             type: CUSTOM_PLAN_ITEM_TYPE,
             order: index,
             title: item.title,
@@ -643,7 +650,7 @@ const EventPlanItems = ({ event, session }: IProps) => {
         // Otherwise it's a material item
         const materialId = item.materialId === null ? "" : item.materialId;
         return {
-          id: item.id,
+          id: serverId,
           type: item.type.toUpperCase(),
           order: index,
           title: item.title,
@@ -673,19 +680,13 @@ const EventPlanItems = ({ event, session }: IProps) => {
         throw new Error('Failed to save plan items');
       }
 
-      // Promote server-assigned IDs back into local state.
-      // itemsToSave[i] was sent as order=i; savedItems is returned sorted by order,
-      // so savedItems[i] corresponds to itemsToSave[i].
-      const localIdToServerId = new Map(
-        itemsToSave.map((item, i) => [item.id, savedItems[i]?.id])
-      );
-      setColumns(prev => ({
-        ...prev,
-        planItems: prev.planItems.map(item => ({
-          ...item,
-          id: localIdToServerId.get(item.id) ?? item.id,
-        })),
-      }));
+      // Record the localId → serverId mapping in a ref so subsequent saves send the
+      // real CUID. We do NOT call setColumns here because that would mutate
+      // columns.planItems and retrigger the auto-save useEffect, causing an infinite loop.
+      itemsToSave.forEach((item, i) => {
+        const realId = savedItems[i]?.id;
+        if (realId) serverIdMapRef.current.set(item.id, realId);
+      });
 
       setSaveStatus({
         message: 'Plan items saved successfully!',
