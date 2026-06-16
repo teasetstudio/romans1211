@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import type { Event, EventPlanItem, Song, Text as TextMat, Game, PreparationItem } from "@prisma/client";
+import { NAMESPACE_DASHBOARD_EVENTS } from "@/res/namespaces";
+import { getEventDays, formatItemTime, clampDayIndex } from "@/utils/eventDays";
 import MaterialModal from "@/app/[locale]/dashboard/events/[id]/components/MaterialModal";
 import CustomItemDialog from "./CustomItemDialog";
 import Tooltip from "@/components/ui/Tooltip";
@@ -66,6 +69,9 @@ type PublicEvent = Event & {
 };
 
 export default function PublicEventView({ event }: { event: PublicEvent }) {
+  const t = useTranslations(NAMESPACE_DASHBOARD_EVENTS);
+  const locale = useLocale();
+  const isSchedule = event.type === "SCHEDULE";
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMaterialId, setModalMaterialId] = useState<string | null>(null);
   const [modalMaterialType, setModalMaterialType] = useState<TMaterialType>("text");
@@ -135,14 +141,9 @@ export default function PublicEventView({ event }: { event: PublicEvent }) {
     }
   };
 
-  return (
-    <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-gray-900">Event Plan</h2>
-      <div className="bg-white border rounded-md divide-y">
-        {event.eventPlanItems.length === 0 && (
-          <div className="p-4 text-sm text-gray-500">No items in the event plan yet</div>
-        )}
-        {event.eventPlanItems.map((item) => (
+  const renderItem = (item: PlanItemWithRelations) => {
+    const time = isSchedule ? formatItemTime(item.startHour, item.startMinute) : null;
+    return (
           <button
             key={item.id}
             type="button"
@@ -153,6 +154,11 @@ export default function PublicEventView({ event }: { event: PublicEvent }) {
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
+                {time && (
+                  <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 tabular-nums">
+                    {time}
+                  </span>
+                )}
                 {renderItemTypeBadge(item)}
                 <span className="font-medium text-gray-900">{renderItemTitle(item)}</span>
               </div>
@@ -219,8 +225,58 @@ export default function PublicEventView({ event }: { event: PublicEvent }) {
               </div>
             )}
           </button>
-        ))}
-      </div>
+    );
+  };
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-lg font-semibold text-gray-900">Event Plan</h2>
+      {isSchedule ? (
+        (() => {
+          const days = getEventDays(event);
+          const itemsByDay = new Map<number, PlanItemWithRelations[]>();
+          for (const item of event.eventPlanItems) {
+            const idx = clampDayIndex(item.dayIndex, days.length);
+            const bucket = itemsByDay.get(idx);
+            if (bucket) {
+              bucket.push(item);
+            } else {
+              itemsByDay.set(idx, [item]);
+            }
+          }
+          return (
+            <div className="space-y-6">
+              {days.map((dayDate, dayIdx) => {
+                const dayItems = itemsByDay.get(dayIdx) ?? [];
+                return (
+                  <div key={dayIdx} className="space-y-2">
+                    <h3 className="text-sm font-semibold text-gray-700">
+                      {t("schedule.day_label_with_date", {
+                        number: dayIdx + 1,
+                        date: dayDate.toLocaleDateString(locale),
+                      })}
+                    </h3>
+                    <div className="bg-white border rounded-md divide-y">
+                      {dayItems.length === 0 ? (
+                        <div className="p-4 text-sm text-gray-500">{t("schedule.empty_day")}</div>
+                      ) : (
+                        dayItems.map(renderItem)
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })()
+      ) : (
+        <div className="bg-white border rounded-md divide-y">
+          {event.eventPlanItems.length === 0 && (
+            <div className="p-4 text-sm text-gray-500">No items in the event plan yet</div>
+          )}
+          {event.eventPlanItems.map(renderItem)}
+        </div>
+      )}
 
       <MaterialModal
         isOpen={modalOpen}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { useForm, FormProvider } from "react-hook-form";
 import { z } from "zod";
@@ -9,22 +10,42 @@ import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import Input from "@/components/inputs/Input";
+import InputError from "@/components/inputs/InputError";
 import Button from "@/components/buttons/Button";
 import { DateTimePicker } from "@/components/inputs/DateTimePicker";
 import { IconClose } from "@/res/icons";
 import { addMinutes } from "date-fns";
 import { predictNextEventTimes } from "@/utils/dates";
+import { getDayCount } from "@/utils/eventDays";
+import { NAMESPACE_DASHBOARD_EVENTS } from "@/res/namespaces";
 
-const eventSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  description: z.string().optional().nullable(),
-  location: z.string().optional().nullable(),
-  startTime: z.date(),
-  endTime: z.date(),
-  isCancelled: z.boolean().default(false),
-});
+const EVENT_TYPES = ["LIST", "SCHEDULE"] as const;
 
-export type EventFormData = z.infer<typeof eventSchema>;
+const createEventSchema = (endAfterStartError: string) =>
+  z
+    .object({
+      title: z.string().min(1, "Title is required"),
+      description: z.string().optional().nullable(),
+      location: z.string().optional().nullable(),
+      startTime: z.date(),
+      endTime: z.date(),
+      isCancelled: z.boolean().default(false),
+      type: z.enum(EVENT_TYPES).default("LIST"),
+    })
+    .superRefine((data, ctx) => {
+      if (
+        data.type === "SCHEDULE" &&
+        data.endTime.getTime() < data.startTime.getTime()
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["endTime"],
+          message: endAfterStartError,
+        });
+      }
+    });
+
+export type EventFormData = z.infer<ReturnType<typeof createEventSchema>>;
 
 interface EventFormDialogProps {
   mode: 'create' | 'edit';
@@ -45,8 +66,13 @@ export default function EventFormDialog({
   course,
   event
 }: EventFormDialogProps) {
-  const t = useTranslations("dashboard_events.createEventDialog");
+  const t = useTranslations(NAMESPACE_DASHBOARD_EVENTS);
   const router = useRouter();
+
+  const eventSchema = useMemo(
+    () => createEventSchema(t("createEventDialog.fields.end_after_start_error")),
+    [t]
+  );
 
   // Calculate initial form values based on mode
   const getDefaultValues = () => {
@@ -58,6 +84,7 @@ export default function EventFormDialog({
         startTime: new Date(event.startTime),
         endTime: new Date(event.endTime),
         isCancelled: event.isCancelled,
+        type: (event.type as EventFormData["type"]) || "LIST",
       };
     }
 
@@ -87,6 +114,7 @@ export default function EventFormDialog({
       startTime,
       endTime,
       isCancelled: false,
+      type: "LIST" as EventFormData["type"],
     };
   };
 
@@ -96,10 +124,20 @@ export default function EventFormDialog({
   });
 
   const startTime = methods.watch("startTime");
+  const endTime = methods.watch("endTime");
+  const eventType = methods.watch("type");
+  const isSchedule = eventType === "SCHEDULE";
+
+  const dayCount =
+    isSchedule && startTime && endTime
+      ? getDayCount({ startTime, endTime })
+      : null;
 
   // Helper function to update end time when start time changes.
   // Uses the previous start time to preserve duration when shifting the start.
+  // Disabled in SCHEDULE mode: start/end dates are independent there.
   const updateEndTime = (newStartTime: Date, prevStartTime: Date) => {
+    if (methods.getValues("type") === "SCHEDULE") return;
     const currentEndTime = methods.getValues("endTime");
     if (!currentEndTime || !prevStartTime) return;
     const currentDuration = currentEndTime.getTime() - prevStartTime.getTime();
@@ -120,6 +158,7 @@ export default function EventFormDialog({
           },
           body: JSON.stringify({
             ...data,
+            type: data.type,
             courseId: course.id,
             organizationId: course.organizationId,
             startTime: data.startTime.toISOString(),
@@ -135,6 +174,7 @@ export default function EventFormDialog({
           },
           body: JSON.stringify({
             ...data,
+            type: data.type,
             startTime: data.startTime.toISOString(),
             endTime: data.endTime.toISOString(),
           }),
@@ -149,7 +189,7 @@ export default function EventFormDialog({
       }
 
       const responseData = await response.json();
-      toast.success(t(mode === 'create' ? "created" : "updated"));
+      toast.success(t(mode === 'create' ? "createEventDialog.created" : "createEventDialog.updated"));
       onSubmit?.(responseData);
       onClose();
       router.refresh();
@@ -167,7 +207,7 @@ export default function EventFormDialog({
         <DialogPanel className="w-full max-w-lg transform overflow-hidden rounded-lg bg-white p-6 shadow-xl">
           <div className="flex items-center justify-between mb-4 border-b pb-3">
             <DialogTitle className="text-lg font-medium text-gray-900">
-              {mode === 'create' ? t("create_event") : t("edit_event")}
+              {mode === 'create' ? t("createEventDialog.create_event") : t("createEventDialog.edit_event")}
             </DialogTitle>
             <button
               onClick={onClose}
@@ -181,37 +221,68 @@ export default function EventFormDialog({
             <form onSubmit={methods.handleSubmit(handleSubmit)} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t("fields.title")}
+                  {t("createEventDialog.fields.title")}
                 </label>
                 <Input
                   name="title"
-                  placeholder={t("fields.title")}
+                  placeholder={t("createEventDialog.fields.title")}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t("fields.description")}
+                  {t("createEventDialog.fields.description")}
                 </label>
                 <Input
                   name="description"
-                  placeholder={t("fields.description")}
+                  placeholder={t("createEventDialog.fields.description")}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t("fields.location")}
+                  {t("createEventDialog.fields.location")}
                 </label>
                 <Input
                   name="location"
-                  placeholder={t("fields.location")}
+                  placeholder={t("createEventDialog.fields.location")}
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t("createEventDialog.fields.event_type")}
+                </label>
+                <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label={t("createEventDialog.fields.event_type")}>
+                  {EVENT_TYPES.map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      role="radio"
+                      aria-checked={eventType === option}
+                      onClick={() => methods.setValue("type", option, { shouldDirty: true, shouldValidate: true })}
+                      className={`px-4 py-2 rounded-md border text-sm font-medium transition-colors ${
+                        eventType === option
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                      }`}
+                    >
+                      {option === "LIST"
+                        ? t("createEventDialog.fields.event_type_list")
+                        : t("createEventDialog.fields.event_type_schedule")}
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-1 text-xs text-gray-500">
+                  {isSchedule
+                    ? t("createEventDialog.fields.event_type_schedule_hint")
+                    : t("createEventDialog.fields.event_type_list_hint")}
+                </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <DateTimePicker
-                  label={t("fields.startTime")}
+                  label={isSchedule ? t("createEventDialog.fields.start_date") : t("createEventDialog.fields.startTime")}
                   selected={startTime}
                   onChange={(date) => {
                     if (date) {
@@ -222,13 +293,24 @@ export default function EventFormDialog({
                   }}
                 />
 
-                <DateTimePicker
-                  label={t("fields.endTime")}
-                  selected={methods.watch("endTime")}
-                  onChange={(date) => date && methods.setValue("endTime", date)}
-                  minDate={startTime}
-                />
+                <div>
+                  {methods.formState.errors.endTime?.message && (
+                    <InputError message={methods.formState.errors.endTime.message} />
+                  )}
+                  <DateTimePicker
+                    label={isSchedule ? t("createEventDialog.fields.end_date") : t("createEventDialog.fields.endTime")}
+                    selected={endTime}
+                    onChange={(date) => date && methods.setValue("endTime", date, { shouldDirty: true, shouldValidate: true })}
+                    minDate={startTime}
+                  />
+                </div>
               </div>
+
+              {isSchedule && dayCount !== null && (
+                <p className="text-xs text-gray-500">
+                  {t("createEventDialog.fields.days_count", { count: dayCount })}
+                </p>
+              )}
 
               <div className="flex justify-end gap-3 pt-4 border-t mt-6">
                 <Button
@@ -236,13 +318,13 @@ export default function EventFormDialog({
                   className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-md text-sm font-medium transition-colors"
                   type="button"
                 >
-                  {t("cancel")}
+                  {t("createEventDialog.cancel")}
                 </Button>
                 <Button
                   type="submit"
                   className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition-colors"
                 >
-                  {mode === 'create' ? t("create") : t("save")}
+                  {mode === 'create' ? t("createEventDialog.create") : t("createEventDialog.save")}
                 </Button>
               </div>
             </form>
@@ -251,4 +333,4 @@ export default function EventFormDialog({
       </div>
     </Dialog>
   );
-} 
+}

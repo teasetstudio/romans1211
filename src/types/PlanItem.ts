@@ -21,6 +21,11 @@ export interface IPlanItem {
   description?: string | null
   isReserve?: boolean
   preparations?: IPreparation[]
+  // Scheduling (SCHEDULE events): day offset from event start + time of day
+  dayIndex?: number
+  startHour?: number | null
+  startMinute?: number | null
+  duration?: number | null
 }
 
 export interface IDefaultPreparation {

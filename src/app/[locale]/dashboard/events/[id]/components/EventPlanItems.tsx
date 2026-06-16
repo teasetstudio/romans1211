@@ -16,6 +16,8 @@ import PlanItemsColumn from "./PlanItemsColumn";
 import ReadOnlyView from "./ReadOnlyView";
 import { IPlanItem } from "@/types/PlanItem";
 import ItemModal from "./ItemModal";
+import ScheduleCalendar, { IScheduleChange } from "./ScheduleCalendar";
+import { getEventDays } from "@/utils/eventDays";
 
 interface Columns {
   planItems: IPlanItem[]
@@ -29,9 +31,10 @@ interface IProps {
   session: Session;
 }
 
-interface SaveResponse {
-  success: boolean;
-  message: string;
+interface SavedItem {
+  id: string;
+  order: number;
+  preparations: Array<{ id: string; order: number }>;
 }
 
 // Create constant for the custom plan item type to avoid mismatches
@@ -57,10 +60,22 @@ const EventPlanItems = ({ event, session }: IProps) => {
 
   const { selectedOrganization } = useOrganization();
 
-  const { hasEditPermission } = useMemo(() => 
-    userInOrganizationData(session?.user?.id ?? '', selectedOrganization), 
+  const { hasEditPermission } = useMemo(() =>
+    userInOrganizationData(session?.user?.id ?? '', selectedOrganization),
     [session?.user?.id, selectedOrganization]
   );
+
+  const isSchedule = event.type === "SCHEDULE";
+  const scheduleDays = useMemo(
+    () => (isSchedule ? getEventDays(event) : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isSchedule, event.startTime, event.endTime]
+  );
+
+  // Material currently dragged via native HTML5 drag (schedule calendar mode)
+  const [draggedMaterial, setDraggedMaterial] = useState<(TMaterialWithType & {isFromPublicLibrary: boolean}) | null>(null);
+  // Day/time of the calendar slot clicked to create a new custom item
+  const [pendingSlot, setPendingSlot] = useState<IScheduleChange | null>(null);
 
   // Fetch materials when filters change
   useEffect(() => {
@@ -145,7 +160,11 @@ const EventPlanItems = ({ event, session }: IProps) => {
           materialId: null,
           title: item.title || "Custom Item",
           preparations: item.preparations || [],
-          description: item.description
+          description: item.description,
+          dayIndex: item.dayIndex ?? 0,
+          startHour: item.startHour,
+          startMinute: item.startMinute,
+          duration: item.duration
         }
       }
 
@@ -161,7 +180,11 @@ const EventPlanItems = ({ event, session }: IProps) => {
         title: material?.title || "Unknown",
         preparations: item.preparations || [],
         description: item.description,
-        isReserve: item.isReserve
+        isReserve: item.isReserve,
+        dayIndex: item.dayIndex ?? 0,
+        startHour: item.startHour,
+        startMinute: item.startMinute,
+        duration: item.duration
       }
     }),
     materials: [],
@@ -202,6 +225,11 @@ const EventPlanItems = ({ event, session }: IProps) => {
 
   // Add new state for loading
   const [isSaving, setIsSaving] = useState(false);
+  // Ref-based guard prevents concurrent auto-saves from racing
+  const isSavingRef = useRef(false);
+  // Maps local (possibly temp) item IDs to the real server-assigned IDs after first save.
+  // Using a ref avoids triggering the auto-save loop that setColumns would cause.
+  const serverIdMapRef = useRef<Map<string, string>>(new Map());
 
   const onDragStart = (start: DragStart) => {
     // Check if dragging from planItems
@@ -332,16 +360,78 @@ const EventPlanItems = ({ event, session }: IProps) => {
       type: CUSTOM_PLAN_ITEM_TYPE,
       materialId: null,
       description: cleanDescription(item.description) || null,
-      preparations: item.preparations || []
+      preparations: item.preparations || [],
+      dayIndex: item.dayIndex ?? 0,
+      startHour: item.startHour ?? null,
+      startMinute: item.startMinute ?? null,
+      duration: item.duration ?? null
     };
-    
+
     setColumns(prev => ({
       ...prev,
       planItems: [...prev.planItems, newItem]
     }));
-    
+
     // Close modal
     setShowCustomItemModal(false);
+    setPendingSlot(null);
+  };
+
+  // Update a plan item's day/time after a calendar drag, resize, or modal edit
+  const handleScheduleChange = useCallback((itemId: string, change: IScheduleChange) => {
+    setColumns(prev => ({
+      ...prev,
+      planItems: prev.planItems.map(item =>
+        item.id === itemId ? { ...item, ...change } : item
+      )
+    }));
+  }, []);
+
+  // Material dragged from the materials column and dropped on the calendar
+  const handleDropMaterial = (change: IScheduleChange) => {
+    if (!draggedMaterial) return;
+    const movedMaterial = draggedMaterial;
+    setDraggedMaterial(null);
+    if (usedMaterials.has(movedMaterial.id)) return;
+
+    const tempItemId = `${Date.now()}-schedule`;
+    const newItem: IPlanItem = {
+      id: tempItemId,
+      materialId: movedMaterial.id,
+      material: movedMaterial,
+      title: movedMaterial.title,
+      type: movedMaterial.type,
+      preparations: movedMaterial.preparations ? movedMaterial.preparations.map(p => ({
+        id: p.id,
+        order: p.order,
+        title: p.title,
+        isCompleted: false,
+        completedAt: null,
+        completedBy: null,
+        eventPlanItemId: tempItemId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })) : [],
+      ...change,
+    };
+
+    const newUsedMaterials = new Set(usedMaterials);
+    newUsedMaterials.add(movedMaterial.id);
+    setUsedMaterials(newUsedMaterials);
+
+    setColumns(prev => ({
+      ...prev,
+      planItems: [...prev.planItems, newItem]
+    }));
+  };
+
+  // Calendar event clicked: open the matching edit modal
+  const handleSelectItem = (item: IPlanItem) => {
+    if (item.type === CUSTOM_PLAN_ITEM_TYPE) {
+      startEditingCustomItem(item);
+    } else {
+      startEditingItem(item);
+    }
   };
 
   // Start editing a custom item
@@ -365,18 +455,24 @@ const EventPlanItems = ({ event, session }: IProps) => {
     // Update existing item
     setColumns(prev => ({
       ...prev,
-      planItems: prev.planItems.map(item => 
+      planItems: prev.planItems.map(item =>
         item.id === editingItemId
-          ? { 
-              ...item, 
+          ? {
+              ...item,
               description: cleanDescription(updatedItemData.description),
               isReserve: updatedItemData.isReserve,
               preparations: updatedItemData.preparations || item.preparations,
+              ...(updatedItemData.dayIndex !== undefined && {
+                dayIndex: updatedItemData.dayIndex,
+                startHour: updatedItemData.startHour ?? null,
+                startMinute: updatedItemData.startMinute ?? null,
+                duration: updatedItemData.duration ?? null,
+              }),
             }
           : item
       )
     }));
-    
+
     // Reset state
     setEditingItemId(null);
     setShowItemModal(false);
@@ -393,18 +489,24 @@ const EventPlanItems = ({ event, session }: IProps) => {
     // Update existing item
     setColumns(prev => ({
       ...prev,
-      planItems: prev.planItems.map(item => 
+      planItems: prev.planItems.map(item =>
         item.id === editingItemId
-          ? { 
-              ...item, 
+          ? {
+              ...item,
               title: updatedItemData.title || item.title,
               description: cleanDescription(updatedItemData.description),
-              preparations: updatedItemData.preparations || item.preparations
+              preparations: updatedItemData.preparations || item.preparations,
+              ...(updatedItemData.dayIndex !== undefined && {
+                dayIndex: updatedItemData.dayIndex,
+                startHour: updatedItemData.startHour ?? null,
+                startMinute: updatedItemData.startMinute ?? null,
+                duration: updatedItemData.duration ?? null,
+              }),
             }
           : item
       )
     }));
-    
+
     // Reset state
     setEditingItemId(null);
     setShowCustomItemModal(false);
@@ -498,38 +600,66 @@ const EventPlanItems = ({ event, session }: IProps) => {
   }, []);
 
   const handleSave = useCallback(async () => {
+    // Prevent concurrent saves from racing
+    if (isSavingRef.current) return;
+    isSavingRef.current = true;
     setIsSaving(true);
     setSaveStatus(null);
 
     try {
-      // Map plan items to the format expected by the API
-      const planItemsData = columns.planItems.map((item, index) => {
+      // For schedule events, persist items in day-major, then time order so the
+      // global `order` stays meaningful; LIST events keep manual drag order.
+      const itemsToSave = isSchedule
+        ? [...columns.planItems].sort((a, b) => {
+            const dayA = a.dayIndex ?? 0;
+            const dayB = b.dayIndex ?? 0;
+            if (dayA !== dayB) return dayA - dayB;
+            const timeA = a.startHour == null ? -1 : a.startHour * 60 + (a.startMinute ?? 0);
+            const timeB = b.startHour == null ? -1 : b.startHour * 60 + (b.startMinute ?? 0);
+            return timeA - timeB;
+          })
+        : columns.planItems;
+
+      // Map plan items to the format expected by the API.
+      // For each item, resolve the real server ID via the ref (for items that were
+      // created in a previous save and got a real CUID back). Temp IDs fall through
+      // to the server as unknown IDs, which treats them as new creates.
+      const planItemsData = itemsToSave.map((item, index) => {
+        const serverId = serverIdMapRef.current.get(item.id) ?? item.id;
+        const scheduleFields = {
+          dayIndex: item.dayIndex ?? 0,
+          startHour: item.startHour ?? null,
+          startMinute: item.startMinute ?? null,
+          duration: item.duration ?? null,
+        };
+
         // If it's a custom item
         if (item.type === CUSTOM_PLAN_ITEM_TYPE) {
           return {
-            // Use a type assertion here
+            id: serverId,
             type: CUSTOM_PLAN_ITEM_TYPE,
             order: index,
             title: item.title,
             description: item.description || "",
             preparations: item.preparations || [],
             eventId: event.id,
+            ...scheduleFields,
           };
         }
-        
+
         // Otherwise it's a material item
         const materialId = item.materialId === null ? "" : item.materialId;
         return {
-          // Use a type assertion here
+          id: serverId,
           type: item.type.toUpperCase(),
           order: index,
           title: item.title,
           description: item.description || "",
           isReserve: item.isReserve || false,
           preparations: item.preparations || [],
-          // Use the string materialId
           [getItemIdField(item.type as TMaterialType)]: materialId,
           eventId: event.id,
+          ...scheduleFields,
         };
       });
 
@@ -544,11 +674,19 @@ const EventPlanItems = ({ event, session }: IProps) => {
         }),
       });
 
-      const data: SaveResponse = await response.json();
+      const savedItems: SavedItem[] = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to save plan items');
+        throw new Error('Failed to save plan items');
       }
+
+      // Record the localId → serverId mapping in a ref so subsequent saves send the
+      // real CUID. We do NOT call setColumns here because that would mutate
+      // columns.planItems and retrigger the auto-save useEffect, causing an infinite loop.
+      itemsToSave.forEach((item, i) => {
+        const realId = savedItems[i]?.id;
+        if (realId) serverIdMapRef.current.set(item.id, realId);
+      });
 
       setSaveStatus({
         message: 'Plan items saved successfully!',
@@ -560,9 +698,10 @@ const EventPlanItems = ({ event, session }: IProps) => {
         isError: true,
       });
     } finally {
+      isSavingRef.current = false;
       setIsSaving(false);
     }
-  }, [columns.planItems, event.id, getItemIdField]);
+  }, [columns.planItems, event.id, getItemIdField, isSchedule]);
 
   // Auto-save when planItems change (debounced)
   const autoSaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -612,6 +751,7 @@ const EventPlanItems = ({ event, session }: IProps) => {
         planItems={columns.planItems}
         expandedDescriptions={expandedDescriptions}
         onToggleDescription={toggleDescriptionExpansion}
+        event={event}
       />
     );
   }
@@ -636,37 +776,74 @@ const EventPlanItems = ({ event, session }: IProps) => {
       />
 
       {/* Main Content */}
-      <DragDropContext 
-        onDragStart={onDragStart} 
-        onDragUpdate={onDragUpdate}
-        onDragEnd={onDragEnd}
-      >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {isSchedule ? (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <MaterialsColumn
             materials={columns.materials}
             usedMaterials={usedMaterials}
             isLoading={isLoading}
-            hoveredMaterialId={hoveredMaterialId}
-            isDraggingRightToLeft={isDraggingRightToLeft}
-            isDraggingFromRight={isDraggingFromRight}
+            hoveredMaterialId={null}
+            isDraggingRightToLeft={false}
+            isDraggingFromRight={false}
             currentPage={currentPage}
             totalCount={totalCount}
             totalPages={totalPages}
             pageSize={pageSize}
             onPageChange={setCurrentPage}
+            nativeDragMode
+            onNativeDragStart={setDraggedMaterial}
+            onNativeDragEnd={() => setDraggedMaterial(null)}
           />
 
-          <PlanItemsColumn
-            planItems={columns.planItems}
-            expandedDescriptions={expandedDescriptions}
-            onToggleDescription={toggleDescriptionExpansion}
-            onEditCustomItem={startEditingCustomItem}
-            onEditItem={startEditingItem}
-            onDeleteCustomItem={deleteCustomItem}
-            updatePreparationCheckbox={updatePreparationCheckbox}
-          />
+          <div className="lg:col-span-2">
+            <ScheduleCalendar
+              eventRange={event}
+              planItems={columns.planItems}
+              hasDraggedMaterial={!!draggedMaterial}
+              draggedMaterialTitle={draggedMaterial?.title}
+              onScheduleChange={handleScheduleChange}
+              onDropMaterial={handleDropMaterial}
+              onSelectSlot={(change) => {
+                setPendingSlot(change);
+                setShowCustomItemModal(true);
+              }}
+              onSelectItem={handleSelectItem}
+            />
+          </div>
         </div>
-      </DragDropContext>
+      ) : (
+        <DragDropContext
+          onDragStart={onDragStart}
+          onDragUpdate={onDragUpdate}
+          onDragEnd={onDragEnd}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <MaterialsColumn
+              materials={columns.materials}
+              usedMaterials={usedMaterials}
+              isLoading={isLoading}
+              hoveredMaterialId={hoveredMaterialId}
+              isDraggingRightToLeft={isDraggingRightToLeft}
+              isDraggingFromRight={isDraggingFromRight}
+              currentPage={currentPage}
+              totalCount={totalCount}
+              totalPages={totalPages}
+              pageSize={pageSize}
+              onPageChange={setCurrentPage}
+            />
+
+            <PlanItemsColumn
+              planItems={columns.planItems}
+              expandedDescriptions={expandedDescriptions}
+              onToggleDescription={toggleDescriptionExpansion}
+              onEditCustomItem={startEditingCustomItem}
+              onEditItem={startEditingItem}
+              onDeleteCustomItem={deleteCustomItem}
+              updatePreparationCheckbox={updatePreparationCheckbox}
+            />
+          </div>
+        </DragDropContext>
+      )}
 
       {/* Custom Item Modal */}
       <CustomItemModal
@@ -674,11 +851,14 @@ const EventPlanItems = ({ event, session }: IProps) => {
         onClose={() => {
           setShowCustomItemModal(false);
           setEditingItemId(null);
+          setPendingSlot(null);
         }}
         onSave={saveCustomItem}
         onDelete={deleteCustomItem}
         editingItem={editingItemId ? columns.planItems.find(item => item.id === editingItemId) || null : null}
         isEditing={!!editingItemId}
+        scheduleDays={scheduleDays}
+        defaultSchedule={pendingSlot}
       />
 
       {/* Item Modal */}
@@ -690,6 +870,7 @@ const EventPlanItems = ({ event, session }: IProps) => {
         }}
         onSave={saveItem}
         editingItem={editingItemId ? columns.planItems.find(item => item.id === editingItemId) || null : null}
+        scheduleDays={scheduleDays}
       />
     </div>
   );

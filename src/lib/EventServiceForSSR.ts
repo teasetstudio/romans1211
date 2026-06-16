@@ -26,7 +26,7 @@ class EventServiceForSSR {
             game: true,
             preparations: true,
           },
-          orderBy: { order: "asc" },
+          orderBy: [{ dayIndex: "asc" }, { order: "asc" }],
         },
       },
     });

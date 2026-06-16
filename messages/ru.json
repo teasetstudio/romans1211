@@ -346,13 +346,41 @@
         "description": "Описание",
         "location": "Место проведения",
         "startTime": "Время начала",
-        "endTime": "Время окончания"
+        "endTime": "Время окончания",
+        "event_type": "Тип события",
+        "event_type_list": "Список",
+        "event_type_list_hint": "Упорядоченный список пунктов плана",
+        "event_type_schedule": "Расписание",
+        "event_type_schedule_hint": "Пункты плана в календаре с днями и временем",
+        "start_date": "Дата начала",
+        "end_date": "Дата окончания",
+        "days_count": "{count} дн.",
+        "end_after_start_error": "Дата окончания должна быть позже даты начала"
       },
       "cancel": "Отмена",
       "create": "Создать",
       "created": "Событие успешно создано",
       "save": "Сохранить",
       "updated": "Событие успешно обновлено"
+    },
+    "schedule": {
+      "day_label": "День {number}",
+      "day_label_with_date": "День {number} — {date}",
+      "unscheduled": "Без времени",
+      "unscheduled_hint": "Перетащите пункты в календарь, чтобы запланировать их",
+      "empty_day": "На этот день ничего не запланировано",
+      "day": "День",
+      "start_time": "Время начала",
+      "duration_minutes": "Длительность (мин)",
+      "no_time": "Время не указано",
+      "calendar_today": "Сегодня",
+      "calendar_previous": "Назад",
+      "calendar_next": "Вперёд",
+      "calendar_week": "Неделя",
+      "calendar_day": "День",
+      "calendar_agenda": "Повестка",
+      "calendar_no_events": "Нет пунктов в этом диапазоне",
+      "outside_period_tooltip": "За пределами периода мероприятия"
     }
   }
 }

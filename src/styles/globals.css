@@ -3,6 +3,16 @@
 @tailwind components;
 @tailwind utilities;
 
+.rbc-day-outside-period {
+  background-color: #f1f5f9 !important;
+  cursor: not-allowed !important;
+}
+
+.rbc-slot-outside-period {
+  background-color: #f1f5f9 !important;
+  cursor: not-allowed !important;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
