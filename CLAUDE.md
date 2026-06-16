@@ -16,17 +16,6 @@ npm run start         # Production server
 npm run lint          # ESLint (next lint)
 npx tsc --noEmit      # Type-check without emitting (no test framework — this is the gate)
 
-# Database
-npm run postgres                              # Start local Postgres via Docker Compose (dev only)
-npm run migrate -- <name>                     # Create and apply a migration (prisma migrate dev --name)
-npm run migrate:create -- <name>              # Create migration SQL only, don't apply
-npm run migrate:deploy                        # Apply pending migrations (production)
-npm run migrate:reset                         # Wipe DB and re-run all migrations (dev only)
-npm run migrate:status                        # Show migration status
-npm run generate                              # Regenerate Prisma client after schema changes
-
-# i18n
-npm run messages      # Pull latest translations from i18nexus
 ```
 
 ---

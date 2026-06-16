@@ -1,14 +1,14 @@
 "use client"
 
-import { useCallback, useMemo } from "react";
-import { Calendar, dateFnsLocalizer, SlotInfo, Views } from "react-big-calendar";
+import { useCallback, useMemo, useState } from "react";
+import { Calendar, dateFnsLocalizer, SlotInfo, View, Views } from "react-big-calendar";
 import withDragAndDrop, { EventInteractionArgs } from "react-big-calendar/lib/addons/dragAndDrop";
-import { format, parse, startOfWeek, getDay, differenceInCalendarDays, differenceInMinutes, startOfDay } from "date-fns";
+import { addDays, format, parse, startOfWeek, getDay, differenceInCalendarDays, differenceInMinutes, startOfDay } from "date-fns";
 import { enUS, ru } from "date-fns/locale";
 import { useLocale, useTranslations } from "next-intl";
 import { NAMESPACE_DASHBOARD_EVENTS } from "@/res/namespaces";
 import { IPlanItem } from "@/types/PlanItem";
-import { IEventDateRange, getDayCount, getItemEnd, getItemStart, clampDayIndex } from "@/utils/eventDays";
+import { IEventDateRange, getDayCount, getItemEnd, getItemStart, clampDayIndex, isWithinEventPeriod } from "@/utils/eventDays";
 
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
@@ -64,6 +64,8 @@ const ScheduleCalendar = ({
 
   const dayCount = getDayCount(eventRange);
 
+  const [currentDate, setCurrentDate] = useState(() => new Date(eventRange.startTime));
+
   const toDayIndex = useCallback(
     (start: Date) =>
       clampDayIndex(
@@ -104,9 +106,27 @@ const ScheduleCalendar = ({
     [t],
   );
 
+  const handleNavigate = useCallback(
+    (newDate: Date, view: View) => {
+      const periodStart = startOfDay(new Date(eventRange.startTime));
+      const periodEnd = startOfDay(new Date(eventRange.endTime));
+      if (view === Views.DAY) {
+        const d = startOfDay(newDate);
+        if (d >= periodStart && d <= periodEnd) setCurrentDate(newDate);
+      } else {
+        const weekStart = startOfWeek(newDate, { weekStartsOn: 1 });
+        const weekEnd = addDays(weekStart, 6);
+        if (weekEnd >= periodStart && weekStart <= periodEnd) setCurrentDate(newDate);
+      }
+    },
+    [eventRange],
+  );
+
   const handleEventDrop = useCallback(
     ({ event: calEvent, start, end, isAllDay }: EventInteractionArgs<ICalendarEvent>) => {
       const startDate = new Date(start);
+      if (!isWithinEventPeriod(startDate, eventRange)) return;
+
       const dayIndex = toDayIndex(startDate);
 
       if (isAllDay) {
@@ -131,12 +151,14 @@ const ScheduleCalendar = ({
         duration: minutes,
       });
     },
-    [onScheduleChange, toDayIndex],
+    [onScheduleChange, toDayIndex, eventRange],
   );
 
   const handleEventResize = useCallback(
     ({ event: calEvent, start, end }: EventInteractionArgs<ICalendarEvent>) => {
       const startDate = new Date(start);
+      if (!isWithinEventPeriod(startDate, eventRange)) return;
+
       onScheduleChange(calEvent.id, {
         dayIndex: toDayIndex(startDate),
         startHour: startDate.getHours(),
@@ -144,12 +166,14 @@ const ScheduleCalendar = ({
         duration: Math.max(differenceInMinutes(new Date(end), startDate), MIN_DURATION),
       });
     },
-    [onScheduleChange, toDayIndex],
+    [onScheduleChange, toDayIndex, eventRange],
   );
 
   const handleDropFromOutside = useCallback(
     ({ start, allDay }: { start: Date | string; end: Date | string; allDay: boolean }) => {
       const startDate = new Date(start);
+      if (!isWithinEventPeriod(startDate, eventRange)) return;
+
       onDropMaterial(
         allDay
           ? { dayIndex: toDayIndex(startDate), startHour: null, startMinute: null, duration: null }
@@ -161,24 +185,29 @@ const ScheduleCalendar = ({
             },
       );
     },
-    [onDropMaterial, toDayIndex],
+    [onDropMaterial, toDayIndex, eventRange],
   );
 
   const dragFromOutsideItem = useCallback(
-    (): ICalendarEvent => ({
-      id: "__outside__",
-      title: draggedMaterialTitle || "",
-      start: new Date(),
-      end: new Date(),
-      allDay: false,
-      item: undefined as unknown as IPlanItem,
-    }),
+    (): ICalendarEvent => {
+      const start = new Date();
+      return {
+        id: "__outside__",
+        title: draggedMaterialTitle || "",
+        start,
+        end: new Date(start.getTime() + DEFAULT_DURATION * 60 * 1000),
+        allDay: false,
+        item: undefined as unknown as IPlanItem,
+      };
+    },
     [draggedMaterialTitle],
   );
 
   const handleSelectSlot = useCallback(
     (slotInfo: SlotInfo) => {
       const start = new Date(slotInfo.start);
+      if (!isWithinEventPeriod(start, eventRange)) return;
+
       const end = new Date(slotInfo.end);
       const allDay = differenceInMinutes(end, start) >= 24 * 60;
       onSelectSlot(
@@ -192,7 +221,7 @@ const ScheduleCalendar = ({
             },
       );
     },
-    [onSelectSlot, toDayIndex],
+    [onSelectSlot, toDayIndex, eventRange],
   );
 
   const eventPropGetter = useCallback((calEvent: ICalendarEvent) => {
@@ -208,6 +237,31 @@ const ScheduleCalendar = ({
     return { className: calEvent.item?.isReserve ? `${base} opacity-60` : base };
   }, []);
 
+  const dayPropGetter = useCallback(
+    (date: Date) => {
+      if (!isWithinEventPeriod(date, eventRange)) {
+        return { className: "rbc-day-outside-period" };
+      }
+      return {};
+    },
+    [eventRange],
+  );
+
+  const outsidePeriodTooltip = t("schedule.outside_period_tooltip");
+
+  const slotPropGetter = useCallback(
+    (slotDate: Date) => {
+      if (!isWithinEventPeriod(slotDate, eventRange)) {
+        return {
+          className: "rbc-slot-outside-period",
+          title: outsidePeriodTooltip,
+        };
+      }
+      return {};
+    },
+    [eventRange, outsidePeriodTooltip],
+  );
+
   const scrollToTime = useMemo(() => {
     const d = new Date();
     d.setHours(8, 0, 0, 0);
@@ -220,7 +274,8 @@ const ScheduleCalendar = ({
         localizer={localizer}
         culture={locale}
         events={calendarEvents}
-        defaultDate={new Date(eventRange.startTime)}
+        date={currentDate}
+        onNavigate={handleNavigate}
         defaultView={dayCount > 1 ? Views.WEEK : Views.DAY}
         views={[Views.WEEK, Views.DAY, Views.AGENDA]}
         messages={messages}
@@ -235,6 +290,8 @@ const ScheduleCalendar = ({
         onSelectSlot={handleSelectSlot}
         onSelectEvent={(calEvent) => calEvent.item && onSelectItem(calEvent.item)}
         eventPropGetter={eventPropGetter}
+        dayPropGetter={dayPropGetter}
+        slotPropGetter={slotPropGetter}
         style={{ height: "100%" }}
       />
     </div>

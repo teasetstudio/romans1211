@@ -379,7 +379,8 @@
       "calendar_week": "Неделя",
       "calendar_day": "День",
       "calendar_agenda": "Повестка",
-      "calendar_no_events": "Нет пунктов в этом диапазоне"
+      "calendar_no_events": "Нет пунктов в этом диапазоне",
+      "outside_period_tooltip": "За пределами периода мероприятия"
     }
   }
 }

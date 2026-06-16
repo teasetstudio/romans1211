@@ -108,56 +108,118 @@ export async function POST(request: NextRequest) {
 
     const dayCount = getDayCount(event);
 
-    // Use transaction to ensure atomicity of delete and create operations
+    // Fetch existing plan items (with their preparations) so we can diff instead of delete-all
+    const existingItems = await prisma.eventPlanItem.findMany({
+      where: { eventId },
+      include: {
+        preparations: true,
+      },
+      orderBy: { order: "asc" },
+    });
+
+    // Build a lookup map: order → existing EventPlanItem
+    // The client always sends the full ordered list with order === array index,
+    // so matching by order position is stable within a single save.
+    const existingByOrder = new Map(existingItems.map(item => [item.order, item]));
+
+    // Determine which existing item IDs are still present in the new payload
+    const incomingOrders = new Set(planItems.map((item: { order: number }) => item.order));
+    const idsToDelete = existingItems
+      .filter(item => !incomingOrders.has(item.order))
+      .map(item => item.id);
+
     const result = await prisma.$transaction(async (tx) => {
-      // Delete existing items for the event (this will cascade delete preparations)
-      await tx.eventPlanItem.deleteMany({
-        where: { eventId },
-      });
+      // 1. Delete items that are no longer in the payload (cascade deletes their preparations)
+      if (idsToDelete.length > 0) {
+        await tx.eventPlanItem.deleteMany({
+          where: { id: { in: idsToDelete } },
+        });
+      }
 
       if (planItems.length === 0) {
         return [];
       }
 
-      // Create new plan items with preparations
-      const createdItems = [];
+      const savedItems = [];
+
       for (const item of planItems) {
-        const createdItem = await tx.eventPlanItem.create({
-          data: {
-            eventId,
-            type: item.type.toUpperCase() as EventPlanItemType,
-            title: item.title,
-            description: item.description || null,
-            duration: item.duration || 0,
-            order: item.order,
-            dayIndex: clampDayIndex(item.dayIndex, dayCount),
-            startHour: item.startHour ?? null,
-            startMinute: item.startMinute ?? null,
-            songId: item.songId || null,
-            textId: item.textId || null,
-            gameId: item.gameId || null,
-            isReserve: item.isReserve || false,
-            preparations: item.preparations && item.preparations.length > 0 ? {
-              create: item.preparations.map((prep: any) => ({
+        const existingItem = existingByOrder.get(item.order);
+
+        const itemData = {
+          type: item.type.toUpperCase() as EventPlanItemType,
+          title: item.title,
+          description: item.description || null,
+          duration: item.duration ?? null,
+          order: item.order,
+          dayIndex: clampDayIndex(item.dayIndex, dayCount),
+          startHour: item.startHour ?? null,
+          startMinute: item.startMinute ?? null,
+          songId: item.songId || null,
+          textId: item.textId || null,
+          gameId: item.gameId || null,
+          isReserve: item.isReserve || false,
+        };
+
+        if (existingItem) {
+          // UPDATE existing plan item
+          const incomingPreps: Array<{ title: string; order: number; isCompleted?: boolean; completedAt?: string | null; completedBy?: string | null }> =
+            item.preparations && Array.isArray(item.preparations) ? item.preparations : [];
+
+          // Batch replace: delete all existing preps, then recreate in one shot (2 queries vs N)
+          await tx.preparationItem.deleteMany({
+            where: { eventPlanItemId: existingItem.id },
+          });
+          if (incomingPreps.length > 0) {
+            await tx.preparationItem.createMany({
+              data: incomingPreps.map(prep => ({
+                eventPlanItemId: existingItem.id,
                 title: prep.title,
                 order: prep.order,
                 isCompleted: prep.isCompleted || false,
-                completedAt: prep.completedAt || null,
+                completedAt: prep.completedAt ? new Date(prep.completedAt) : null,
                 completedBy: prep.completedBy || null,
-              }))
-            } : undefined
-          },
-          include: {
-            preparations: {
-              orderBy: { order: 'asc' }
-            }
+              })),
+            });
           }
-        });
-        createdItems.push(createdItem);
+
+          // Update the plan item itself (after preps are in sync)
+          const updatedItem = await tx.eventPlanItem.update({
+            where: { id: existingItem.id },
+            data: itemData,
+            include: {
+              preparations: { orderBy: { order: "asc" } },
+            },
+          });
+          savedItems.push(updatedItem);
+        } else {
+          // CREATE new plan item with preparations
+          const createdItem = await tx.eventPlanItem.create({
+            data: {
+              eventId,
+              ...itemData,
+              preparations:
+                item.preparations && item.preparations.length > 0
+                  ? {
+                      create: item.preparations.map((prep: { title: string; order: number; isCompleted?: boolean; completedAt?: string | null; completedBy?: string | null }) => ({
+                        title: prep.title,
+                        order: prep.order,
+                        isCompleted: prep.isCompleted || false,
+                        completedAt: prep.completedAt ? new Date(prep.completedAt) : null,
+                        completedBy: prep.completedBy || null,
+                      })),
+                    }
+                  : undefined,
+            },
+            include: {
+              preparations: { orderBy: { order: "asc" } },
+            },
+          });
+          savedItems.push(createdItem);
+        }
       }
 
-      return createdItems;
-    });
+      return savedItems;
+    }, { timeout: 30000 });
 
     return NextResponse.json(result, { status: 201 });
   } catch (error) {

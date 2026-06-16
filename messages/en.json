@@ -389,7 +389,8 @@
       "calendar_week": "Week",
       "calendar_day": "Day",
       "calendar_agenda": "Agenda",
-      "calendar_no_events": "No items in this range"
+      "calendar_no_events": "No items in this range",
+      "outside_period_tooltip": "Outside event period"
     }
   },
   "NotFound": {

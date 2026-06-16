@@ -50,3 +50,10 @@ export const formatItemTime = (startHour?: number | null, startMinute?: number |
 
 export const clampDayIndex = (dayIndex: number | undefined | null, dayCount: number): number =>
   Math.min(Math.max(dayIndex ?? 0, 0), Math.max(dayCount - 1, 0));
+
+export const isWithinEventPeriod = (date: Date, event: IEventDateRange): boolean => {
+  const d = startOfDay(date);
+  const start = startOfDay(new Date(event.startTime));
+  const end = startOfDay(new Date(event.endTime));
+  return d >= start && d <= end;
+};
